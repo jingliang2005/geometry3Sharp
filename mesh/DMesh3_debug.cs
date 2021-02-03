@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Text;
 using System.Collections.Generic;
 
 namespace g3
@@ -31,12 +32,12 @@ namespace g3
 			System.Console.WriteLine("Vertex " + v.ToString());
 			List<int> tris = new List<int>();
 			GetVtxTriangles(v, tris, false);
-			System.Console.WriteLine(string.Format("  Tris {0}  Edges {1}  refcount {2}", tris.Count, GetVtxEdges(v).Count, vertices_refcount.refCount(v) ));
+			System.Console.WriteLine(string.Format("  Tris {0}  Edges {1}  refcount {2}", tris.Count, GetVtxEdgeCount(v), vertices_refcount.refCount(v) ));
 			foreach ( int t in tris ) {
 				Index3i tv = GetTriangle(t), te = GetTriEdges(t);
 				System.Console.WriteLine(string.Format("  t{6} {0} {1} {2}   te {3} {4} {5}", tv[0],tv[1],tv[2], te[0],te[1],te[2],t));
 			}
-			foreach ( int e in GetVtxEdges(v) ) {
+			foreach ( int e in VtxEdgesItr(v) ) {
 				Index2i ev = GetEdgeV(e), et = GetEdgeT(e);
 				System.Console.WriteLine(string.Format("  e{4} {0} {1} / {2} {3}", ev[0],ev[1], et[0],et[1], e));
 			}
@@ -52,13 +53,25 @@ namespace g3
 			}
 		}
 
+        public string MeshInfoString()
+        {
+            StringBuilder b = new StringBuilder();
+            b.AppendFormat("Vertices  count {0} max {1} {2}", VertexCount, MaxVertexID, vertices_refcount.UsageStats);  b.AppendLine();
+            b.AppendFormat("Triangles count {0} max {1} {2}", TriangleCount, MaxTriangleID, triangles_refcount.UsageStats); b.AppendLine();
+            b.AppendFormat("Edges     count {0} max {1} {2}", EdgeCount, MaxEdgeID, edges_refcount.UsageStats); b.AppendLine();
+            b.AppendFormat("Normals {0}  Colors {1}  UVs {2}  Groups {3}", HasVertexNormals, HasVertexColors, HasVertexUVs, HasTriangleGroups); b.AppendLine();
+            b.AppendFormat("Closed {0} Compact {1} timestamp {2} shape_timestamp {3}  MaxGroupID {4}", CachedIsClosed, IsCompact, timestamp, shape_timestamp, max_group_id); b.AppendLine();
+            b.AppendFormat("VertexEdges " + vertex_edges.MemoryUsage); b.AppendLine();
+            return b.ToString();
+        }
+
 
 
         /// <summary>
         /// Check if this m2 is the same as this mesh. By default only checks
         /// vertices and triangles, turn on other parameters w/ flags
         /// </summary>
-        public bool IsSameMesh(DMesh3 m2, bool bCheckEdges = false, 
+        public bool IsSameMesh(DMesh3 m2, bool bCheckConnectivity, bool bCheckEdgeIDs = false, 
             bool bCheckNormals = false, bool bCheckColors = false, bool bCheckUVs = false,
             bool bCheckGroups = false,
             float Epsilon = MathUtil.Epsilonf )
@@ -75,7 +88,18 @@ namespace g3
                 if (m2.IsTriangle(tid) == false || GetTriangle(tid).Equals(m2.GetTriangle(tid)) == false)
                     return false;
             }
-            if (bCheckEdges) {
+            if (bCheckConnectivity) {
+                foreach (int eid in EdgeIndices()) {
+                    Index4i e = GetEdge(eid);
+                    int other_eid = m2.FindEdge(e.a, e.b);
+                    if (other_eid == InvalidID)
+                        return false;
+                    Index4i oe = m2.GetEdge(other_eid);
+                    if (Math.Min(e.c, e.d) != Math.Min(oe.c, oe.d) || Math.Max(e.c, e.d) != Math.Max(oe.c, oe.d))
+                        return false;
+                }
+            }
+            if (bCheckEdgeIDs) {
                 if (EdgeCount != m2.EdgeCount)
                     return false;
                 foreach (int eid in EdgeIndices()) {
@@ -235,8 +259,7 @@ namespace g3
                 CheckOrFailF(double.IsNaN(v.LengthSquared) == false);
                 CheckOrFailF(double.IsInfinity(v.LengthSquared) == false);
 
-                List<int> l = vertex_edges[vID];
-                foreach(int edgeid in l) { 
+                foreach(int edgeid in vertex_edges.ValueItr(vID)) { 
                     CheckOrFailF(IsEdge(edgeid));
                     CheckOrFailF(edge_has_v(edgeid, vID));
 
@@ -249,15 +272,21 @@ namespace g3
                     CheckOrFailF(e2 == edgeid);
                 }
 
+                foreach ( int nbr_vid in VtxVerticesItr(vID) ) {
+                    CheckOrFailF(IsVertex(nbr_vid));
+                    int edge = find_edge(vID, nbr_vid);
+                    CheckOrFailF(IsEdge(edge));
+                }
+
 				List<int> vTris = new List<int>(), vTris2 = new List<int>();
                 GetVtxTriangles(vID, vTris, false);
 				GetVtxTriangles(vID, vTris2, true);
 				CheckOrFailF(vTris.Count == vTris2.Count);
 				//System.Console.WriteLine(string.Format("{0} {1} {2}", vID, vTris.Count, GetVtxEdges(vID).Count));
                 if ( bAllowNonManifoldVertices )
-    				CheckOrFailF(vTris.Count <= GetVtxEdges(vID).Count);
+    				CheckOrFailF(vTris.Count <= GetVtxEdgeCount(vID));
                 else
-    				CheckOrFailF(vTris.Count == GetVtxEdges(vID).Count || vTris.Count == GetVtxEdges(vID).Count-1);
+    				CheckOrFailF(vTris.Count == GetVtxEdgeCount(vID) || vTris.Count == GetVtxEdgeCount(vID) - 1);
                 CheckOrFailF(vertices_refcount.refCount(vID) == vTris.Count + 1);
                 CheckOrFailF(triToVtxRefs[vID] == vTris.Count);
                 foreach( int tID in vTris) {
@@ -266,7 +295,7 @@ namespace g3
 
 				// check that edges around vert only references tris above, and reference all of them!
 				List<int> vRemoveTris = new List<int>(vTris);
-				foreach ( int edgeid in l ) {
+				foreach ( int edgeid in vertex_edges.ValueItr(vID)) {
 					Index2i edget = GetEdgeT(edgeid);
 					CheckOrFailF( vTris.Contains(edget[0]) );
 					if ( edget[1] != InvalidID )

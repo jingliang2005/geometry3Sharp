@@ -29,6 +29,36 @@ namespace g3 {
 		}
 
 
+        /// <summary>
+        /// Create Arc around center, **clockwise** from start to end points.
+        /// Points must both be the same distance from center (ie on circle)
+        /// </summary>
+        public Arc2d(Vector2d vCenter, Vector2d vStart, Vector2d vEnd)
+        {
+            IsReversed = false;
+            SetFromCenterAndPoints(vCenter, vStart, vEnd);
+        }
+
+
+        /// <summary>
+        /// Initialize Arc around center, **clockwise** from start to end points.
+        /// Points must both be the same distance from center (ie on circle)
+        /// </summary>
+        public void SetFromCenterAndPoints(Vector2d vCenter, Vector2d vStart, Vector2d vEnd)
+        {
+            Vector2d ds = vStart - vCenter;
+            Vector2d de = vEnd - vCenter;
+            Debug.Assert(Math.Abs(ds.LengthSquared - de.LengthSquared) < MathUtil.ZeroTolerancef);
+            AngleStartDeg = Math.Atan2(ds.y, ds.x) * MathUtil.Rad2Deg;
+            AngleEndDeg = Math.Atan2(de.y, de.x) * MathUtil.Rad2Deg;
+            if (AngleEndDeg < AngleStartDeg)
+                AngleEndDeg += 360;
+            Center = vCenter;
+            Radius = ds.Length;
+        }
+
+
+
 		public Vector2d P0 {
 			get { return SampleT(0.0); }
 		}
@@ -108,6 +138,44 @@ namespace g3 {
             return new Arc2d(this.Center, this.Radius, this.AngleStartDeg, this.AngleEndDeg) 
                 { IsReversed = this.IsReversed };
         }
+
+
+        public bool IsTransformable { get { return true; } }
+        public void Transform(ITransform2 xform)
+        {
+            Vector2d vCenter = xform.TransformP(Center);
+            Vector2d vStart = xform.TransformP((IsReversed) ? P1 : P0);
+            Vector2d vEnd = xform.TransformP((IsReversed) ? P0 : P1);
+
+            SetFromCenterAndPoints(vCenter, vStart, vEnd);
+        }
+
+
+
+        public AxisAlignedBox2d Bounds {
+            get {
+                // extrema of arc are P0, P1, and any axis-crossings that lie in arc span.
+                // We can compute bounds of axis-crossings in normalized space and then scale/translate.
+                int k = (int)(AngleStartDeg / 90.0);
+                if (k * 90 < AngleStartDeg) 
+                    k++;
+                int stop_k = (int)(AngleEndDeg / 90);       
+                if (stop_k * 90 > AngleEndDeg)
+                    stop_k--;
+                // [TODO] we should only ever need to check at most 4 here, right? then we have gone a circle...
+                AxisAlignedBox2d bounds = AxisAlignedBox2d.Empty;
+                while (k <= stop_k) {
+                    int i = k++ % 4;
+                    bounds.Contain(bounds_dirs[i]);
+                }
+                bounds.Scale(Radius); bounds.Translate(Center);
+                bounds.Contain(P0); bounds.Contain(P1);
+                return bounds;
+            }
+        }
+        private static readonly Vector2d[] bounds_dirs = new Vector2d[4] {
+            Vector2d.AxisX, Vector2d.AxisY, -Vector2d.AxisX, -Vector2d.AxisY };
+
 
 
 

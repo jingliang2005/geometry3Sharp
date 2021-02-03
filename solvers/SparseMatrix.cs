@@ -131,6 +131,23 @@ namespace g3
 
 
 
+
+
+
+        /// <summary>
+        /// Returns this*this, as a packed sparse matrix. Computes in parallel.
+        /// </summary>
+        public PackedSparseMatrix SquarePackedParallel()
+        {
+            PackedSparseMatrix M = new PackedSparseMatrix(this);
+            M.Sort();
+            return M.Square();
+        }
+
+
+
+
+
         public SymmetricSparseMatrix Multiply(SymmetricSparseMatrix M2)
         {
             SymmetricSparseMatrix R = new SymmetricSparseMatrix();

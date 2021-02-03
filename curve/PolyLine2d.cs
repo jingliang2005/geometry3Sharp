@@ -24,14 +24,17 @@ namespace g3
 
         public PolyLine2d(Polygon2d copy, bool bDuplicateFirstLast)
 		{
-            if (bDuplicateFirstLast)
-			    vertices = new List<Vector2d>(copy);        // Polygon2d iterator outputs first vtx again at end...
-            else
-                vertices = new List<Vector2d>(copy.Vertices);        // Polygon2d iterator outputs first vtx again at end...
+            vertices = new List<Vector2d>(copy.VerticesItr(bDuplicateFirstLast));
             Timestamp = 0;
 		}
 
         public PolyLine2d(IList<Vector2d> copy)
+        {
+            vertices = new List<Vector2d>(copy);
+            Timestamp = 0;
+        }
+
+        public PolyLine2d(IEnumerable<Vector2d> copy)
         {
             vertices = new List<Vector2d>(copy);
             Timestamp = 0;
@@ -152,15 +155,17 @@ namespace g3
 		}
 
 
-		public double Length {
-			get {
-				double fLength = 0;
-				int N = vertices.Count;
-				for (int i = 0; i < N-1; ++i)
-					fLength += vertices[i].Distance(vertices[i + 1]);
-				return fLength;
-			}
-		}
+        [System.Obsolete("This method name is confusing. Will remove in future. Use ArcLength instead")]
+        public double Length { get { return ArcLength; } }
+        public double ArcLength {
+            get {
+                double fLength = 0;
+                int N = vertices.Count;
+                for (int i = 0; i < N - 1; ++i)
+                    fLength += vertices[i].Distance(vertices[i + 1]);
+                return fLength;
+            }
+        }
 
 
         /// <summary>
@@ -229,7 +234,7 @@ namespace g3
         /// </summary>
         public bool Trim(double each_end_dist)
         {
-            if (Length < 2 * each_end_dist)
+            if (ArcLength < 2 * each_end_dist)
                 return false;
             return (TrimEnd(each_end_dist) == false) 
                 ? false : TrimStart(each_end_dist);
@@ -247,7 +252,7 @@ namespace g3
         //            v[] = polyline array of vertex points
         //            j,k = indices for the subchain v[j] to v[k]
         //    Output: mk[] = array of markers matching vertex array v[]
-        static void simplifyDP(double tol, Vector2d[] v, int j, int k, bool[] mk)
+        static protected void simplifyDP(double tol, Vector2d[] v, int j, int k, bool[] mk)
 		{
 			if (k <= j + 1) // there is nothing to simplify
 				return;
@@ -325,5 +330,107 @@ namespace g3
 			return;
 		}
 
-	}
+
+        public PolyLine2d Transform(ITransform2 xform)
+        {
+            int N = vertices.Count;
+            for (int k = 0; k < N; ++k)
+                vertices[k] = xform.TransformP(vertices[k]);
+            return this;
+        }
+
+
+
+        static public PolyLine2d MakeBoxSpiral(Vector2d center, double len, double spacing)
+        {
+            PolyLine2d pline = new PolyLine2d();
+            pline.AppendVertex(center);
+
+            Vector2d c = center;
+            c.x += spacing / 2;
+            pline.AppendVertex(c);
+            c.y += spacing;
+            pline.AppendVertex(c);
+            double accum = spacing / 2 + spacing;
+
+            double w = spacing / 2;
+            double h = spacing;
+
+            double sign = -1.0;
+            while (accum < len) {
+                w += spacing;
+                c.x += sign * w;
+                pline.AppendVertex(c);
+                accum += w;
+
+                h += spacing;
+                c.y += sign * h;
+                pline.AppendVertex(c);
+                accum += h;
+
+                sign *= -1.0;
+            }
+
+            return pline;
+        }
+
+
+
+    }
+
+
+
+
+    /// <summary>
+    /// Wrapper for a PolyLine2d that provides minimal IParametricCurve2D interface
+    /// </summary>
+    public class PolyLine2DCurve : IParametricCurve2d
+    {
+        public PolyLine2d Polyline;
+
+        public bool IsClosed { get { return false; } }
+
+        // can call SampleT in range [0,ParamLength]
+        public double ParamLength { get { return Polyline.VertexCount; } }
+        public Vector2d SampleT(double t)
+        {
+            int i = (int)t;
+            if (i >= Polyline.VertexCount - 1)
+                return Polyline[Polyline.VertexCount - 1];
+            Vector2d a = Polyline[i];
+            Vector2d b = Polyline[i + 1];
+            double alpha = t - (double)i;
+            return (1.0 - alpha) * a + (alpha) * b;
+        }
+        public Vector2d TangentT(double t)
+        {
+            throw new NotImplementedException("Polygon2dCurve.TangentT");
+        }
+
+        public bool HasArcLength { get { return true; } }
+        public double ArcLength {
+            get { return Polyline.ArcLength; }
+        }
+
+        public Vector2d SampleArcLength(double a)
+        {
+            throw new NotImplementedException("Polygon2dCurve.SampleArcLength");
+        }
+
+        public void Reverse()
+        {
+            Polyline.Reverse();
+        }
+
+        public IParametricCurve2d Clone()
+        {
+            return new PolyLine2DCurve() { Polyline = new PolyLine2d(this.Polyline) };
+        }
+
+        public bool IsTransformable { get { return true; } }
+        public void Transform(ITransform2 xform) {
+            Polyline.Transform(xform);
+        }
+    }
+
 }

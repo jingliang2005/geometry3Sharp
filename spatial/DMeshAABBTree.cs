@@ -6,21 +6,48 @@ using System.Diagnostics;
 
 namespace g3
 {
+    /// <summary>
+    /// Hierarchical Axis-Aligned-Bounding-Box tree for a DMesh3 mesh.
+    /// This class supports a variety of spatial queries, listed below.
+    /// 
+    /// Various construction strategies are also available, the default is the
+    /// fastest to build but if you are doing a *lot* of queries, you might experiment
+    /// with the others (eg TopDownMedian)
+    /// 
+    /// Available queries:
+    ///   - FindNearestTriangle(point, maxdist)
+    ///   - FindNearestHitTriangle(ray, maxdist)
+    ///   - FindAllHitTriangles(ray, maxdist)
+    ///   - TestIntersection(triangle)
+    ///   - TestIntersection(mesh)
+    ///   - TestIntersection(otherAABBTree)
+    ///   - FindAllIntersections(otherAABBTree)
+    ///   - FindNearestTriangles(otherAABBTree, maxdist)
+    ///   - IsInside(point)
+    ///   - WindingNumber(point)
+    ///   - FastWindingNumber(point)
+    ///   - DoTraversal(generic_traversal_object)
+    /// 
+    /// </summary>
     public class DMeshAABBTree3 : ISpatial
     {
-        DMesh3 mesh;
-        int mesh_timestamp;
+        protected DMesh3 mesh;
+        protected int mesh_timestamp;
 
-        public DMeshAABBTree3(DMesh3 m)
+        public DMeshAABBTree3(DMesh3 m, bool autoBuild = false)
         {
             mesh = m;
+            if (autoBuild)
+                Build();
         }
 
 
         public DMesh3 Mesh { get { return mesh; } }
 
 
-        // if non-null, return false to ignore certain triangles
+        /// <summary>
+        /// If non-null, only triangle IDs that pass this filter (ie filter is true) are considered
+        /// </summary>
         public Func<int, bool> TriangleFilterF = null;
 
 
@@ -79,9 +106,20 @@ namespace g3
         }
 
 
+        public bool IsValid { get { return mesh_timestamp == mesh.ShapeTimestamp; } }
 
+
+        /// <summary>
+        /// Does this ISpatial implementation support nearest-point query? (yes)
+        /// </summary>
         public bool SupportsNearestTriangle { get { return true; } }
-        public int FindNearestTriangle(Vector3d p, double fMaxDist = double.MaxValue)
+
+
+        /// <summary>
+        /// Find the triangle closest to p, within distance fMaxDist, or return InvalidID
+        /// Use MeshQueries.TriangleDistance() to get more information
+        /// </summary>
+        public virtual int FindNearestTriangle(Vector3d p, double fMaxDist = double.MaxValue)
         {
             if (mesh_timestamp != mesh.ShapeTimestamp)
                 throw new Exception("DMeshAABBTree3.FindNearestTriangle: mesh has been modified since tree construction");
@@ -91,7 +129,21 @@ namespace g3
             find_nearest_tri(root_index, p, ref fNearestSqr, ref tNearID);
             return tNearID;
         }
-        void find_nearest_tri(int iBox, Vector3d p, ref double fNearestSqr, ref int tID)
+        /// <summary>
+        /// Find the triangle closest to p, and distance to it, within distance fMaxDist, or return InvalidID
+        /// Use MeshQueries.TriangleDistance() to get more information
+        /// </summary>
+        public virtual int FindNearestTriangle(Vector3d p, out double fNearestDistSqr, double fMaxDist = double.MaxValue)
+        {
+            if (mesh_timestamp != mesh.ShapeTimestamp)
+                throw new Exception("DMeshAABBTree3.FindNearestTriangle: mesh has been modified since tree construction");
+
+            fNearestDistSqr = (fMaxDist < double.MaxValue) ? fMaxDist * fMaxDist : double.MaxValue;
+            int tNearID = DMesh3.InvalidID;
+            find_nearest_tri(root_index, p, ref fNearestDistSqr, ref tNearID);
+            return tNearID;
+        }
+        protected void find_nearest_tri(int iBox, Vector3d p, ref double fNearestSqr, ref int tID)
         {
             int idx = box_to_index[iBox];
             if ( idx < triangles_end ) {            // triange-list case, array is [N t1 t2 ... tN]
@@ -141,9 +193,84 @@ namespace g3
 
 
 
+        /// <summary>
+        /// Find the vertex closest to p, within distance fMaxDist, or return InvalidID
+        /// </summary>
+        public virtual int FindNearestVertex(Vector3d p, double fMaxDist = double.MaxValue)
+        {
+            if (mesh_timestamp != mesh.ShapeTimestamp)
+                throw new Exception("DMeshAABBTree3.FindNearestVertex: mesh has been modified since tree construction");
 
+            double fNearestSqr = (fMaxDist < double.MaxValue) ? fMaxDist * fMaxDist : double.MaxValue;
+            int vNearID = DMesh3.InvalidID;
+            find_nearest_vtx(root_index, p, ref fNearestSqr, ref vNearID);
+            return vNearID;
+        }
+        protected void find_nearest_vtx(int iBox, Vector3d p, ref double fNearestSqr, ref int vid)
+        {
+            int idx = box_to_index[iBox];
+            if (idx < triangles_end) {            // triange-list case, array is [N t1 t2 ... tN]
+                int num_tris = index_list[idx];
+                for (int i = 1; i <= num_tris; ++i) {
+                    int ti = index_list[idx + i];
+                    if (TriangleFilterF != null && TriangleFilterF(ti) == false)
+                        continue;
+                    Vector3i tv = mesh.GetTriangle(ti);
+                    for ( int j = 0; j < 3; ++j ) {
+                        double dsqr = mesh.GetVertex(tv[j]).DistanceSquared(ref p);
+                        if (  dsqr < fNearestSqr ) {
+                            fNearestSqr = dsqr;
+                            vid = tv[j];
+                        }
+                    }
+                }
+
+            } else {                                // internal node, either 1 or 2 child boxes
+                int iChild1 = index_list[idx];
+                if (iChild1 < 0) {                 // 1 child, descend if nearer than cur min-dist
+                    iChild1 = (-iChild1) - 1;
+                    double fChild1DistSqr = box_distance_sqr(iChild1, p);
+                    if (fChild1DistSqr <= fNearestSqr)
+                        find_nearest_vtx(iChild1, p, ref fNearestSqr, ref vid);
+
+                } else {                            // 2 children, descend closest first
+                    iChild1 = iChild1 - 1;
+                    int iChild2 = index_list[idx + 1] - 1;
+
+                    double fChild1DistSqr = box_distance_sqr(iChild1, p);
+                    double fChild2DistSqr = box_distance_sqr(iChild2, p);
+                    if (fChild1DistSqr < fChild2DistSqr) {
+                        if (fChild1DistSqr < fNearestSqr) {
+                            find_nearest_vtx(iChild1, p, ref fNearestSqr, ref vid);
+                            if (fChild2DistSqr < fNearestSqr)
+                                find_nearest_vtx(iChild2, p, ref fNearestSqr, ref vid);
+                        }
+                    } else {
+                        if (fChild2DistSqr < fNearestSqr) {
+                            find_nearest_vtx(iChild2, p, ref fNearestSqr, ref vid);
+                            if (fChild1DistSqr < fNearestSqr)
+                                find_nearest_vtx(iChild1, p, ref fNearestSqr, ref vid);
+                        }
+                    }
+
+                }
+            }
+        }
+
+
+
+
+
+        /// <summary>
+        /// Does this ISpatial implementation support ray-triangle intersection? (yes)
+        /// </summary>
         public bool SupportsTriangleRayIntersection { get { return true; } }
-        public int FindNearestHitTriangle(Ray3d ray, double fMaxDist = double.MaxValue)
+
+        /// <summary>
+        /// find id of first triangle that ray hits, within distance fMaxDist, or return DMesh3.InvalidID
+        /// Use MeshQueries.TriangleIntersection() to get more information
+        /// </summary>
+        public virtual int FindNearestHitTriangle(Ray3d ray, double fMaxDist = double.MaxValue)
         {
             if (mesh_timestamp != mesh.ShapeTimestamp)
                 throw new Exception("DMeshAABBTree3.FindNearestHitTriangle: mesh has been modified since tree construction");
@@ -158,7 +285,8 @@ namespace g3
             find_hit_triangle(root_index, ref ray, ref fNearestT, ref tNearID);
             return tNearID;
         }
-        void find_hit_triangle(int iBox, ref Ray3d ray, ref double fNearestT, ref int tID)
+
+        protected void find_hit_triangle(int iBox, ref Ray3d ray, ref double fNearestT, ref int tID)
         {
             int idx = box_to_index[iBox];
             if ( idx < triangles_end ) {            // triange-list case, array is [N t1 t2 ... tN]
@@ -169,15 +297,21 @@ namespace g3
                     if (TriangleFilterF != null && TriangleFilterF(ti) == false)
                         continue;
 
-                    // [TODO] optimize this
                     mesh.GetTriVertices(ti, ref tri.V0, ref tri.V1, ref tri.V2);
-                    IntrRay3Triangle3 ray_tri_hit = new IntrRay3Triangle3(ray, tri);
-                    if ( ray_tri_hit.Find() ) {
-                        if ( ray_tri_hit.RayParameter < fNearestT ) {
-                            fNearestT = ray_tri_hit.RayParameter;
+                    double rayt;
+                    if (IntrRay3Triangle3.Intersects(ref ray, ref tri.V0, ref tri.V1, ref tri.V2, out rayt)) {
+                        if (rayt < fNearestT) {
+                            fNearestT = rayt;
                             tID = ti;
                         }
                     }
+                    //IntrRay3Triangle3 ray_tri_hit = new IntrRay3Triangle3(ray, tri);
+                    //if ( ray_tri_hit.Find() ) {
+                    //    if ( ray_tri_hit.RayParameter < fNearestT ) {
+                    //        fNearestT = ray_tri_hit.RayParameter;
+                    //        tID = ti;
+                    //    }
+                    //}
                 }
 
             } else {                                // internal node, either 1 or 2 child boxes
@@ -224,8 +358,11 @@ namespace g3
 
 
 
-        // returns cout
-        public int FindAllHitTriangles(Ray3d ray, List<int> hitTriangles = null, double fMaxDist = double.MaxValue)
+        /// <summary>
+        /// Find the ids of all the triangles that they ray intersects, within distance fMaxDist from ray origin
+        /// Returns count of triangles.
+        /// </summary>
+        public virtual int FindAllHitTriangles(Ray3d ray, List<int> hitTriangles = null, double fMaxDist = double.MaxValue)
         {
             if (mesh_timestamp != mesh.ShapeTimestamp)
                 throw new Exception("DMeshAABBTree3.FindNearestHitTriangle: mesh has been modified since tree construction");
@@ -239,7 +376,8 @@ namespace g3
             int nCount = find_all_hit_triangles(root_index, hitTriangles, ref ray, fUseMaxDist);
             return nCount;
         }
-        int find_all_hit_triangles(int iBox, List<int> hitTriangles, ref Ray3d ray, double fMaxDist)
+
+        protected int find_all_hit_triangles(int iBox, List<int> hitTriangles, ref Ray3d ray, double fMaxDist)
         {
             int hit_count = 0;
 
@@ -252,16 +390,23 @@ namespace g3
                     if (TriangleFilterF != null && TriangleFilterF(ti) == false)
                         continue;
 
-                    // [TODO] optimize this
                     mesh.GetTriVertices(ti, ref tri.V0, ref tri.V1, ref tri.V2);
-                    IntrRay3Triangle3 ray_tri_hit = new IntrRay3Triangle3(ray, tri);
-                    if (ray_tri_hit.Find()) {
-                        if (ray_tri_hit.RayParameter < fMaxDist) {
+                    double rayt;
+                    if (IntrRay3Triangle3.Intersects(ref ray, ref tri.V0, ref tri.V1, ref tri.V2, out rayt)) {
+                        if (rayt < fMaxDist) {
                             if (hitTriangles != null)
                                 hitTriangles.Add(ti);
                             hit_count++;
                         }
                     }
+                    //IntrRay3Triangle3 ray_tri_hit = new IntrRay3Triangle3(ray, tri);
+                    //if (ray_tri_hit.Find()) {
+                    //    if (ray_tri_hit.RayParameter < fMaxDist) {
+                    //        if (hitTriangles != null)
+                    //            hitTriangles.Add(ti);
+                    //        hit_count++;
+                    //    }
+                    //}
                 }
 
             } else {                                // internal node, either 1 or 2 child boxes
@@ -294,8 +439,12 @@ namespace g3
 
 
 
-        // TransformF takes vertices of testMesh to our tree
-        public bool TestIntersection(IMesh testMesh, Func<Vector3d, Vector3d> TransformF, bool bBoundsCheck = true)
+        /// <summary>
+        /// return true if *any* triangle of testMesh intersects with our tree.
+        /// Use TransformF to transform vertices of testMesh into space of this tree.
+        /// if boundsCheck is false, we skip bbox/bbox early-out
+        /// </summary>
+        public virtual bool TestIntersection(IMesh testMesh, Func<Vector3d, Vector3d> TransformF = null, bool bBoundsCheck = true)
         {
             if (mesh_timestamp != mesh.ShapeTimestamp)
                 throw new Exception("DMeshAABBTree3.TestIntersection: mesh has been modified since tree construction");
@@ -305,6 +454,9 @@ namespace g3
                 if (box_box_intersect(root_index, ref meshBox) == false )
                     return false;
             }
+
+            if (TransformF == null)
+                TransformF = (x) => { return x; };
 
             Triangle3d test_tri = new Triangle3d();
             foreach (int tid in testMesh.TriangleIndices()) {
@@ -317,7 +469,11 @@ namespace g3
             }
             return false;
         }
-        public bool TestIntersection(Triangle3d triangle)
+
+        /// <summary>
+        /// Returns true if triangle intersects any triangle of our mesh
+        /// </summary>
+        public virtual bool TestIntersection(Triangle3d triangle)
         {
             if (mesh_timestamp != mesh.ShapeTimestamp)
                 throw new Exception("DMeshAABBTree3.TestIntersection: mesh has been modified since tree construction");
@@ -326,7 +482,9 @@ namespace g3
             int interTri = find_any_intersection(root_index, ref triangle, ref triBounds);
             return (interTri >= 0);
         }
-        int find_any_intersection(int iBox, ref Triangle3d triangle, ref AxisAlignedBox3d triBounds)
+
+
+        protected int find_any_intersection(int iBox, ref Triangle3d triangle, ref AxisAlignedBox3d triBounds)
         {
             int idx = box_to_index[iBox];
             if ( idx < triangles_end ) {            // triange-list case, array is [N t1 t2 ... tN]
@@ -337,9 +495,7 @@ namespace g3
                     if (TriangleFilterF != null && TriangleFilterF(ti) == false)
                         continue;
                     mesh.GetTriVertices(ti, ref box_tri.V0, ref box_tri.V1, ref box_tri.V2);
-
-                    IntrTriangle3Triangle3 intr = new IntrTriangle3Triangle3(triangle, box_tri);
-                    if (intr.Test())
+                    if ( IntrTriangle3Triangle3.Intersects(ref triangle, ref box_tri))
                         return ti;
                 }
             } else {                                // internal node, either 1 or 2 child boxes
@@ -370,9 +526,11 @@ namespace g3
 
 
 
-        // Returns true if there is any intersection between our mesh and 'other' mesh, via AABBs
-        // TransformF takes vertices of otherTree to our tree - can be null if in same coord space
-        public bool TestIntersection(DMeshAABBTree3 otherTree, Func<Vector3d, Vector3d> TransformF)
+        /// <summary>
+        /// Returns true if there is *any* intersection between our mesh and 'other' mesh.
+        /// TransformF takes vertices of otherTree into our tree - can be null if in same coord space
+        /// </summary>
+        public virtual bool TestIntersection(DMeshAABBTree3 otherTree, Func<Vector3d, Vector3d> TransformF = null)
         {
             if (mesh_timestamp != mesh.ShapeTimestamp)
                 throw new Exception("DMeshAABBTree3.TestIntersection: mesh has been modified since tree construction");
@@ -382,7 +540,8 @@ namespace g3
 
             return false;
         }
-        bool find_any_intersection(int iBox, DMeshAABBTree3 otherTree, Func<Vector3d, Vector3d> TransformF, int oBox, int depth)
+
+        protected bool find_any_intersection(int iBox, DMeshAABBTree3 otherTree, Func<Vector3d, Vector3d> TransformF, int oBox, int depth)
         {
             int idx = box_to_index[iBox];
             int odx = otherTree.box_to_index[oBox];
@@ -393,7 +552,7 @@ namespace g3
                 int num_tris = index_list[idx], onum_tris = otherTree.index_list[odx];
 
                 // can re-use because Test() doesn't cache anything
-                IntrTriangle3Triangle3 intr = new IntrTriangle3Triangle3(new Triangle3d(), new Triangle3d());
+                //IntrTriangle3Triangle3 intr = new IntrTriangle3Triangle3(new Triangle3d(), new Triangle3d());
 
                 // outer iteration is "other" tris that need to be transformed (more expensive)
                 for (int j = 1; j <= onum_tris; ++j) {
@@ -406,7 +565,6 @@ namespace g3
                         otri.V1 = TransformF(otri.V1);
                         otri.V2 = TransformF(otri.V2);
                     }
-                    intr.Triangle0 = otri;
 
                     // inner iteration over "our" triangles
                     for (int i = 1; i <= num_tris; ++i) {
@@ -414,8 +572,7 @@ namespace g3
                         if (TriangleFilterF != null && TriangleFilterF(ti) == false)
                             continue;
                         mesh.GetTriVertices(ti, ref tri.V0, ref tri.V1, ref tri.V2);
-                        intr.Triangle1 = tri;
-                        if (intr.Test())
+                        if (IntrTriangle3Triangle3.Intersects(ref otri, ref tri))
                             return true;
                     }
                 }
@@ -437,33 +594,26 @@ namespace g3
 
                 // [TODO] could we do efficient box.intersects(transform(box)) test?
                 //   ( Contains() on each xformed point? )
-
                 AxisAlignedBox3d bounds = get_boxd(iBox);
 
                 int oChild1 = otherTree.index_list[odx];
                 if ( oChild1 < 0 ) {                 // 1 child, descend if nearer than cur min-dist
                     oChild1 = (-oChild1) - 1;
-                    AxisAlignedBox3d oChild1Box = otherTree.get_boxd(oChild1);
-                    if ( TransformF != null )
-                        oChild1Box = BoundsUtil.Bounds(ref oChild1Box, TransformF);
-                    if ( box_box_intersect(oChild1, ref bounds) )
-                        return find_any_intersection(oChild1, otherTree, TransformF, oBox, depth + 1);
+                    AxisAlignedBox3d oChild1Box = otherTree.get_boxd(oChild1, TransformF);
+                    if (oChild1Box.Intersects(bounds) )
+                        return find_any_intersection(iBox, otherTree, TransformF, oBox, depth + 1);
 
                 } else {                            // 2 children
                     oChild1 = oChild1 - 1;          // [TODO] could descend one w/ larger overlap volume first??
                     int oChild2 = otherTree.index_list[odx + 1] - 1;
 
                     bool intersects = false;
-                    AxisAlignedBox3d oChild1Box = otherTree.get_boxd(oChild1);
-                    if ( TransformF != null )
-                        oChild1Box = BoundsUtil.Bounds(ref oChild1Box, TransformF);
+                    AxisAlignedBox3d oChild1Box = otherTree.get_boxd(oChild1, TransformF);
                     if ( oChild1Box.Intersects(bounds) ) 
                         intersects = find_any_intersection(iBox, otherTree, TransformF, oChild1, depth + 1);
 
                     if (intersects == false) {
-                        AxisAlignedBox3d oChild2Box = otherTree.get_boxd(oChild2);
-                        if ( TransformF != null )
-                            oChild2Box = BoundsUtil.Bounds(ref oChild2Box, TransformF);
+                        AxisAlignedBox3d oChild2Box = otherTree.get_boxd(oChild2, TransformF);
                         if ( oChild2Box.Intersects(bounds) )
                             intersects = find_any_intersection(iBox, otherTree, TransformF, oChild2, depth + 1);
                     }
@@ -472,10 +622,8 @@ namespace g3
 
 
             } else {
-
                 // descend our tree nodes if they intersect w/ current bounds of other tree
-                AxisAlignedBox3d oBounds = otherTree.get_boxd(oBox);
-                oBounds = BoundsUtil.Bounds(ref oBounds, TransformF);
+                AxisAlignedBox3d oBounds = otherTree.get_boxd(oBox, TransformF);
 
                 int iChild1 = index_list[idx];
                 if ( iChild1 < 0 ) {                 // 1 child, descend if nearer than cur min-dist
@@ -520,10 +668,13 @@ namespace g3
         }
 
 
-        // Compute all intersections between two Meshes via AABB's
-        // TransformF argument transforms vertices of otherTree to our tree (can be null if in same coord space)
-        // Returns pairs of intersecting triangles, which could intersect in either point or segment
-        public IntersectionsQueryResult FindIntersections(DMeshAABBTree3 otherTree, Func<Vector3d, Vector3d> TransformF)
+        /// <summary>
+        /// Compute all intersections between two Meshes. 
+        /// TransformF argument transforms vertices of otherTree to our tree (can be null if in same coord space)
+        /// Returns pairs of intersecting triangles, which could intersect in either point or segment
+        /// Currently *does not* return coplanar intersections.
+        /// </summary>
+        public virtual IntersectionsQueryResult FindAllIntersections(DMeshAABBTree3 otherTree, Func<Vector3d, Vector3d> TransformF = null)
         {
             if (mesh_timestamp != mesh.ShapeTimestamp)
                 throw new Exception("DMeshAABBTree3.FindIntersections: mesh has been modified since tree construction");
@@ -532,12 +683,15 @@ namespace g3
             result.Points = new List<PointIntersection>();
             result.Segments = new List<SegmentIntersection>();
 
-            find_intersections(root_index, otherTree, TransformF, otherTree.root_index, 0, result);
+            IntrTriangle3Triangle3 intr = new IntrTriangle3Triangle3(new Triangle3d(), new Triangle3d());
+            find_intersections(root_index, otherTree, TransformF, otherTree.root_index, 0, intr, result);
 
             return result;
         }
-        void find_intersections(int iBox, DMeshAABBTree3 otherTree, Func<Vector3d, Vector3d> TransformF, 
-                                int oBox, int depth, IntersectionsQueryResult result)
+
+        protected void find_intersections(int iBox, DMeshAABBTree3 otherTree, Func<Vector3d, Vector3d> TransformF, 
+                                          int oBox, int depth,
+                                          IntrTriangle3Triangle3 intr, IntersectionsQueryResult result)
         {
             int idx = box_to_index[iBox];
             int odx = otherTree.box_to_index[oBox];
@@ -546,9 +700,6 @@ namespace g3
                 // ok we are at triangles for both trees, do triangle-level testing
                 Triangle3d tri = new Triangle3d(), otri = new Triangle3d();
                 int num_tris = index_list[idx], onum_tris = otherTree.index_list[odx];
-
-                // can re-use
-                IntrTriangle3Triangle3 intr = new IntrTriangle3Triangle3(new Triangle3d(), new Triangle3d());
 
                 // outer iteration is "other" tris that need to be transformed (more expensive)
                 for (int j = 1; j <= onum_tris; ++j) {
@@ -571,16 +722,20 @@ namespace g3
                         mesh.GetTriVertices(ti, ref tri.V0, ref tri.V1, ref tri.V2);
                         intr.Triangle1 = tri;
 
-                        if (intr.Find()) {
-                            if (intr.Quantity == 1) {
-                                result.Points.Add(new PointIntersection() 
-                                        { t0 = ti, t1 = tj, point = intr.Points[0] });
-                            } else if (intr.Quantity == 2) {
-                                result.Segments.Add( new SegmentIntersection() 
-                                        { t0 = ti, t1 = tj, point0 = intr.Points[0], point1 = intr.Points[1] });
-                            } else {
-                                throw new Exception("DMeshAABBTree.find_intersections: found quantity " + intr.Quantity );
-                            }
+                        // [RMS] Test() is much faster than Find() so it makes sense to call it first, as most
+                        // triangles will not intersect (right?)
+                        if (intr.Test()) {
+                            if ( intr.Find() ) { 
+                                if (intr.Quantity == 1) {
+                                    result.Points.Add(new PointIntersection() 
+                                            { t0 = ti, t1 = tj, point = intr.Points[0] });
+                                } else if (intr.Quantity == 2) {
+                                    result.Segments.Add( new SegmentIntersection() 
+                                            { t0 = ti, t1 = tj, point0 = intr.Points[0], point1 = intr.Points[1] });
+                                } else {
+                                    throw new Exception("DMeshAABBTree.find_intersections: found quantity " + intr.Quantity );
+                                }
+                                }
                         }
                     }
                 }
@@ -604,54 +759,194 @@ namespace g3
 
                 // [TODO] could we do efficient box.intersects(transform(box)) test?
                 //   ( Contains() on each xformed point? )
-
                 AxisAlignedBox3d bounds = get_boxd(iBox);
 
                 int oChild1 = otherTree.index_list[odx];
                 if ( oChild1 < 0 ) {                 // 1 child, descend if nearer than cur min-dist
                     oChild1 = (-oChild1) - 1;
-                    AxisAlignedBox3d oChild1Box = otherTree.get_boxd(oChild1);
-                    if ( TransformF != null )
-                        oChild1Box = BoundsUtil.Bounds(ref oChild1Box, TransformF);
-                    if ( box_box_intersect(oChild1, ref bounds) )
-                        find_intersections(oChild1, otherTree, TransformF, oBox, depth + 1, result);
+                    AxisAlignedBox3d oChild1Box = otherTree.get_boxd(oChild1, TransformF);
+                    if (oChild1Box.Intersects(bounds) )
+                        find_intersections(iBox, otherTree, TransformF, oChild1, depth + 1, intr, result);
 
                 } else {                            // 2 children
                     oChild1 = oChild1 - 1;
 
-                    AxisAlignedBox3d oChild1Box = otherTree.get_boxd(oChild1);
-                    if ( TransformF != null )
-                        oChild1Box = BoundsUtil.Bounds(ref oChild1Box, TransformF);
+                    AxisAlignedBox3d oChild1Box = otherTree.get_boxd(oChild1, TransformF);
                     if ( oChild1Box.Intersects(bounds) ) 
-                        find_intersections(iBox, otherTree, TransformF, oChild1, depth + 1, result);
+                        find_intersections(iBox, otherTree, TransformF, oChild1, depth + 1, intr, result);
 
                     int oChild2 = otherTree.index_list[odx + 1] - 1;
-                    AxisAlignedBox3d oChild2Box = otherTree.get_boxd(oChild2);
-                    if ( TransformF != null )
-                        oChild2Box = BoundsUtil.Bounds(ref oChild2Box, TransformF);
+                    AxisAlignedBox3d oChild2Box = otherTree.get_boxd(oChild2, TransformF);
                     if ( oChild2Box.Intersects(bounds) )
-                        find_intersections(iBox, otherTree, TransformF, oChild2, depth + 1, result);
+                        find_intersections(iBox, otherTree, TransformF, oChild2, depth + 1, intr, result);
                 }
 
             } else {
                 // descend our tree nodes if they intersect w/ current bounds of other tree
-                AxisAlignedBox3d oBounds = otherTree.get_boxd(oBox);
-                oBounds = BoundsUtil.Bounds(ref oBounds, TransformF);
+                AxisAlignedBox3d oBounds = otherTree.get_boxd(oBox, TransformF);
 
                 int iChild1 = index_list[idx];
                 if ( iChild1 < 0 ) {                 // 1 child, descend if nearer than cur min-dist
                     iChild1 = (-iChild1) - 1;
                     if ( box_box_intersect(iChild1, ref oBounds) )
-                        find_intersections(iChild1, otherTree, TransformF, oBox, depth + 1, result);
+                        find_intersections(iChild1, otherTree, TransformF, oBox, depth + 1, intr, result);
 
                 } else {                            // 2 children
                     iChild1 = iChild1 - 1;          
                     if ( box_box_intersect(iChild1, ref oBounds) ) 
-                        find_intersections(iChild1, otherTree, TransformF, oBox, depth + 1, result);
+                        find_intersections(iChild1, otherTree, TransformF, oBox, depth + 1, intr, result);
 
                     int iChild2 = index_list[idx + 1] - 1;
                     if ( box_box_intersect(iChild2, ref oBounds) )
-                        find_intersections(iChild2, otherTree, TransformF, oBox, depth + 1, result);
+                        find_intersections(iChild2, otherTree, TransformF, oBox, depth + 1, intr, result);
+                }
+
+            }
+        }
+
+
+
+
+
+
+        /// <summary>
+        /// Find nearest pair of triangles on this tree with otherTree, within max_dist.
+        /// TransformF transforms vertices of otherTree into our coordinates. can be null.
+        /// returns triangle-id pair (my_tri,other_tri), or Index2i.Max if not found within max_dist
+        /// Use MeshQueries.TrianglesDistance() to get more information
+        /// </summary>
+        public virtual Index2i FindNearestTriangles(DMeshAABBTree3 otherTree, Func<Vector3d, Vector3d> TransformF, out double distance, double max_dist = double.MaxValue)
+        {
+            if (mesh_timestamp != mesh.ShapeTimestamp)
+                throw new Exception("DMeshAABBTree3.TestIntersection: mesh has been modified since tree construction");
+
+            double nearest_sqr = double.MaxValue;
+            if (max_dist < double.MaxValue)
+                nearest_sqr = max_dist * max_dist;
+            Index2i nearest_pair = Index2i.Max;
+
+            find_nearest_triangles(root_index, otherTree, TransformF, otherTree.root_index, 0, ref nearest_sqr, ref nearest_pair);
+            distance = (nearest_sqr < double.MaxValue) ? Math.Sqrt(nearest_sqr) : double.MaxValue;
+            return nearest_pair;
+        }
+
+        protected void find_nearest_triangles(int iBox, DMeshAABBTree3 otherTree, Func<Vector3d, Vector3d> TransformF, int oBox, int depth, ref double nearest_sqr, ref Index2i nearest_pair)
+        {
+            int idx = box_to_index[iBox];
+            int odx = otherTree.box_to_index[oBox];
+
+            if (idx < triangles_end && odx < otherTree.triangles_end) {
+                // ok we are at triangles for both trees, do triangle-level testing
+                Triangle3d tri = new Triangle3d(), otri = new Triangle3d();
+                int num_tris = index_list[idx], onum_tris = otherTree.index_list[odx];
+
+                DistTriangle3Triangle3 dist = new DistTriangle3Triangle3(new Triangle3d(), new Triangle3d());
+
+                // outer iteration is "other" tris that need to be transformed (more expensive)
+                for (int j = 1; j <= onum_tris; ++j) {
+                    int tj = otherTree.index_list[odx + j];
+                    if (otherTree.TriangleFilterF != null && otherTree.TriangleFilterF(tj) == false)
+                        continue;
+                    otherTree.mesh.GetTriVertices(tj, ref otri.V0, ref otri.V1, ref otri.V2);
+                    if (TransformF != null) {
+                        otri.V0 = TransformF(otri.V0);
+                        otri.V1 = TransformF(otri.V1);
+                        otri.V2 = TransformF(otri.V2);
+                    }
+                    dist.Triangle0 = otri;
+
+                    // inner iteration over "our" triangles
+                    for (int i = 1; i <= num_tris; ++i) {
+                        int ti = index_list[idx + i];
+                        if (TriangleFilterF != null && TriangleFilterF(ti) == false)
+                            continue;
+                        mesh.GetTriVertices(ti, ref tri.V0, ref tri.V1, ref tri.V2);
+                        dist.Triangle1 = tri;
+                        double dist_sqr = dist.GetSquared();
+                        if ( dist_sqr < nearest_sqr ) {
+                            nearest_sqr = dist_sqr;
+                            nearest_pair = new Index2i(ti, tj);
+                        }
+                    }
+                }
+
+                return;
+            }
+
+            // we either descend "our" tree or the other tree
+            //   - if we have hit triangles on "our" tree, we have to descend other
+            //   - if we hit triangles on "other", we have to descend ours
+            //   - otherwise, we alternate at each depth. This produces wider
+            //     branching but is significantly faster (~10x) for both hits and misses
+            bool bDescendOther = (idx < triangles_end || depth % 2 == 0);
+            if (bDescendOther && odx < otherTree.triangles_end)
+                bDescendOther = false;      // can't
+
+            if (bDescendOther) {
+                // ok we reached triangles on our side but we need to still reach triangles on
+                // the other side, so we descend "their" children
+                AxisAlignedBox3d bounds = get_boxd(iBox);
+
+                int oChild1 = otherTree.index_list[odx];
+                if (oChild1 < 0) {                 // 1 child, descend if nearer than cur min-dist
+                    oChild1 = (-oChild1) - 1;
+                    AxisAlignedBox3d oChild1Box = otherTree.get_boxd(oChild1, TransformF);
+                    if (oChild1Box.DistanceSquared(ref bounds) < nearest_sqr)
+                        find_nearest_triangles(iBox, otherTree, TransformF, oChild1, depth + 1, ref nearest_sqr, ref nearest_pair);
+
+                } else {                            // 2 children
+                    oChild1 = oChild1 - 1;          
+                    int oChild2 = otherTree.index_list[odx + 1] - 1;
+
+                    AxisAlignedBox3d oChild1Box = otherTree.get_boxd(oChild1, TransformF);
+                    AxisAlignedBox3d oChild2Box = otherTree.get_boxd(oChild2, TransformF);
+
+                    // descend closer box first
+                    double d1Sqr = oChild1Box.DistanceSquared(ref bounds);
+                    double d2Sqr = oChild2Box.DistanceSquared(ref bounds);
+                    if (d2Sqr < d1Sqr) {
+                        if (d2Sqr < nearest_sqr)
+                            find_nearest_triangles(iBox, otherTree, TransformF, oChild2, depth + 1, ref nearest_sqr, ref nearest_pair);
+                        if (d1Sqr < nearest_sqr)
+                            find_nearest_triangles(iBox, otherTree, TransformF, oChild1, depth + 1, ref nearest_sqr, ref nearest_pair);
+                    } else {
+                        if (d1Sqr < nearest_sqr)
+                            find_nearest_triangles(iBox, otherTree, TransformF, oChild1, depth + 1, ref nearest_sqr, ref nearest_pair);
+                        if (d2Sqr < nearest_sqr)
+                            find_nearest_triangles(iBox, otherTree, TransformF, oChild2, depth + 1, ref nearest_sqr, ref nearest_pair);
+                    }
+
+                }
+
+            } else {
+                // descend our tree nodes if they intersect w/ current bounds of other tree
+                AxisAlignedBox3d oBounds = otherTree.get_boxd(oBox, TransformF);
+
+                int iChild1 = index_list[idx];
+                if (iChild1 < 0) {                 // 1 child, descend if nearer than cur min-dist
+                    iChild1 = (-iChild1) - 1;
+                    if (box_box_distsqr(iChild1, ref oBounds) < nearest_sqr)
+                        find_nearest_triangles(iChild1, otherTree, TransformF, oBox, depth + 1, ref nearest_sqr, ref nearest_pair);
+
+                } else {                            // 2 children
+                    iChild1 = iChild1 - 1;
+                    int iChild2 = index_list[idx + 1] - 1;
+
+                    // descend closer box first
+                    double d1Sqr = box_box_distsqr(iChild1, ref oBounds);
+                    double d2Sqr = box_box_distsqr(iChild2, ref oBounds);
+                    if ( d2Sqr < d1Sqr ) {
+                        if ( d2Sqr < nearest_sqr )
+                            find_nearest_triangles(iChild2, otherTree, TransformF, oBox, depth + 1, ref nearest_sqr, ref nearest_pair);
+                        if ( d1Sqr < nearest_sqr )
+                            find_nearest_triangles(iChild1, otherTree, TransformF, oBox, depth + 1, ref nearest_sqr, ref nearest_pair);
+                    } else {
+                        if (d1Sqr < nearest_sqr)
+                            find_nearest_triangles(iChild1, otherTree, TransformF, oBox, depth + 1, ref nearest_sqr, ref nearest_pair);
+                        if (d2Sqr < nearest_sqr)
+                            find_nearest_triangles(iChild2, otherTree, TransformF, oBox, depth + 1, ref nearest_sqr, ref nearest_pair);
+                    }
+
                 }
 
             }
@@ -663,9 +958,15 @@ namespace g3
 
 
 
-
+        /// <summary>
+        /// Does this ISpatial support IsInside() test (yes!)
+        /// </summary>
         public bool SupportsPointContainment { get { return true; } }
-        public bool IsInside(Vector3d p)
+
+        /// <summary>
+        /// Returns true if point p is inside this mesh.
+        /// </summary>
+        public virtual bool IsInside(Vector3d p)
         {
             // This is a raycast crossing-count test, which is not ideal!
             // Only works for closed meshes.
@@ -693,10 +994,13 @@ namespace g3
 
 
 
-
-        // DoTraversal function will walk through tree and call NextBoxF for each
-        //  internal box node, and NextTriangleF for each triangle. 
-        //  You can prune branches by returning false from NextBoxF
+        /// <summary>
+        /// Instances of this class can be passed in to the DoTraversal() function to implement your
+        /// own tree-traversal queries.
+        /// NextBoxF() is called for each box node. Return false from this function to halt terminate 
+        /// that branch of the traversal, or true to descend into that box's children (boxes or triangles).
+        /// NextTriangleF() is called for each triangle.
+        /// </summary>
         public class TreeTraversal
         {
             // return false to terminate this branch
@@ -707,8 +1011,10 @@ namespace g3
         }
 
 
-        // walk over tree, calling functions in TreeTraversal object for internal nodes and triangles
-        public void DoTraversal(TreeTraversal traversal)
+        /// <summary>
+        /// Hierarchically descend through the tree nodes, calling the TreeTrversal functions at each level
+        /// </summary>
+        public virtual void DoTraversal(TreeTraversal traversal)
         {
             if (mesh_timestamp != mesh.ShapeTimestamp)
                 throw new Exception("DMeshAABBTree3.DoTraversal: mesh has been modified since tree construction");
@@ -716,8 +1022,8 @@ namespace g3
             tree_traversal(root_index, 0, traversal);
         }
 
-        // traversal implementation
-        private void tree_traversal(int iBox, int depth, TreeTraversal traversal)
+        // traversal implementation. you can override to customize this if necessary.
+        protected virtual void tree_traversal(int iBox, int depth, TreeTraversal traversal)
         {
             int idx = box_to_index[iBox];
 
@@ -751,6 +1057,450 @@ namespace g3
 
 
 
+
+
+        /*
+         *  Hierarchical Mesh Winding Number computation
+         */
+
+
+        /// <summary>
+        /// Evaluate the mesh winding number at point. To do this, we must construct additional
+        /// information to short-circuit tree branches. This happens on the first evaluation.
+        /// This does consume some additional memory, mainly temporary memory during construction.
+        /// (eg on a 500k sphere, about 30mb to construct, but then only 2-5mb is stored at the end)
+        /// If you don't want this, just use Mesh.WindingNumber() directly. Also note that if you
+        /// are only evaluating a few times, it is not sensible - assume you need at least 
+        /// hundreds of evaluations to see speed improvements.
+        /// </summary>
+        public virtual double WindingNumber(Vector3d p)
+        {
+            if (mesh_timestamp != mesh.ShapeTimestamp)
+                throw new Exception("DMeshAABBTree3.WindingNumber: mesh has been modified since tree construction");
+
+            if (WindingCache == null || winding_cache_timestamp != mesh.ShapeTimestamp) {
+                build_winding_cache();
+                winding_cache_timestamp = mesh.ShapeTimestamp;
+            }
+
+            double sum = branch_winding_num(root_index, p);
+            return sum / (4.0 * Math.PI);
+        }
+
+        // evaluate winding number contribution for all triangles below iBox
+        protected double branch_winding_num(int iBox, Vector3d p)
+        {
+            Vector3d a = Vector3d.Zero, b = Vector3d.Zero, c = Vector3d.Zero;
+            double branch_sum = 0;
+
+            int idx = box_to_index[iBox];
+            if (idx < triangles_end) {            // triange-list case, array is [N t1 t2 ... tN]
+                int num_tris = index_list[idx];
+                for (int i = 1; i <= num_tris; ++i) {
+                    int ti = index_list[idx + i];
+                    mesh.GetTriVertices(ti, ref a, ref b, ref c);
+                    branch_sum += MathUtil.TriSolidAngle(a, b, c, ref p);
+                }
+
+            } else {                                // internal node, either 1 or 2 child boxes
+                int iChild1 = index_list[idx];
+                if (iChild1 < 0) {                 // 1 child, descend if nearer than cur min-dist
+                    iChild1 = (-iChild1) - 1;
+
+                    // if we have winding cache, we can more efficiently compute contribution of all triangles
+                    // below this box. Otherwise, recursively descend tree.
+                    bool contained = box_contains(iChild1, p);
+                    if (contained == false && WindingCache.ContainsKey(iChild1))
+                        branch_sum += evaluate_box_winding_cache(iChild1, p);
+                    else
+                        branch_sum += branch_winding_num(iChild1, p);
+
+                } else {                            // 2 children, descend closest first
+                    iChild1 = iChild1 - 1;
+                    int iChild2 = index_list[idx + 1] - 1;
+
+                    bool contained1 = box_contains(iChild1, p);
+                    if (contained1 == false && WindingCache.ContainsKey(iChild1))
+                        branch_sum += evaluate_box_winding_cache(iChild1, p);
+                    else
+                        branch_sum += branch_winding_num(iChild1, p);
+
+                    bool contained2 = box_contains(iChild2, p);
+                    if (contained2 == false && WindingCache.ContainsKey(iChild2))
+                        branch_sum += evaluate_box_winding_cache(iChild2, p);
+                    else
+                        branch_sum += branch_winding_num(iChild2, p);
+                }
+            }
+
+            return branch_sum;
+        }
+
+
+        Dictionary<int, List<int>> WindingCache;
+        int winding_cache_timestamp = -1;
+
+        protected void build_winding_cache()
+        {
+            // The basic strategy to build the winding cache is to descend the tree until we hit a node with N
+            // triangles below it, then build a cache for those triangles. We also (currently) build all caches
+            // above such a node, because it makes a big speed difference. Changing this threshold does not appear
+            // to make a big difference in query speed, but it does affect the build time and memory usage.
+            // If the mesh is large, we can use larger caches, but on a small mesh it may result in
+            // not actually getting that many caches, which is les compute-efficient. 
+            // So, we step up as the threshold the mesh gets larger.
+            // [TODO] profile this? would be nice to have a functional relationship, but it is not linear...
+            int WINDING_CACHE_THRESH = 100;
+            if (Mesh.TriangleCount > 250000)
+                WINDING_CACHE_THRESH = 500;
+            if (Mesh.TriangleCount > 1000000)
+                WINDING_CACHE_THRESH = 1000;
+
+            WindingCache = new Dictionary<int, List<int>>();
+            HashSet<int> root_hash;
+            build_winding_cache(root_index, 0, WINDING_CACHE_THRESH, out root_hash);
+
+            // [RMS] some debugging info
+            //int cache_count = 0;
+            //foreach (var value in WindingCache.Values)
+            //    cache_count += value.Count;
+            //System.Console.WriteLine("total cached kb: {0}  tricount {1} caches {2} boxes {3}  ", cache_count*sizeof(int)/1024, Mesh.TriangleCount, WindingCache.Count, box_centers.size);
+        }
+        protected int build_winding_cache(int iBox, int depth, int tri_count_thresh, out HashSet<int> tri_hash)
+        {
+            tri_hash = null;
+
+            int idx = box_to_index[iBox];
+            if (idx < triangles_end) {            // triange-list case, array is [N t1 t2 ... tN]
+                int num_tris = index_list[idx];
+                return num_tris;
+
+            } else {                                // internal node, either 1 or 2 child boxes
+                int iChild1 = index_list[idx];
+                if (iChild1 < 0) {                 // 1 child, descend if nearer than cur min-dist
+                    iChild1 = (-iChild1) - 1;
+                    int num_child_tris = build_winding_cache(iChild1, depth+1, tri_count_thresh, out tri_hash);
+
+                    // if count in child is large enough, we already built a cache at lower node
+                    return num_child_tris;
+
+                } else {                            // 2 children, descend closest first
+                    iChild1 = iChild1 - 1;
+                    int iChild2 = index_list[idx + 1] - 1;
+
+                    // let each child build its own cache if it wants. If so, it will return the
+                    // list of its child tris
+                    HashSet<int> child2_hash;
+                    int num_tris_1 = build_winding_cache(iChild1, depth+1, tri_count_thresh, out tri_hash);
+                    int num_tris_2 = build_winding_cache(iChild2, depth+1, tri_count_thresh, out child2_hash);
+                    bool build_cache = (num_tris_1 + num_tris_2 > tri_count_thresh);
+
+                    if (depth == 0)
+                        return num_tris_1 + num_tris_2;  // cannot build cache at level 0...
+
+                    // collect up the triangles we need. there are various cases depending on what children already did
+                    if ( tri_hash != null || child2_hash != null || build_cache ) {
+                        if ( tri_hash == null && child2_hash != null ) {
+                            collect_triangles(iChild1, child2_hash);
+                            tri_hash = child2_hash;
+                        } else {
+                            if (tri_hash == null) {
+                                tri_hash = new HashSet<int>();
+                                collect_triangles(iChild1, tri_hash);
+                            }
+                            if (child2_hash == null)
+                                collect_triangles(iChild2, tri_hash);
+                            else
+                                tri_hash.UnionWith(child2_hash);
+                        }
+                    }
+                    if ( build_cache )
+                        make_box_winding_cache(iBox, tri_hash);
+
+                    return (num_tris_1 + num_tris_2);
+                }
+            }
+        }
+
+        /// collect all triangles under iBox, find open edges [a,b],
+        /// and add them all to a list associated with iBox
+        protected void make_box_winding_cache(int iBox, HashSet<int> triangles)
+        {
+            Util.gDevAssert(WindingCache.ContainsKey(iBox) == false);
+
+            List<int> edges = new List<int>();
+            foreach ( int tid in triangles ) {
+                Index3i tri = Mesh.GetTriangle(tid);
+                Index3i nbr_tris = Mesh.GetTriNeighbourTris(tid);
+                for ( int j = 0; j < 3; ++j) {
+                    if ( nbr_tris[j] == DMesh3.InvalidID || triangles.Contains(nbr_tris[j]) == false ) {
+                        edges.Add(tri[(j+1) % 3]);
+                        edges.Add(tri[j]);
+                    }
+                }
+            }
+            WindingCache[iBox] = edges;
+        }
+
+        // evaluate the winding cache for iBox
+        protected double evaluate_box_winding_cache(int iBox, Vector3d p)
+        {
+            List<int> boxcache = WindingCache[iBox];
+            int N = boxcache.Count / 2;
+            // evaluate winding calc over arbitrary triangle fan that "closes" 
+            // the open mesh below this box. 
+            Vector3d c = box_centers[iBox];
+            double cluster_sum = 0;
+            for (int i = 0; i < N; ++i) {
+                Vector3d a = Mesh.GetVertex(boxcache[2 * i]);
+                Vector3d b = Mesh.GetVertex(boxcache[2 * i + 1]);
+                cluster_sum += MathUtil.TriSolidAngle(a, b, c, ref p);
+            }
+            // contribution of open mesh is -sum over fan
+            return -cluster_sum;
+        }
+
+
+        // collect all the triangles below iBox in a hash
+        protected void collect_triangles(int iBox, HashSet<int> triangles)
+        {
+            int idx = box_to_index[iBox];
+            if (idx < triangles_end) {            // triange-list case, array is [N t1 t2 ... tN]
+                int num_tris = index_list[idx];
+                for (int i = 1; i <= num_tris; ++i)
+                    triangles.Add(index_list[idx + i]);
+            } else {
+                int iChild1 = index_list[idx];
+                if (iChild1 < 0) {                 // 1 child, descend if nearer than cur min-dist
+                    collect_triangles((-iChild1) - 1, triangles);
+                } else {                           // 2 children, descend closest first
+                    collect_triangles(iChild1 - 1, triangles);
+                    collect_triangles(index_list[idx + 1] - 1, triangles);
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+
+        /*
+          *  Fast Mesh Winding Number computation
+          */
+
+        /// <summary>
+        /// FWN beta parameter - is 2.0 in paper
+        /// </summary>
+        public double FWNBeta = 2.0;
+
+        /// <summary>
+        /// FWN approximation order. can be 1 or 2. 2 is more accurate, obviously.
+        /// </summary>
+        public int FWNApproxOrder = 2;
+
+
+        /// <summary>
+        /// Fast approximation of winding number using far-field approximations
+        /// </summary>
+        public virtual double FastWindingNumber(Vector3d p)
+        {
+            if (mesh_timestamp != mesh.ShapeTimestamp)
+                throw new Exception("DMeshAABBTree3.FastWindingNumber: mesh has been modified since tree construction");
+
+            if (FastWindingCache == null || fast_winding_cache_timestamp != mesh.ShapeTimestamp) {
+                build_fast_winding_cache();
+                fast_winding_cache_timestamp = mesh.ShapeTimestamp;
+            }
+
+            double sum = branch_fast_winding_num(root_index, p);
+            return sum;
+        }
+
+        // evaluate winding number contribution for all triangles below iBox
+        protected double branch_fast_winding_num(int iBox, Vector3d p)
+        {
+            Vector3d a = Vector3d.Zero, b = Vector3d.Zero, c = Vector3d.Zero;
+            double branch_sum = 0;
+
+            int idx = box_to_index[iBox];
+            if (idx < triangles_end) {            // triange-list case, array is [N t1 t2 ... tN]
+                int num_tris = index_list[idx];
+                for (int i = 1; i <= num_tris; ++i) {
+                    int ti = index_list[idx + i];
+                    mesh.GetTriVertices(ti, ref a, ref b, ref c);
+                    branch_sum += MathUtil.TriSolidAngle(a, b, c, ref p) / MathUtil.FourPI;
+                }
+
+            } else {                                // internal node, either 1 or 2 child boxes
+                int iChild1 = index_list[idx];
+                if (iChild1 < 0) {                 // 1 child, descend if nearer than cur min-dist
+                    iChild1 = (-iChild1) - 1;
+
+                    // if we have winding cache, we can more efficiently compute contribution of all triangles
+                    // below this box. Otherwise, recursively descend tree.
+                    bool contained = box_contains(iChild1, p);
+                    if (contained == false && can_use_fast_winding_cache(iChild1, ref p))
+                        branch_sum += evaluate_box_fast_winding_cache(iChild1, ref p);
+                    else
+                        branch_sum += branch_fast_winding_num(iChild1, p);
+
+                } else {                            // 2 children, descend closest first
+                    iChild1 = iChild1 - 1;
+                    int iChild2 = index_list[idx + 1] - 1;
+
+                    bool contained1 = box_contains(iChild1, p);
+                    if (contained1 == false && can_use_fast_winding_cache(iChild1, ref p))
+                        branch_sum += evaluate_box_fast_winding_cache(iChild1, ref p);
+                    else
+                        branch_sum += branch_fast_winding_num(iChild1, p);
+
+                    bool contained2 = box_contains(iChild2, p);
+                    if (contained2 == false && can_use_fast_winding_cache(iChild2, ref p))
+                        branch_sum += evaluate_box_fast_winding_cache(iChild2, ref p);
+                    else
+                        branch_sum += branch_fast_winding_num(iChild2, p);
+                }
+            }
+
+            return branch_sum;
+        }
+
+
+        struct FWNInfo
+        {
+            public Vector3d Center;
+            public double R;
+            public Vector3d Order1Vec;
+            public Matrix3d Order2Mat;
+        }
+
+        Dictionary<int, FWNInfo> FastWindingCache;
+        int fast_winding_cache_timestamp = -1;
+
+        protected void build_fast_winding_cache()
+        {
+            // set this to a larger number to ignore caches if number of triangles is too small.
+            // (seems to be no benefit to doing this...is holdover from tree-decomposition FWN code)
+            int WINDING_CACHE_THRESH = 1;
+
+            //MeshTriInfoCache triCache = null;
+            MeshTriInfoCache triCache = new MeshTriInfoCache(mesh);
+
+            FastWindingCache = new Dictionary<int, FWNInfo>();
+            HashSet<int> root_hash;
+            build_fast_winding_cache(root_index, 0, WINDING_CACHE_THRESH, out root_hash, triCache);
+        }
+        protected int build_fast_winding_cache(int iBox, int depth, int tri_count_thresh, out HashSet<int> tri_hash, MeshTriInfoCache triCache)
+        {
+            tri_hash = null;
+
+            int idx = box_to_index[iBox];
+            if (idx < triangles_end) {            // triange-list case, array is [N t1 t2 ... tN]
+                int num_tris = index_list[idx];
+                return num_tris;
+
+            } else {                                // internal node, either 1 or 2 child boxes
+                int iChild1 = index_list[idx];
+                if (iChild1 < 0) {                 // 1 child, descend if nearer than cur min-dist
+                    iChild1 = (-iChild1) - 1;
+                    int num_child_tris = build_fast_winding_cache(iChild1, depth + 1, tri_count_thresh, out tri_hash, triCache);
+
+                    // if count in child is large enough, we already built a cache at lower node
+                    return num_child_tris;
+
+                } else {                            // 2 children, descend closest first
+                    iChild1 = iChild1 - 1;
+                    int iChild2 = index_list[idx + 1] - 1;
+
+                    // let each child build its own cache if it wants. If so, it will return the
+                    // list of its child tris
+                    HashSet<int> child2_hash;
+                    int num_tris_1 = build_fast_winding_cache(iChild1, depth + 1, tri_count_thresh, out tri_hash, triCache);
+                    int num_tris_2 = build_fast_winding_cache(iChild2, depth + 1, tri_count_thresh, out child2_hash, triCache);
+                    bool build_cache = (num_tris_1 + num_tris_2 > tri_count_thresh);
+
+                    if (depth == 0)
+                        return num_tris_1 + num_tris_2;  // cannot build cache at level 0...
+
+                    // collect up the triangles we need. there are various cases depending on what children already did
+                    if (tri_hash != null || child2_hash != null || build_cache) {
+                        if (tri_hash == null && child2_hash != null) {
+                            collect_triangles(iChild1, child2_hash);
+                            tri_hash = child2_hash;
+                        } else {
+                            if (tri_hash == null) {
+                                tri_hash = new HashSet<int>();
+                                collect_triangles(iChild1, tri_hash);
+                            }
+                            if (child2_hash == null)
+                                collect_triangles(iChild2, tri_hash);
+                            else
+                                tri_hash.UnionWith(child2_hash);
+                        }
+                    }
+                    if (build_cache)
+                        make_box_fast_winding_cache(iBox, tri_hash, triCache);
+
+                    return (num_tris_1 + num_tris_2);
+                }
+            }
+        }
+
+
+        // check if we can use fwn 
+        protected bool can_use_fast_winding_cache(int iBox, ref Vector3d q)
+        {
+            FWNInfo cacheInfo;
+            if (FastWindingCache.TryGetValue(iBox, out cacheInfo) == false)
+                return false;
+
+            double dist_qp = cacheInfo.Center.Distance(ref q);
+            if (dist_qp > FWNBeta * cacheInfo.R)
+                return true;
+
+            return false;
+        }
+
+
+        // compute FWN cache for all triangles underneath this box
+        protected void make_box_fast_winding_cache(int iBox, IEnumerable<int> triangles, MeshTriInfoCache triCache)
+        {
+            Util.gDevAssert(FastWindingCache.ContainsKey(iBox) == false);
+
+            // construct cache
+            FWNInfo cacheInfo = new FWNInfo();
+            FastTriWinding.ComputeCoeffs(Mesh, triangles, ref cacheInfo.Center, ref cacheInfo.R, ref cacheInfo.Order1Vec, ref cacheInfo.Order2Mat, triCache);
+
+            FastWindingCache[iBox] = cacheInfo;
+        }
+
+        // evaluate the FWN cache for iBox
+        protected double evaluate_box_fast_winding_cache(int iBox, ref Vector3d q)
+        {
+            FWNInfo cacheInfo = FastWindingCache[iBox];
+
+            if (FWNApproxOrder == 2)
+                return FastTriWinding.EvaluateOrder2Approx(ref cacheInfo.Center, ref cacheInfo.Order1Vec, ref cacheInfo.Order2Mat, ref q);
+            else
+                return FastTriWinding.EvaluateOrder1Approx(ref cacheInfo.Center, ref cacheInfo.Order1Vec, ref q);
+        }
+
+
+
+
+
+
+
+
+
+
+        /// <summary>
+        /// Total sum of volumes of all boxes in the tree. Mainly useful to evaluate tree quality.
+        /// </summary>
         public double TotalVolume()
         {
             double volSum = 0;
@@ -763,6 +1513,10 @@ namespace g3
             DoTraversal(t);
             return volSum;
         }
+
+        /// <summary>
+        /// Total sum-of-extents over all boxes in the tree. Mainly useful to evaluate tree quality.
+        /// </summary>
         public double TotalExtentSum()
         {
             double extSum = 0;
@@ -777,6 +1531,13 @@ namespace g3
         }
 
 
+        /// <summary>
+        /// Root bounding box of tree (note: tree must be generated by calling a query function first!)
+        /// </summary>
+        public AxisAlignedBox3d Bounds {
+            get { return get_box(root_index); }
+        }
+
 
 
         //
@@ -789,9 +1550,9 @@ namespace g3
         // storage for box nodes. 
         //   - box_to_index is a pointer into index_list
         //   - box_centers and box_extents are the centers/extents of the bounding boxes
-        DVector<int> box_to_index;
-        DVector<Vector3f> box_centers;
-        DVector<Vector3f> box_extents;
+        protected DVector<int> box_to_index;
+        protected DVector<Vector3f> box_centers;
+        protected DVector<Vector3f> box_extents;
 
         // list of indices for a given box. There is *no* marker/sentinel between
         // boxes, you have to get the starting index from box_to_index[]
@@ -803,13 +1564,13 @@ namespace g3
         //       internal box, with index (-index_list[i])-1     (shift-by-one in case actual value is 0!)
         //   - if i > triangles_end and index_list[i] > 0, this is a two-child
         //       internal box, with indices index_list[i]-1 and index_list[i+1]-1
-        DVector<int> index_list;
+        protected DVector<int> index_list;
 
         // index_list[i] for i < triangles_end is a triangle-index list, otherwise box-index pair/single
-        int triangles_end = -1;
+        protected int triangles_end = -1;
 
         // box_to_index[root_index] is the root node of the tree
-        int root_index = -1;
+        protected int root_index = -1;
 
 
 
@@ -1448,53 +2209,82 @@ namespace g3
         }
 
 
+        const float box_eps = 50.0f * MathUtil.Epsilonf;
+
         AxisAlignedBox3f get_box(int iBox)
         {
             Vector3f c = box_centers[iBox];
             Vector3f e = box_extents[iBox];
-            e += 10.0f*MathUtil.Epsilonf;      // because of float/double casts, box may drift to the point
-                                               // where mesh vertex will be slightly outside box
-            return new AxisAlignedBox3f(c - e, c + e);
+            return new AxisAlignedBox3f(ref c, e.x + box_eps, e.y + box_eps, e.z + box_eps);
         }
         AxisAlignedBox3d get_boxd(int iBox)
         {
-            Vector3f c = box_centers[iBox];
+            Vector3d c = (Vector3d)box_centers[iBox];
             Vector3f e = box_extents[iBox];
-            e += 10.0f*MathUtil.Epsilonf;      // because of float/double casts, box may drift to the point
-                                               // where mesh vertex will be slightly outside box
-            return new AxisAlignedBox3d(c - e, c + e);
+            return new AxisAlignedBox3d(ref c, e.x + box_eps, e.y + box_eps, e.z + box_eps);
         }
-
+        AxisAlignedBox3d get_boxd(int iBox, Func<Vector3d, Vector3d> TransformF)
+        {
+            if (TransformF != null) {
+                AxisAlignedBox3d box = get_boxd(iBox);
+                return BoundsUtil.Bounds(ref box, TransformF);
+            } else {
+                return get_boxd(iBox);
+            }
+        }
 
         double box_ray_intersect_t(int iBox, Ray3d ray)
         {
-            Vector3d c = box_centers[iBox];
-            Vector3d e = box_extents[iBox];
-            AxisAlignedBox3d box = new AxisAlignedBox3d(c - e, c + e);
-            IntrRay3AxisAlignedBox3 intr = new IntrRay3AxisAlignedBox3(ray, box);
-            if (intr.Find()) {
-                return intr.RayParam0;
+            Vector3d c = (Vector3d)box_centers[iBox];
+            Vector3f e = box_extents[iBox];
+            AxisAlignedBox3d box = new AxisAlignedBox3d(ref c, e.x + box_eps, e.y + box_eps, e.z + box_eps);
+
+            double ray_t = double.MaxValue;
+            if (IntrRay3AxisAlignedBox3.FindRayIntersectT(ref ray, ref box, out ray_t)) {
+                return ray_t;
             } else {
-                Debug.Assert(intr.Result != IntersectionResult.InvalidQuery);
                 return double.MaxValue;
             }
         }
 
         bool box_box_intersect(int iBox, ref AxisAlignedBox3d testBox)
         {
-            Vector3d c = box_centers[iBox];
-            Vector3d e = box_extents[iBox];
-            AxisAlignedBox3d box = new AxisAlignedBox3d(c - e, c + e);
+            // [TODO] could compute this w/o constructing box
+            Vector3d c = (Vector3d)box_centers[iBox];
+            Vector3f e = box_extents[iBox];
+            AxisAlignedBox3d box = new AxisAlignedBox3d(ref c, e.x + box_eps, e.y + box_eps, e.z + box_eps);
+
             return box.Intersects(testBox);
+        }
+
+        double box_box_distsqr(int iBox, ref AxisAlignedBox3d testBox)
+        {
+            // [TODO] could compute this w/o constructing box
+            Vector3d c = (Vector3d)box_centers[iBox];
+            Vector3f e = box_extents[iBox];
+            AxisAlignedBox3d box = new AxisAlignedBox3d(ref c, e.x + box_eps, e.y + box_eps, e.z + box_eps);
+            return box.DistanceSquared(ref testBox);
         }
 
 
         double box_distance_sqr(int iBox, Vector3d p)
         {
-            Vector3d c = box_centers[iBox];
-            Vector3d e = box_extents[iBox];
-            AxisAlignedBox3d box = new AxisAlignedBox3d(c - e, c + e);
+            // [TODO] could compute this w/o constructing box
+            Vector3d c = (Vector3d)box_centers[iBox];
+            Vector3f e = box_extents[iBox];
+            AxisAlignedBox3d box = new AxisAlignedBox3d(ref c, e.x + box_eps, e.y + box_eps, e.z + box_eps);
+
             return box.DistanceSquared(p);
+        }
+
+
+        protected bool box_contains(int iBox, Vector3d p)
+        {
+            // [TODO] this could be way faster...
+            Vector3d c = (Vector3d)box_centers[iBox];
+            Vector3f e = box_extents[iBox];
+            AxisAlignedBox3d box = new AxisAlignedBox3d(ref c, e.x + box_eps, e.y + box_eps, e.z + box_eps);
+            return box.Contains(p);
         }
 
 

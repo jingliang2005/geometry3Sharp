@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-#if G3_USING_UNITY
-using UnityEngine;
-#endif
-
 namespace g3
 {
     public struct AxisAlignedBox3i : IComparable<AxisAlignedBox3i>, IEquatable<AxisAlignedBox3i>
@@ -64,17 +60,14 @@ namespace g3
             Min = Max = vCenter;
         }
 
-        public int Width
-        {
-            get { return Max.x - Min.x; }
+        public int Width {
+            get { return Math.Max(Max.x - Min.x, 0); }
         }
-        public int Height
-        {
-            get { return Max.y - Min.y; }
+        public int Height {
+            get { return Math.Max(Max.y - Min.y, 0); }
         }
-        public int Depth
-        {
-            get { return Max.z - Min.z; }
+        public int Depth {
+            get { return Math.Max(Max.z - Min.z, 0); }
         }
 
         public int Volume
@@ -253,6 +246,27 @@ namespace g3
         }
 
 
+        /// <summary>
+        /// Clamp v to grid bounds [min, max]
+        /// </summary>
+        public Vector3i ClampInclusive(Vector3i v) {
+            return new Vector3i(
+                MathUtil.Clamp(v.x, Min.x, Max.x),
+                MathUtil.Clamp(v.y, Min.y, Max.y),
+                MathUtil.Clamp(v.z, Min.z, Max.z));
+        }
+
+        /// <summary>
+        /// clamp v to grid bounds [min,max)
+        /// </summary>
+        public Vector3i ClampExclusive(Vector3i v) {
+            return new Vector3i(
+                MathUtil.Clamp(v.x, Min.x, Max.x-1),
+                MathUtil.Clamp(v.y, Min.y, Max.y-1),
+                MathUtil.Clamp(v.z, Min.z, Max.z-1));
+        }
+
+
 
         //! relative translation
         public void Translate(Vector3i vTranslate)
@@ -300,7 +314,7 @@ namespace g3
 
         public override string ToString()
         {
-            return string.Format("x[{0:F8},{1:F8}] y[{2:F8},{3:F8}] z[{4:F8},{5:F8}]", Min.x, Max.x, Min.y, Max.y, Min.z, Max.z);
+            return string.Format("x[{0},{1}] y[{2},{3}] z[{4},{5}]", Min.x, Max.x, Min.y, Max.y, Min.z, Max.z);
         }
 
 

@@ -7,14 +7,33 @@ namespace g3
 {
     public class DMesh3Builder : IMeshBuilder
     {
+        public enum AddTriangleFailBehaviors
+        {
+            DiscardTriangle = 0,
+            DuplicateAllVertices = 1
+        }
+
+        /// <summary>
+        /// What should we do when AddTriangle() fails because triangle is non-manifold?
+        /// </summary>
+        public AddTriangleFailBehaviors NonManifoldTriBehavior = AddTriangleFailBehaviors.DuplicateAllVertices;
+
+        /// <summary>
+        /// What should we do when AddTriangle() fails because the triangle already exists?
+        /// </summary>
+        public AddTriangleFailBehaviors DuplicateTriBehavior = AddTriangleFailBehaviors.DiscardTriangle;
+
+
+
+
         public List<DMesh3> Meshes;
         public List<GenericMaterial> Materials;
 
-		// this is a map from index into Meshes to index into Materials (-1 if no material)
-		//  (so, currently we can only have 1 material per mesh!)
+        // this is a map from index into Meshes to index into Materials (-1 if no material)
+        //  (so, currently we can only have 1 material per mesh!)
         public List<int> MaterialAssignment;
 
-        public List<Dictionary<string, object> > Metadata;
+        public List<Dictionary<string, object>> Metadata;
 
         int nActiveMesh;
 
@@ -30,13 +49,24 @@ namespace g3
         public int AppendNewMesh(bool bHaveVtxNormals, bool bHaveVtxColors, bool bHaveVtxUVs, bool bHaveFaceGroups)
         {
             int index = Meshes.Count;
-			DMesh3 m = new DMesh3(bHaveVtxNormals, bHaveVtxColors, bHaveVtxUVs, bHaveFaceGroups);
+            DMesh3 m = new DMesh3(bHaveVtxNormals, bHaveVtxColors, bHaveVtxUVs, bHaveFaceGroups);
             Meshes.Add(m);
             MaterialAssignment.Add(-1);     // no material is known
             Metadata.Add(new Dictionary<string, object>());
             nActiveMesh = index;
             return index;
         }
+
+        public int AppendNewMesh(DMesh3 existingMesh)
+        {
+            int index = Meshes.Count;
+            Meshes.Add(existingMesh);
+            MaterialAssignment.Add(-1);     // no material is known
+            Metadata.Add(new Dictionary<string, object>());
+            nActiveMesh = index;
+            return index;
+        }
+
 
         public void SetActiveMesh(int id)
         {
@@ -48,14 +78,7 @@ namespace g3
 
         public int AppendTriangle(int i, int j, int k)
         {
-            // [RMS] What to do here? We definitely do not want to add a duplicate triangle!!
-            //   But is silently ignoring the right thing to do?
-            int existing_tid = Meshes[nActiveMesh].FindTriangle(i, j, k);
-            if (existing_tid != DMesh3.InvalidID)
-                return existing_tid;
-
-            int tid = Meshes[nActiveMesh].AppendTriangle(i, j, k);
-            return tid;
+            return AppendTriangle(i, j, k, -1);
         }
 
         public int AppendTriangle(int i, int j, int k, int g)
@@ -63,12 +86,35 @@ namespace g3
             // [RMS] What to do here? We definitely do not want to add a duplicate triangle!!
             //   But is silently ignoring the right thing to do?
             int existing_tid = Meshes[nActiveMesh].FindTriangle(i, j, k);
-            if (existing_tid != DMesh3.InvalidID)
-                return existing_tid;
+            if (existing_tid != DMesh3.InvalidID) {
+                if (DuplicateTriBehavior == AddTriangleFailBehaviors.DuplicateAllVertices)
+                    return append_duplicate_triangle(i, j, k, g);
+                else
+                    return existing_tid;
+            }
 
             int tid = Meshes[nActiveMesh].AppendTriangle(i, j, k, g);
+            if ( tid == DMesh3.NonManifoldID ) {
+                if (NonManifoldTriBehavior == AddTriangleFailBehaviors.DuplicateAllVertices)
+                    return append_duplicate_triangle(i, j, k, g);
+                else
+                    return DMesh3.NonManifoldID;
+            }
             return tid;
         }
+        int append_duplicate_triangle(int i, int j, int k, int g)
+        {
+            NewVertexInfo vinfo = new NewVertexInfo();
+            Meshes[nActiveMesh].GetVertex(i, ref vinfo, true, true, true);
+            int new_i = Meshes[nActiveMesh].AppendVertex(vinfo);
+            Meshes[nActiveMesh].GetVertex(j, ref vinfo, true, true, true);
+            int new_j = Meshes[nActiveMesh].AppendVertex(vinfo);
+            Meshes[nActiveMesh].GetVertex(k, ref vinfo, true, true, true);
+            int new_k = Meshes[nActiveMesh].AppendVertex(vinfo);
+            return Meshes[nActiveMesh].AppendTriangle(new_i, new_j, new_k, g);
+        }
+
+
 
         public int AppendVertex(double x, double y, double z)
         {

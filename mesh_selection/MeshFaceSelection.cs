@@ -46,23 +46,33 @@ namespace g3
         {
             minCount = MathUtil.Clamp(minCount, 1, 3);
 
-            foreach ( int tid in mesh.TriangleIndices() ) {
-                Index3i tri = mesh.GetTriangle(tid);
-
-                if (minCount == 1) {
-                    if (convertV.IsSelected(tri.a) || convertV.IsSelected(tri.b) || convertV.IsSelected(tri.c))
-                        add(tid);
-                } else if (minCount == 3) {
-                    if (convertV.IsSelected(tri.a) && convertV.IsSelected(tri.b) && convertV.IsSelected(tri.c))
-                        add(tid);
-                } else {
-                    int n = (convertV.IsSelected(tri.a) ? 1 : 0) +
-                            (convertV.IsSelected(tri.b) ? 1 : 0) +
-                            (convertV.IsSelected(tri.c) ? 1 : 0);
-                    if (n >= minCount)
+            if (minCount == 1) {
+                foreach ( int vid in convertV ) {
+                    foreach (int tid in mesh.VtxTrianglesItr(vid))
                         add(tid);
                 }
+            } else {
+                foreach (int tid in mesh.TriangleIndices()) {
+                    Index3i tri = mesh.GetTriangle(tid);
+                    if (minCount == 3) {
+                        if (convertV.IsSelected(tri.a) && convertV.IsSelected(tri.b) && convertV.IsSelected(tri.c))
+                            add(tid);
+                    } else {
+                        int n = (convertV.IsSelected(tri.a) ? 1 : 0) +
+                                (convertV.IsSelected(tri.b) ? 1 : 0) +
+                                (convertV.IsSelected(tri.c) ? 1 : 0);
+                        if (n >= minCount)
+                            add(tid);
+                    }
+                }
             }
+        }
+
+
+        // select a group
+        public MeshFaceSelection(DMesh3 mesh, int group_id) : this(mesh)
+        {
+            SelectGroup(group_id);
         }
 
 
@@ -135,6 +145,11 @@ namespace g3
             Select(temp);
         }
 
+
+        public void SelectVertexOneRing(int vid) {
+            foreach (int tid in Mesh.VtxTrianglesItr(vid))
+                add(tid);
+        }
         public void SelectVertexOneRings(int[] vertices)
         {
             for ( int i = 0; i < vertices.Length; ++i ) {
@@ -152,6 +167,15 @@ namespace g3
         }
 
 
+        public void SelectEdgeTris(int eid)
+        {
+            Index2i et = Mesh.GetEdgeT(eid);
+            add(et.a);
+            if (et.b != DMesh3.InvalidID)
+                add(et.b);
+        }
+
+
         public void Deselect(int tid) {
             remove(tid);
         }
@@ -162,6 +186,10 @@ namespace g3
         public void Deselect(IEnumerable<int> triangles) {
             foreach ( int tid in triangles )
                 remove(tid);
+        }
+        public void DeselectAll()
+        {
+            Selected.Clear();
         }
 
 
@@ -205,6 +233,40 @@ namespace g3
 
 
 
+        /// <summary>
+        /// find set of tris just outside border of selection
+        /// </summary>
+        public List<int> FindNeighbourTris()
+        {
+            List<int> result = new List<int>();
+            foreach (int tid in Selected) {
+                Index3i nbr_tris = Mesh.GetTriNeighbourTris(tid);
+                for (int j = 0; j < 3; ++j) {
+                    if (nbr_tris[j] != DMesh3.InvalidID && IsSelected(nbr_tris[j]) == false)
+                        result.Add(nbr_tris[j]);
+                }
+            }
+            return result;
+        }
+
+
+        /// <summary>
+        /// find set of tris just inside border of selection
+        /// </summary>
+        public List<int> FindBorderTris()
+        {
+            List<int> result = new List<int>();
+            foreach (int tid in Selected) {
+                Index3i nbr_tris = Mesh.GetTriNeighbourTris(tid);
+                if (IsSelected(nbr_tris.a) == false || IsSelected(nbr_tris.b) == false || IsSelected(nbr_tris.c) == false)
+                    result.Add(tid);
+            }
+            return result;
+        }
+
+
+
+
         public void ExpandToFaceNeighbours(Func<int, bool> FilterF = null)
         {
             temp.Clear();
@@ -222,6 +284,11 @@ namespace g3
             for (int i = 0; i < temp.Count; ++i)
                 add(temp[i]);
         }
+        public void ExpandToFaceNeighbours(int rounds, Func<int, bool> FilterF = null)
+        {
+            for (int k = 0; k < rounds; ++k)
+                ExpandToFaceNeighbours(FilterF);
+        }
 
 
         /// <summary>
@@ -231,7 +298,6 @@ namespace g3
         /// 
         /// Return false from FilterF to prevent triangles from being included.
         /// </summary>
-        /// <param name="FilterF"></param>
         public void ExpandToOneRingNeighbours(Func<int, bool> FilterF = null)
         {
             temp.Clear();
@@ -301,6 +367,46 @@ namespace g3
                 var t = checkTris; checkTris = addTris; addTris = t;   // swap
             }
         }
+
+
+
+
+
+        /// <summary>
+        /// remove all triangles in vertex one-rings of current selection to set.
+        /// On a large mesh this is quite expensive as we don't know the boundary,
+        /// so we have to iterate over all triangles.
+        /// 
+        /// Return false from FilterF to prevent triangles from being deselected.
+        /// </summary>
+        public void ContractBorderByOneRingNeighbours()
+        {
+            temp.Clear();   // border vertices
+
+            // [TODO] border vertices are pushed onto the temp list multiple times.
+            // minor inefficiency, but maybe we could improve it?
+
+            // find set of vertices on border
+            foreach (int tid in Selected) {
+                Index3i tri_v = Mesh.GetTriangle(tid);
+                for (int j = 0; j < 3; ++j) {
+                    int vid = tri_v[j];
+                    foreach (int nbr_t in Mesh.VtxTrianglesItr(vid)) {
+                        if ( IsSelected(nbr_t) == false ) {
+                            temp.Add(vid);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            foreach ( int vid in temp) {
+                foreach (int nbr_t in Mesh.VtxTrianglesItr(vid)) 
+                    Deselect(nbr_t);
+            }
+
+        }
+
 
 
 
@@ -382,25 +488,85 @@ namespace g3
         }
 
         // returns true if selection was modified
-        public bool LocalOptimize(bool bClipFins, bool bFillEars, bool bFillTinyHoles = true, bool bClipLoners = true)
+        public bool LocalOptimize(bool bClipFins, bool bFillEars, bool bFillTinyHoles = true, bool bClipLoners = true, bool bRemoveBowties = false)
         {
             bool bModified = false;
             bool done = false;
+            int count = 0;
+            HashSet<int> temp_hash = new HashSet<int>();
             while ( ! done ) {
                 done = true;
+                if (count++ == 25)      // terminate in case we get stuck
+                    break;
                 if (bClipFins && ClipFins(bClipLoners))
                     done = false;
                 if (bFillEars && FillEars(bFillTinyHoles))
                     done = false;
+                if (bRemoveBowties && remove_bowties(temp_hash))
+                    done = false;
                 if (done == false)
                     bModified = true;
             }
+            if (bRemoveBowties)
+                remove_bowties(temp_hash);        // do a final pass of this because it is usually the most problematic...
             return bModified;
+        }
+        public bool LocalOptimize(bool bRemoveBowties = true) {
+            return LocalOptimize(true, true, true, true, bRemoveBowties);
         }
 
 
 
 
+        /// <summary>
+        /// Find any "bowtie" vertices - ie vertex v such taht there is multiple spans of triangles
+        /// selected in v's triangle one-ring - and deselect those one-rings.
+        /// Returns true if selection was modified.
+        /// </summary>
+        public bool RemoveBowties() {
+            return remove_bowties(null);
+        }
+        public bool remove_bowties(HashSet<int> tempHash)
+        {
+            bool bModified = false;
+            bool done = false;
+            HashSet<int> vertices = (tempHash == null) ? new HashSet<int>() : tempHash;
+            while (!done) {
+                done = true;
+                vertices.Clear();
+                foreach (int tid in Selected) {
+                    Index3i tv = Mesh.GetTriangle(tid);
+                    vertices.Add(tv.a); vertices.Add(tv.b); vertices.Add(tv.c);
+                }
+
+                foreach (int vid in vertices) {
+                    if (is_bowtie_vtx(vid)) {
+                        Deselect(Mesh.VtxTrianglesItr(vid));
+                        done = false;
+                    }
+                }
+                if (done == false)
+                    bModified = true;
+            }
+            return bModified;
+        }
+        private bool is_bowtie_vtx(int vid)
+        {
+            int border_edges = 0;
+            foreach ( int eid in Mesh.VtxEdgesItr(vid) ) {
+                Index2i et = Mesh.GetEdgeT(eid);
+                if (et.b != DMesh3.InvalidID) {
+                    bool in_a = IsSelected(et.a);
+                    bool in_b = IsSelected(et.b);
+                    if (in_a != in_b)
+                        border_edges++;
+                } else {
+                    if (IsSelected(et.a))
+                        border_edges++;
+                }
+            }
+            return border_edges > 2;
+        }
 
 
 

@@ -28,8 +28,11 @@ namespace g3
         }
 
         // Create a rotation matrix (positive angle -> counterclockwise).
-        public Matrix2d(double radians) {
-            SetToRotationRad(radians);
+        public Matrix2d(double angle, bool bDegrees = false) {
+            if (bDegrees)
+                SetToRotationDeg(angle);
+            else
+                SetToRotationRad(angle);
         }
 
         // Create matrices based on vector input.  The bool is interpreted as
@@ -50,6 +53,12 @@ namespace g3
             m01 = u.x * v.y;
             m10 = u.y * v.x;
             m11 = u.y * v.y;
+        }
+
+
+
+        public double this[int r, int c] {
+            get { return (r == 0) ? ((c == 0) ? m00 : m01) : ((c == 0) ? m10 : m11); }
         }
 
 
@@ -100,6 +109,14 @@ namespace g3
         public double ExtractAngle () {
             // assert:  'this' matrix represents a rotation
             return Math.Atan2(m10, m00);
+        }
+
+
+        public Vector2d Row(int i) {
+            return (i == 0) ? new Vector2d(m00, m01) : new Vector2d(m10, m11);
+        }
+        public Vector2d Column(int i) {
+            return (i == 0) ? new Vector2d(m00, m10) : new Vector2d(m01, m11);
         }
 
 

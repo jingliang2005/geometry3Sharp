@@ -14,7 +14,8 @@ namespace g3
         public DMesh3 BaseMesh;
         public DMesh3 SubMesh;
         public MeshComponents WantComponents = MeshComponents.All;
-
+        public bool ComputeTriMaps = false;
+        public int OverrideGroupID = -1;
         
         public IndexFlagSet BaseSubmeshV;       // vertices in base mesh that are in submesh
                                                 // (we compute this anyway, might as well hang onto it)
@@ -22,11 +23,13 @@ namespace g3
         public IndexMap BaseToSubV;             // vertex index map from base to submesh 
         public DVector<int> SubToBaseV;         // vertex index map from submesh to base mesh
 
+        public IndexMap BaseToSubT;             // triangle index map from base to submesh. Only computed if ComputeTriMaps = true.
+        public DVector<int> SubToBaseT;         // triangle index map from submesh to base mesh. Only computed if ComputeTriMaps = true.
 
         // boundary info
-        public IndexHashSet BaseBorderE;        // list of internal border edge indices on base mesh
+        public IndexHashSet BaseBorderE;        // list of internal border edge indices on base mesh. Does not include mesh boundary edges.
         public IndexHashSet BaseBoundaryE;      // list of mesh-boundary edges on base mesh that are in submesh
-        public IndexHashSet BaseBorderV;        // list of border vertex indices on base mesh (ie verts of BaseBorderE)
+        public IndexHashSet BaseBorderV;        // list of border vertex indices on base mesh (ie verts of BaseBorderE - does not include mesh boundary vertices)
 
 
         public DSubmesh3(DMesh3 mesh, int[] subTriangles)
@@ -40,10 +43,16 @@ namespace g3
             compute(subTriangles, nTriEstimate);
         }
 
-        // [RMS] wtf? what is this for? commenting out for now...
-        //public int MapVertexToSubmesh(Index2i v) {
-        //    return BaseToSubV[v.a];
-        //}
+        public DSubmesh3(DMesh3 mesh)
+        {
+            BaseMesh = mesh;
+        }
+        public void Compute(int[] subTriangles) {
+            compute(subTriangles, subTriangles.Length);
+        }
+        public void Compute(IEnumerable<int> subTriangles, int nTriEstimate = 0) {
+            compute(subTriangles, nTriEstimate);
+        }
 
         public int MapVertexToSubmesh(int base_vID) {
             return BaseToSubV[base_vID];
@@ -57,6 +66,10 @@ namespace g3
         public Index2i MapVerticesToSubmesh(Index2i v) {
             return new Index2i(BaseToSubV[v.a], BaseToSubV[v.b]);
         }
+        public Index2i MapVerticesToBaseMesh(Index2i v) {
+            return new Index2i(MapVertexToBaseMesh(v.a), MapVertexToBaseMesh(v.b));
+        }
+
         public void MapVerticesToSubmesh(int[] vertices)
         {
             for (int i = 0; i < vertices.Length; ++i)
@@ -75,6 +88,39 @@ namespace g3
             for (int i = 0; i < edges.Length; ++i)
                 edges[i] = MapEdgeToSubmesh(edges[i]);
         }
+
+        public int MapEdgeToBaseMesh(int sub_eid)
+        {
+            Index2i sub_ev = SubMesh.GetEdgeV(sub_eid);
+            Index2i base_ev = MapVerticesToBaseMesh(sub_ev);
+            return BaseMesh.FindEdge(base_ev.a, base_ev.b);
+        }
+
+
+        public int MapTriangleToSubmesh(int base_tID)
+        {
+            if (ComputeTriMaps == false)
+                throw new InvalidOperationException("DSubmesh3.MapTriangleToSubmesh: must set ComputeTriMaps = true!");
+            return BaseToSubT[base_tID];
+        }
+        public int MapTriangleToBaseMesh(int sub_tID)
+        {
+            if (ComputeTriMaps == false)
+                throw new InvalidOperationException("DSubmesh3.MapTriangleToBaseMesh: must set ComputeTriMaps = true!");
+            if (sub_tID < SubToBaseT.Length)
+                return SubToBaseT[sub_tID];
+            return DMesh3.InvalidID;
+        }
+
+        public void MapTrianglesToSubmesh(int[] triangles)
+        {
+            if (ComputeTriMaps == false)
+                throw new InvalidOperationException("DSubmesh3.MapTrianglesToSubmesh: must set ComputeTriMaps = true!");
+            for (int i = 0; i < triangles.Length; ++i)
+                triangles[i] = BaseToSubT[triangles[i]];
+        }
+
+
 
 
         public void ComputeBoundaryInfo(int[] subTriangles) {
@@ -128,12 +174,17 @@ namespace g3
             BaseToSubV = new IndexMap(BaseMesh.MaxVertexID, est_verts);
             SubToBaseV = new DVector<int>();
 
-            foreach ( int ti in triangles ) {
-                if ( ! BaseMesh.IsTriangle(ti) )
-                    throw new Exception("DSubmesh3.compute: triangle " + ti + " does not exist in BaseMesh!");
-                Index3i base_t = BaseMesh.GetTriangle(ti);
+            if ( ComputeTriMaps ) {
+                BaseToSubT = new IndexMap(BaseMesh.MaxTriangleID, tri_count_est);
+                SubToBaseT = new DVector<int>();
+            }
+
+            foreach ( int tid in triangles ) {
+                if ( ! BaseMesh.IsTriangle(tid) )
+                    throw new Exception("DSubmesh3.compute: triangle " + tid + " does not exist in BaseMesh!");
+                Index3i base_t = BaseMesh.GetTriangle(tid);
                 Index3i new_t = Index3i.Zero;
-                int gid = BaseMesh.GetTriangleGroup(ti);
+                int gid = BaseMesh.GetTriangleGroup(tid);
 
                 for ( int j = 0; j < 3; ++j ) {
                     int base_v = base_t[j];
@@ -148,7 +199,14 @@ namespace g3
                     new_t[j] = sub_v;
                 }
 
-                SubMesh.AppendTriangle(new_t, gid);
+                if (OverrideGroupID >= 0)
+                    gid = OverrideGroupID;
+                int sub_tid = SubMesh.AppendTriangle(new_t, gid);
+
+                if ( ComputeTriMaps ) {
+                    BaseToSubT[tid] = sub_tid;
+                    SubToBaseT.insert(tid, sub_tid);
+                }
             }
 
 

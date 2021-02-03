@@ -1,5 +1,9 @@
 using System;
 
+#if G3_USING_UNITY
+using UnityEngine;
+#endif
+
 namespace g3
 {
     public struct AxisAlignedBox2f
@@ -57,10 +61,10 @@ namespace g3
         }
 
         public float Width {
-            get { return Max.x - Min.x; }
+            get { return Math.Max(Max.x - Min.x, 0); }
         }
         public float Height {
-            get { return Max.y - Min.y; }
+            get { return Math.Max(Max.y - Min.y, 0); }
         }
 
         public float Area {
@@ -255,6 +259,19 @@ namespace g3
             return string.Format("[{0:F8},{1:F8}] [{2:F8},{3:F8}]", Min.x, Max.x, Min.y, Max.y);
         }
 
+
+#if G3_USING_UNITY
+        public static implicit operator AxisAlignedBox2f(UnityEngine.Rect b)
+        {
+            return new AxisAlignedBox2f(b.min, b.max);
+        }
+        public static implicit operator UnityEngine.Rect(AxisAlignedBox2f b)
+        {
+            Rect ub = new Rect();
+            ub.min = b.Min; ub.max = b.Max;
+            return ub;
+        }
+#endif
 
     }
 }

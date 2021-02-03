@@ -23,7 +23,7 @@ namespace g3
 
 
 
-        abstract public void Generate();
+        abstract public MeshGenerator Generate();
 
 
         public virtual void MakeMesh(SimpleMesh m)
@@ -41,13 +41,19 @@ namespace g3
         public virtual void MakeMesh(DMesh3 m)
         {
             int nV = vertices.Count;
+            bool bWantNormals = WantNormals && normals != null && normals.Count == vertices.Count;
+            if (bWantNormals)
+                m.EnableVertexNormals(Vector3f.AxisY);
+            bool bWantUVs = WantUVs && uv != null && uv.Count == vertices.Count;
+            if (bWantUVs)
+                m.EnableVertexUVs(Vector2f.Zero);
             for (int i = 0; i < nV; ++i) {
 				NewVertexInfo ni = new NewVertexInfo() { v = vertices[i] };
-				if ( WantNormals ) {
+				if (bWantNormals) {
 					ni.bHaveN = true; 
 					ni.n = normals[i];
 				}
-				if ( WantUVs ) {
+				if (bWantUVs) {
 					ni.bHaveUV = true;
 					ni.uv = uv[i];
 				}
@@ -56,6 +62,7 @@ namespace g3
             }
             int nT = triangles.Count;
             if (WantGroups && groups != null && groups.Length == nT) {
+                m.EnableTriangleGroups();
                 for (int i = 0; i < nT; ++i)
                     m.AppendTriangle(triangles[i], groups[i]);
             } else {
@@ -69,6 +76,40 @@ namespace g3
             MakeMesh(m);
             return m;
         }
+
+
+
+
+
+
+        public virtual void MakeMesh(NTMesh3 m)
+        {
+            int nV = vertices.Count;
+            for (int i = 0; i < nV; ++i) {
+                int vID = m.AppendVertex(vertices[i]);
+                Util.gDevAssert(vID == i);
+            }
+            int nT = triangles.Count;
+            if (WantGroups && groups != null && groups.Length == nT) {
+                m.EnableTriangleGroups();
+                for (int i = 0; i < nT; ++i)
+                    m.AppendTriangle(triangles[i], groups[i]);
+            } else {
+                for (int i = 0; i < nT; ++i)
+                    m.AppendTriangle(triangles[i]);
+            }
+        }
+        public virtual NTMesh3 MakeNTMesh()
+        {
+            NTMesh3 m = new NTMesh3();
+            MakeMesh(m);
+            return m;
+        }
+
+
+
+
+
 
 
 
@@ -174,6 +215,43 @@ namespace g3
         }
 
 
+        protected Vector3d bilerp(ref Vector3d v00, ref Vector3d v10, ref Vector3d v11, ref Vector3d v01, double tx, double ty)
+        {
+            Vector3d a = Vector3d.Lerp(ref v00, ref v01, ty);
+            Vector3d b = Vector3d.Lerp(ref v10, ref v11, ty);
+            return Vector3d.Lerp(a, b, tx);
+        }
+
+        protected Vector2d bilerp(ref Vector2d v00, ref Vector2d v10, ref Vector2d v11, ref Vector2d v01, double tx, double ty)
+        {
+            Vector2d a = Vector2d.Lerp(ref v00, ref v01, ty);
+            Vector2d b = Vector2d.Lerp(ref v10, ref v11, ty);
+            return Vector2d.Lerp(a, b, tx);
+        }
+        protected Vector2f bilerp(ref Vector2f v00, ref Vector2f v10, ref Vector2f v11, ref Vector2f v01, float tx, float ty)
+        {
+            Vector2f a = Vector2f.Lerp(ref v00, ref v01, ty);
+            Vector2f b = Vector2f.Lerp(ref v10, ref v11, ty);
+            return Vector2f.Lerp(a, b, tx);
+        }
+
+        protected Vector3i bilerp(ref Vector3i v00, ref Vector3i v10, ref Vector3i v11, ref Vector3i v01, double tx, double ty)
+        {
+            Vector3d a = Vector3d.Lerp((Vector3d)v00, (Vector3d)v01, ty);
+            Vector3d b = Vector3d.Lerp((Vector3d)v10, (Vector3d)v11, ty);
+            Vector3d c = Vector3d.Lerp(a, b, tx);
+            return new Vector3i((int)Math.Round(c.x), (int)Math.Round(c.y), (int)Math.Round(c.z));
+        }
+
+        protected Vector3i lerp(ref Vector3i a, ref Vector3i b, double t)
+        {
+            Vector3d c = Vector3d.Lerp((Vector3d)a, (Vector3d)b, t);
+            return new Vector3i((int)Math.Round(c.x), (int)Math.Round(c.y), (int)Math.Round(c.z));
+        }
+
+
+
+
 #if G3_USING_UNITY
         // generate unity mesh. 
         // [TODO] The left/right flip here may not work...
@@ -217,6 +295,8 @@ namespace g3
                 m.uv = ToUnityVector2(uv);
             if (normals != null && WantNormals)
                 m.normals = ToUnityVector3(normals, bFlipLR);
+            if ( m.vertexCount > 64000 ||  triangles.Count > 64000 )
+                m.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
             m.triangles = triangles.array;
             if (bRecalcNormals)
                 m.RecalculateNormals();

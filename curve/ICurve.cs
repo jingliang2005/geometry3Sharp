@@ -31,9 +31,11 @@ namespace g3
     public interface ISampledCurve3d
     {
         int VertexCount { get; }
+        int SegmentCount { get; }
         bool Closed { get; }
 
         Vector3d GetVertex(int i);
+        Segment3d GetSegment(int i);
 
         IEnumerable<Vector3d> Vertices { get; }
     }
@@ -56,6 +58,9 @@ namespace g3
 		Vector2d SampleArcLength(double a);
 
 		void Reverse();
+
+        bool IsTransformable { get; }
+        void Transform(ITransform2 xform);
 
         IParametricCurve2d Clone();
 	}

@@ -42,17 +42,26 @@ namespace g3
             Max = new Vector3f(fWidth, fHeight, fDepth);
         }
 
-        public AxisAlignedBox3f(Vector3f vMin, Vector3f vMax)
-        {
+        public AxisAlignedBox3f(Vector3f vMin, Vector3f vMax) {
+            Min = new Vector3f(Math.Min(vMin.x, vMax.x), Math.Min(vMin.y, vMax.y), Math.Min(vMin.z, vMax.z));
+            Max = new Vector3f(Math.Max(vMin.x, vMax.x), Math.Max(vMin.y, vMax.y), Math.Max(vMin.z, vMax.z));
+        }
+        public AxisAlignedBox3f(ref Vector3f vMin, ref Vector3f vMax) {
             Min = new Vector3f(Math.Min(vMin.x, vMax.x), Math.Min(vMin.y, vMax.y), Math.Min(vMin.z, vMax.z));
             Max = new Vector3f(Math.Max(vMin.x, vMax.x), Math.Max(vMin.y, vMax.y), Math.Max(vMin.z, vMax.z));
         }
 
-        public AxisAlignedBox3f(Vector3f vCenter, float fHalfWidth, float fHalfHeight, float fHalfDepth)
-        {
+
+        public AxisAlignedBox3f(Vector3f vCenter, float fHalfWidth, float fHalfHeight, float fHalfDepth) {
             Min = new Vector3f(vCenter.x - fHalfWidth, vCenter.y - fHalfHeight, vCenter.z - fHalfDepth);
             Max = new Vector3f(vCenter.x + fHalfWidth, vCenter.y + fHalfHeight, vCenter.z + fHalfDepth);
         }
+        public AxisAlignedBox3f(ref Vector3f vCenter, float fHalfWidth, float fHalfHeight, float fHalfDepth) {
+            Min = new Vector3f(vCenter.x - fHalfWidth, vCenter.y - fHalfHeight, vCenter.z - fHalfDepth);
+            Max = new Vector3f(vCenter.x + fHalfWidth, vCenter.y + fHalfHeight, vCenter.z + fHalfDepth);
+        }
+
+
         public AxisAlignedBox3f(Vector3f vCenter, float fHalfSize)
         {
             Min = new Vector3f(vCenter.x - fHalfSize, vCenter.y - fHalfSize, vCenter.z - fHalfSize);
@@ -63,17 +72,14 @@ namespace g3
             Min = Max = vCenter;
         }
 
-        public float Width
-        {
-            get { return Max.x - Min.x; }
+        public float Width {
+            get { return Math.Max(Max.x - Min.x,0); }
         }
-        public float Height
-        {
-            get { return Max.y - Min.y; }
+        public float Height {
+            get { return Math.Max(Max.y - Min.y,0); }
         }
-        public float Depth
-        {
-            get { return Max.z - Min.z; }
+        public float Depth {
+            get { return Math.Max(Max.z - Min.z,0); }
         }
 
         public float Volume
@@ -134,11 +140,27 @@ namespace g3
         }
 
 
-        // TODO
-        ////! 0 == bottom-left, 1 = bottom-right, 2 == top-right, 3 == top-left
-        //public Vector3f GetCorner(int i) {
-        //    return new Vector3f((i % 3 == 0) ? Min.x : Max.x, (i < 2) ? Min.y : Max.y);
-        //}
+        // See Box3.Corner for details on which corner is which
+        public Vector3f Corner(int i)
+        {
+            float x = (((i & 1) != 0) ^ ((i & 2) != 0)) ? (Max.x) : (Min.x);
+            float y = ((i / 2) % 2 == 0) ? (Min.y) : (Max.y);
+            float z = (i < 4) ? (Min.z) : (Max.z);
+            return new Vector3f(x, y, z);
+        }
+
+
+        /// <summary>
+        /// Returns point on face/edge/corner. For each coord value neg==min, 0==center, pos==max
+        /// </summary>
+        public Vector3f Point(int xi, int yi, int zi)
+        {
+            float x = (xi < 0) ? Min.x : ((xi == 0) ? (0.5f * (Min.x + Max.x)) : Max.x);
+            float y = (yi < 0) ? Min.y : ((yi == 0) ? (0.5f * (Min.y + Max.y)) : Max.y);
+            float z = (zi < 0) ? Min.z : ((zi == 0) ? (0.5f * (Min.z + Max.z)) : Max.z);
+            return new Vector3f(x, y, z);
+        }
+
 
         //! value is subtracted from min and added to max
         public void Expand(float fRadius)

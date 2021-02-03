@@ -12,6 +12,8 @@ namespace g3
         NotBoundaryVertex,
         NotBoundaryEdge,
 
+        NotATriangle,
+
         VerticesNotConnectedByEdge,
         IncorrectLoopOrientation,
 
@@ -50,7 +52,7 @@ namespace g3
             int N = loop.Vertices.Length;
 
             for ( int i = 0; i < N; ++i ) {
-                if ( ! mesh.vertex_is_boundary(loop.Vertices[i]) )
+                if ( ! mesh.IsBoundaryVertex(loop.Vertices[i]) )
                     return ValidationStatus.NotBoundaryVertex;
             }
 

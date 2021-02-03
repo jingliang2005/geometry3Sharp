@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-#if !G3_USING_UNITY
+#if !(NET_2_0 || NET_2_0_SUBSET)
 using System.Threading.Tasks;
 #endif
 
@@ -20,12 +20,58 @@ namespace g3
         }
         public static void ForEach<T>( IEnumerable<T> source, Action<T> body )
         {
-#if G3_USING_UNITY
+#if G3_USING_UNITY && (NET_2_0 || NET_2_0_SUBSET)
             for_each<T>(source, body);
 #else
             Parallel.ForEach<T>(source, body);
 #endif
         }
+
+
+        /// <summary>
+        /// Evaluate input actions in parallel
+        /// </summary>
+        public static void Evaluate(params Action[] funcs)
+        {
+            int N = funcs.Length;
+            gParallel.ForEach(Interval1i.Range(N), (i) => {
+                funcs[i]();
+            });
+        }
+
+
+
+        /// <summary>
+        /// Process indices [iStart,iEnd] *inclusive* by passing sub-intervals [start,end] to blockF.
+        /// Blocksize is automatically determind unless you specify one.
+        /// Iterate over [start,end] *inclusive* in each block
+        /// </summary>
+        public static void BlockStartEnd(int iStart, int iEnd, Action<int,int> blockF, int iBlockSize = -1, bool bDisableParallel = false )
+        {
+            if (iBlockSize == -1)
+                iBlockSize = 100;  // seems to work
+            int N = (iEnd - iStart + 1);
+            int num_blocks = N / iBlockSize;
+            // process main blocks in parallel
+            if (bDisableParallel) {
+                ForEach_Sequential(Interval1i.Range(num_blocks), (bi) => {
+                    int k = iStart + iBlockSize * bi;
+                    blockF(k, k + iBlockSize - 1);
+                });
+            } else {
+                ForEach(Interval1i.Range(num_blocks), (bi) => {
+                    int k = iStart + iBlockSize * bi;
+                    blockF(k, k + iBlockSize - 1);
+                });
+            }
+            // process leftover elements
+            int remaining = N - (num_blocks * iBlockSize);
+            if (remaining > 0) {
+                int k = iStart + num_blocks * iBlockSize;
+                blockF(k, k+remaining-1);
+            }
+        }
+
 
 
         // parallel for-each that will work on .net 3.5 (maybe?)
@@ -224,5 +270,41 @@ namespace g3
             }
         }
     }
+
+
+
+
+#if G3_USING_UNITY && (NET_2_0 || NET_2_0_SUBSET)
+
+    /*
+     * .NET 3.5 (default in Unity) does not have SpinLock object, which we
+     * are using in a few places. So provide a wrapper around Monitor.
+     * Note that this is class and SpinLock is a struct, so this may cause
+     * disasters, but at least things build...
+     */
+    public class SpinLock
+    {
+        object o;
+        public SpinLock()
+        {
+            o = new object();
+        }
+
+        public void Enter(ref bool entered)
+        {
+            Monitor.Enter(o);
+            entered = true;
+        }
+
+        public void Exit()
+        {
+            Monitor.Exit(o);
+        }
+
+    }
+
+
+#endif
+
 
 }

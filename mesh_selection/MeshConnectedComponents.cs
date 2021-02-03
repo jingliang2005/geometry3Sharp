@@ -77,6 +77,23 @@ namespace g3
 
 
 
+        /// <summary>
+        /// Evaluate valueF for each component and sort by that
+        /// </summary>
+        public void SortByValue(Func<Component,double> valueF, bool bIncreasing = true)
+        {
+            Dictionary<Component, double> vals = new Dictionary<Component, double>();
+            foreach (Component c in Components)
+                vals[c] = valueF(c);
+
+            if (bIncreasing)
+                Components.Sort((x, y) => { return vals[x].CompareTo(vals[y]); });
+            else
+                Components.Sort((x, y) => { return -vals[x].CompareTo(vals[y]); });
+        }
+
+
+
         public void FindConnectedT()
         {
             Components = new List<Component>();
@@ -174,12 +191,14 @@ namespace g3
 
 
         /// <summary>
-        /// Separate input mesh into disconnected shells
+        /// Separate input mesh into disconnected shells.
+        /// Resulting array is sorted by decreasing triangle count.
         /// </summary>
         public static DMesh3[] Separate(DMesh3 meshIn)
         {
             MeshConnectedComponents c = new MeshConnectedComponents(meshIn);
             c.FindConnectedT();
+            c.SortByCount(false);
 
             DMesh3[] result = new DMesh3[c.Components.Count];
 
@@ -190,6 +209,45 @@ namespace g3
             }
 
             return result;
+        }
+
+
+        /// <summary>
+        /// extract largest shell of meshIn
+        /// </summary>
+        public static DMesh3 LargestT(DMesh3 meshIn)
+        {
+            MeshConnectedComponents c = new MeshConnectedComponents(meshIn);
+            c.FindConnectedT();
+            c.SortByCount(false);
+            DSubmesh3 submesh = new DSubmesh3(meshIn, c.Components[0].Indices);
+            return submesh.SubMesh;
+        }
+
+
+
+
+        /// <summary>
+        /// Utility function that finds set of triangles connected to tSeed. Does not use MeshConnectedComponents class.
+        /// </summary>
+        public static HashSet<int> FindConnectedT(DMesh3 mesh, int tSeed)
+        {
+            HashSet<int> found = new HashSet<int>();
+            found.Add(tSeed);
+            List<int> queue = new List<int>(64) { tSeed };
+            while ( queue.Count > 0 ) {
+                int tid = queue[queue.Count - 1];
+                queue.RemoveAt(queue.Count - 1);
+                Index3i nbr_t = mesh.GetTriNeighbourTris(tid);
+                for ( int j = 0; j < 3; ++j ) {
+                    int nbrid = nbr_t[j];
+                    if (nbrid == DMesh3.InvalidID || found.Contains(nbrid))
+                        continue;
+                    found.Add(nbrid);
+                    queue.Add(nbrid);
+                }
+            }
+            return found;
         }
 
 

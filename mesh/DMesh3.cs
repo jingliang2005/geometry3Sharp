@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.ObjectModel;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 
 namespace g3
 {
@@ -14,6 +15,7 @@ namespace g3
         Failed_NotAnEdge = 3,
 
         Failed_BrokenTopology = 10,
+        Failed_HitValenceLimit = 11,
 
         Failed_IsBoundaryEdge = 20,
         Failed_FlippedEdgeExists = 21,
@@ -26,6 +28,12 @@ namespace g3
 		Failed_SameOrientation = 28,
 
         Failed_WouldCreateBowtie = 30,
+        Failed_VertexAlreadyExists = 31,
+        Failed_CannotAllocateVertex = 32,
+
+        Failed_WouldCreateNonmanifoldEdge = 50,
+        Failed_TriangleAlreadyExists = 51,
+        Failed_CannotAllocateTriangle = 52
 
     };
 
@@ -109,11 +117,9 @@ namespace g3
 		DVector<float> colors;
 		DVector<float> uv;
 
-        // [TODO] this seems like it will not be efficient! 
-        //   do our own short_list backed my a memory pool?
         // [TODO] this is optional if we only want to use this class as an iterable mesh-with-nbrs
         //   make it optional with a flag? (however find_edge depends on it...)
-        DVector<List<int>> vertex_edges;
+        SmallListSet vertex_edges;
 
         RefCountVector triangles_refcount;
         DVector<int> triangles;
@@ -145,7 +151,9 @@ namespace g3
 				colors = new DVector<float>();
 			if ( bWantUVs )
 				uv = new DVector<float>();
-            vertex_edges = new DVector<List<int>>();
+
+            vertex_edges = new SmallListSet();
+
             vertices_refcount = new RefCountVector();
 
             triangles = new DVector<int>();
@@ -203,7 +211,7 @@ namespace g3
             }
 
             vertices = new DVector<double>();
-            vertex_edges = new DVector<List<int>>();
+            vertex_edges = new SmallListSet();
             vertices_refcount = new RefCountVector();
             triangles = new DVector<int>();
             triangle_edges = new DVector<int>();
@@ -251,14 +259,8 @@ namespace g3
             uv = (bUVs && copy.uv != null) ? new DVector<float>(copy.uv) : null;
 
             vertices_refcount = new RefCountVector(copy.vertices_refcount);
-            vertex_edges = new DVector<List<int>>(copy.vertex_edges);
-            int N = vertex_edges.Length;
-            for ( int i = 0; i < N; ++i ) {
-                if (vertices_refcount.isValid(i))
-                    vertex_edges[i] = new List<int>(copy.vertex_edges[i]);
-                else
-                    vertex_edges[i] = null;
-            }
+
+            vertex_edges = new SmallListSet(copy.vertex_edges);
 
             triangles = new DVector<int>(copy.triangles);
             triangle_edges = new DVector<int>(copy.triangle_edges);
@@ -279,7 +281,7 @@ namespace g3
         public CompactInfo Copy(IMesh copy, MeshHints hints, bool bNormals = true, bool bColors = true, bool bUVs = true)
         {
             vertices = new DVector<double>();
-            vertex_edges = new DVector<List<int>>();
+            vertex_edges = new SmallListSet();
             vertices_refcount = new RefCountVector();
             triangles = new DVector<int>();
             triangle_edges = new DVector<int>();
@@ -326,9 +328,17 @@ namespace g3
             if (bShapeChange)
                 shape_timestamp++;
 		}
+
+        /// <summary>
+        /// Timestamp is incremented any time any change is made to the mesh
+        /// </summary>
         public int Timestamp {
             get { return timestamp; }
         }
+
+        /// <summary>
+        /// ShapeTimestamp is incremented any time any vertex position is changed or the mesh topology is modified
+        /// </summary>
         public int ShapeTimestamp {
             get { return shape_timestamp; }
         }
@@ -413,9 +423,9 @@ namespace g3
 		}
 
 		public Vector3f GetVertexNormal(int vID) {
-            if (normals == null)
+            if (normals == null) {
                 return Vector3f.AxisY;
-            else {
+            } else {
                 debug_check_is_vertex(vID);
                 int i = 3 * vID;
                 return new Vector3f(normals[i], normals[i + 1], normals[i + 2]);
@@ -431,10 +441,10 @@ namespace g3
 			}
 		}
 
-		public Vector3f GetVertexColor(int vID) {
-            if (normals == null)
+        public Vector3f GetVertexColor(int vID) {
+            if (colors == null) { 
                 return Vector3f.One;
-            else {
+            } else {
                 debug_check_is_vertex(vID);
                 int i = 3 * vID;
                 return new Vector3f(colors[i], colors[i + 1], colors[i + 2]);
@@ -451,9 +461,9 @@ namespace g3
 		}
 
 		public Vector2f GetVertexUV(int vID) {
-            if (uv == null)
+            if (uv == null) {
                 return Vector2f.Zero;
-            else {
+            } else {
                 debug_check_is_vertex(vID);
                 int i = 2 * vID;
                 return new Vector2f(uv[i], uv[i + 1]);
@@ -475,7 +485,7 @@ namespace g3
                 return false;
             vinfo.v.Set(vertices[3 * vID], vertices[3 * vID + 1], vertices[3 * vID + 2]);
             vinfo.bHaveN = vinfo.bHaveUV = vinfo.bHaveC = false;
-            if (HasVertexColors && bWantNormals) {
+            if (HasVertexNormals && bWantNormals) {
                 vinfo.bHaveN = true;
                 vinfo.n.Set(normals[3 * vID], normals[3 * vID + 1], normals[3 * vID + 2]);
             }
@@ -491,21 +501,28 @@ namespace g3
         }
 
 
+        [System.Obsolete("GetVtxEdges will be removed in future, use VtxEdgesItr instead")]
         public ReadOnlyCollection<int> GetVtxEdges(int vID) {
-            return vertices_refcount.isValid(vID) ?
-                vertex_edges[vID].AsReadOnly() : null;
+            if (vertices_refcount.isValid(vID) == false)
+                return null;
+            return vertex_edges_list(vID).AsReadOnly();
         }
 
         public int GetVtxEdgeCount(int vID) {
-            return vertices_refcount.isValid(vID) ?
-                vertex_edges[vID].Count : -1;
+            return vertices_refcount.isValid(vID) ? vertex_edges.Count(vID) : -1;
+        }
+
+
+        [System.Obsolete("GetVtxEdgeValence will be removed in future, use GetVtxEdgeCount instead")]
+        public int GetVtxEdgeValence(int vID) {
+            return vertex_edges.Count(vID);
         }
 
 
         public int GetMaxVtxEdgeCount() {
             int max = 0;
             foreach (int vid in vertices_refcount)
-                max = Math.Max(max, vertex_edges[vid].Count);
+                max = Math.Max(max, vertex_edges.Count(vid));
             return max;
         }
 
@@ -536,26 +553,28 @@ namespace g3
         /// the mesh topology doesn't change, meaning that one axis of the frame
         /// will be computed from projection of outgoing edge.
         /// Requires that vertex normals are available.
+        /// by default, frame.Z is normal, and .X points along mesh edge
+        /// if bFrameNormalY, then frame.Y is normal (X still points along mesh edge)
         /// </summary>
-        public Frame3f GetVertexFrame(int vID, int nFrameNormal = 2)
+        public Frame3f GetVertexFrame(int vID, bool bFrameNormalY = false)
         {
             Debug.Assert(HasVertexNormals);
 
             int vi = 3 * vID;
             Vector3d v = new Vector3d(vertices[vi], vertices[vi + 1], vertices[vi + 2]);
             Vector3d normal = new Vector3d(normals[vi], normals[vi + 1], normals[vi + 2]);
-            int eid = vertex_edges[vID][0];
+            int eid = vertex_edges.First(vID);
             int ovi = 3 * edge_other_v(eid, vID);
             Vector3d ov = new Vector3d(vertices[ovi], vertices[ovi + 1], vertices[ovi + 2]);
             Vector3d edge = (ov - v);
             edge.Normalize();
 
-            Vector3d t2 = edge.Cross(normal);
-            t2.Normalize();
-            Vector3d t1 = normal.Cross(t2);
-            t1.Normalize();
-
-            return new Frame3f((Vector3f)v, (Vector3f)t1, (Vector3f)t2, (Vector3f)normal);
+            Vector3d other = normal.Cross(edge);
+            edge = other.Cross(normal);
+            if (bFrameNormalY)
+                return new Frame3f((Vector3f)v, (Vector3f)edge, (Vector3f)normal, (Vector3f)(-other));
+            else 
+                return new Frame3f((Vector3f)v, (Vector3f)edge, (Vector3f)other, (Vector3f)normal);
         }
 
 
@@ -620,7 +639,7 @@ namespace g3
 		}
 
         public int AllocateTriangleGroup() {
-            return max_group_id++;
+            return ++max_group_id;
         }
 
 
@@ -652,14 +671,14 @@ namespace g3
         {
             Vector3d v0 = Vector3d.Zero, v1 = Vector3d.Zero, v2 = Vector3d.Zero;
             GetTriVertices(tID, ref v0, ref v1, ref v2);
-            return MathUtil.Normal(v0, v1, v2);
+            return MathUtil.Normal(ref v0, ref v1, ref v2);
         }
 
         public double GetTriArea(int tID)
         {
             Vector3d v0 = Vector3d.Zero, v1 = Vector3d.Zero, v2 = Vector3d.Zero;
             GetTriVertices(tID, ref v0, ref v1, ref v2);
-            return MathUtil.Area(v0, v1, v2);
+            return MathUtil.Area(ref v0, ref v1, ref v2);
         }
 
 		/// <summary>
@@ -672,10 +691,13 @@ namespace g3
 			Vector3d v0 = Vector3d.Zero, v1 = Vector3d.Zero, v2 = Vector3d.Zero;
 			GetTriVertices(tID, ref v0, ref v1, ref v2);
 			vCentroid = (1.0 / 3.0) * (v0 + v1 + v2);
-			normal = MathUtil.FastNormalArea(v0, v1, v2, out fArea);
+			normal = MathUtil.FastNormalArea(ref v0, ref v1, ref v2, out fArea);
 		}
 
 
+        /// <summary>
+        /// interpolate vertex normals of triangle using barycentric coordinates
+        /// </summary>
         public Vector3d GetTriBaryNormal(int tID, double bary0, double bary1, double bary2) { 
             int ai = 3 * triangles[3 * tID], 
                 bi = 3 * triangles[3 * tID + 1], 
@@ -688,6 +710,9 @@ namespace g3
             return n;
         }
 
+        /// <summary>
+        /// efficiently compute centroid of triangle
+        /// </summary>
         public Vector3d GetTriCentroid(int tID)
         {
             int ai = 3 * triangles[3 * tID], 
@@ -741,7 +766,9 @@ namespace g3
         }
 
 
-
+        /// <summary>
+        /// construct bounding box of triangle as efficiently as possible
+        /// </summary>
         public AxisAlignedBox3d GetTriBounds(int tID)
         {
             int vi = 3 * triangles[3 * tID];
@@ -758,20 +785,72 @@ namespace g3
         }
 
 
+        /// <summary>
+        /// Construct stable frame at triangle centroid, where frame.Z is face normal,
+        /// and frame.X is aligned with edge nEdge of triangle.
+        /// </summary>
         public Frame3f GetTriFrame(int tID, int nEdge = 0)
         {
             int ti = 3 * tID;
-            int a = triangles[ti + (nEdge % 3)];
-            int b = triangles[ti + ((nEdge+1) % 3)];
-            int c = triangles[ti + ((nEdge+2) % 3)];
-            Vector3d v0 = new Vector3d(vertices[3 * a], vertices[3 * a + 1], vertices[3 * a + 2]);
-            Vector3d v1 = new Vector3d(vertices[3 * b], vertices[3 * b + 1], vertices[3 * b + 2]);
-            Vector3d v2 = new Vector3d(vertices[3 * c], vertices[3 * c + 1], vertices[3 * c + 2]);
-            Vector3f edge = (Vector3f)(v1 - v0).Normalized;
-            Vector3f normal = (Vector3f)MathUtil.Normal(v0, v1, v2);
-            Vector3f other = edge.Cross(normal);
-            Vector3f center = (Vector3f)(v0 + v1 + v2) / 3;
-            return new Frame3f(center, edge, other, normal);
+            int a = 3 * triangles[ti + (nEdge % 3)];
+            int b = 3 * triangles[ti + ((nEdge+1) % 3)];
+            int c = 3 * triangles[ti + ((nEdge+2) % 3)];
+            Vector3d v1 = new Vector3d(vertices[a], vertices[a + 1], vertices[a + 2]);
+            Vector3d v2 = new Vector3d(vertices[b], vertices[b + 1], vertices[b + 2]);
+            Vector3d v3 = new Vector3d(vertices[c], vertices[c + 1], vertices[c + 2]);
+
+            Vector3d edge1 = v2 - v1;  edge1.Normalize();
+            Vector3d edge2 = v3 - v2;  edge2.Normalize();
+            Vector3d normal = edge1.Cross(edge2); normal.Normalize();
+
+            Vector3d other = normal.Cross(edge1);
+
+            Vector3f center = (Vector3f)(v1 + v2 + v3) / 3;
+            return new Frame3f(center, (Vector3f)edge1, (Vector3f)other, (Vector3f)normal);
+        }
+
+
+
+        /// <summary>
+        /// compute solid angle of oriented triangle tID relative to point p - see WindingNumber()
+        /// </summary>
+        public double GetTriSolidAngle(int tID, ref Vector3d p)
+        {
+            int ti = 3 * tID;
+            int ta = 3 * triangles[ti];
+            Vector3d a = new Vector3d(vertices[ta] - p.x, vertices[ta + 1] - p.y, vertices[ta + 2] - p.z);
+            int tb = 3 * triangles[ti + 1];
+            Vector3d b = new Vector3d(vertices[tb] - p.x, vertices[tb + 1] - p.y, vertices[tb + 2] - p.z);
+            int tc = 3 * triangles[ti + 2];
+            Vector3d c = new Vector3d(vertices[tc] - p.x, vertices[tc + 1] - p.y, vertices[tc + 2] - p.z);
+            // note: top and bottom are reversed here from formula in the paper? but it doesn't work otherwise...
+            double la = a.Length, lb = b.Length, lc = c.Length;
+            double bottom = (la * lb * lc) + a.Dot(ref b) * lc + b.Dot(ref c) * la + c.Dot(ref a) * lb;
+            double top = a.x * (b.y * c.z - c.y * b.z) - a.y * (b.x * c.z - c.x * b.z) + a.z * (b.x * c.y - c.x * b.y);
+            return 2.0 * Math.Atan2(top, bottom);
+        }
+
+
+
+        /// <summary>
+        /// compute internal angle at vertex i of triangle (where i is 0,1,2);
+        /// TODO can be more efficient here, probably...
+        /// </summary>
+        public double GetTriInternalAngleR(int tID, int i)
+        {
+            int ti = 3 * tID;
+            int ta = 3 * triangles[ti];
+            Vector3d a = new Vector3d(vertices[ta], vertices[ta + 1], vertices[ta + 2]);
+            int tb = 3 * triangles[ti + 1];
+            Vector3d b = new Vector3d(vertices[tb], vertices[tb + 1], vertices[tb + 2]);
+            int tc = 3 * triangles[ti + 2];
+            Vector3d c = new Vector3d(vertices[tc], vertices[tc + 1], vertices[tc + 2]);
+            if ( i == 0 )
+                return (b-a).Normalized.AngleR((c-a).Normalized);
+            else if ( i == 1 )
+                return (a-b).Normalized.AngleR((c-b).Normalized);
+            else
+                return (a-c).Normalized.AngleR((b-c).Normalized);
         }
 
 
@@ -866,12 +945,19 @@ namespace g3
         // mesh-building
 
 
+        /// <summary>
+        /// Append new vertex at position, returns new vid
+        /// </summary>
         public int AppendVertex(Vector3d v) {
             return AppendVertex(new NewVertexInfo() {
                 v = v, bHaveC = false, bHaveUV = false, bHaveN = false
             });
         }
-        public int AppendVertex(NewVertexInfo info)
+
+        /// <summary>
+        /// Append new vertex at position and other fields, returns new vid
+        /// </summary>
+        public int AppendVertex(ref NewVertexInfo info)
         {
             int vid = vertices_refcount.allocate();
 			int i = 3*vid;
@@ -900,13 +986,18 @@ namespace g3
 				uv.insert(u[0], j);
 			}
 
-            vertex_edges.insert(new List<int>(), vid);
+            allocate_edges_list(vid);
 
             updateTimeStamp(true);
             return vid;
         }
+        public int AppendVertex(NewVertexInfo info) {
+            return AppendVertex(ref info);
+        }
 
-        // direct copy from source mesh
+        /// <summary>
+        /// copy vertex fromVID from existing source mesh, returns new vid
+        /// </summary>
         public int AppendVertex(DMesh3 from, int fromVID)
         {
             int bi = 3 * fromVID;
@@ -952,11 +1043,72 @@ namespace g3
                 }
 			}
 
-            vertex_edges.insert(new List<int>(), vid);
+            allocate_edges_list(vid);
 
             updateTimeStamp(true);
             return vid;
         }
+
+
+
+        /// <summary>
+        /// insert vertex at given index, assuming it is unused
+        /// If bUnsafe, we use fast id allocation that does not update free list.
+        /// You should only be using this between BeginUnsafeVerticesInsert() / EndUnsafeVerticesInsert() calls
+        /// </summary>
+        public MeshResult InsertVertex(int vid, ref NewVertexInfo info, bool bUnsafe = false)
+        {
+            if (vertices_refcount.isValid(vid))
+                return MeshResult.Failed_VertexAlreadyExists;
+
+            bool bOK = (bUnsafe) ? vertices_refcount.allocate_at_unsafe(vid) :
+                                   vertices_refcount.allocate_at(vid);
+            if (bOK == false)
+                return MeshResult.Failed_CannotAllocateVertex;
+
+            int i = 3 * vid;
+            vertices.insert(info.v[2], i + 2);
+            vertices.insert(info.v[1], i + 1);
+            vertices.insert(info.v[0], i);
+
+            if (normals != null) {
+                Vector3f n = (info.bHaveN) ? info.n : Vector3f.AxisY;
+                normals.insert(n[2], i + 2);
+                normals.insert(n[1], i + 1);
+                normals.insert(n[0], i);
+            }
+
+            if (colors != null) {
+                Vector3f c = (info.bHaveC) ? info.c : Vector3f.One;
+                colors.insert(c[2], i + 2);
+                colors.insert(c[1], i + 1);
+                colors.insert(c[0], i);
+            }
+
+            if (uv != null) {
+                Vector2f u = (info.bHaveUV) ? info.uv : Vector2f.Zero;
+                int j = 2 * vid;
+                uv.insert(u[1], j + 1);
+                uv.insert(u[0], j);
+            }
+
+            allocate_edges_list(vid);
+
+            updateTimeStamp(true);
+            return MeshResult.Ok;
+        }
+        public MeshResult InsertVertex(int vid, NewVertexInfo info) {
+            return InsertVertex(vid, ref info);
+        }
+
+
+        public virtual void BeginUnsafeVerticesInsert() {
+            // do nothing...
+        }
+        public virtual void EndUnsafeVerticesInsert() {
+            vertices_refcount.rebuild_free_list();
+        }
+
 
 
         public int AppendTriangle(int v0, int v1, int v2, int gid = -1) {
@@ -977,9 +1129,9 @@ namespace g3
             int e0 = find_edge(tv[0], tv[1]);
             int e1 = find_edge(tv[1], tv[2]);
             int e2 = find_edge(tv[2], tv[0]);
-            if ((e0 != InvalidID && edge_is_boundary(e0) == false)
-                 || (e1 != InvalidID && edge_is_boundary(e1) == false)
-                 || (e2 != InvalidID && edge_is_boundary(e2) == false)) {
+            if ((e0 != InvalidID && IsBoundaryEdge(e0) == false)
+                 || (e1 != InvalidID && IsBoundaryEdge(e1) == false)
+                 || (e2 != InvalidID && IsBoundaryEdge(e2) == false)) {
                 return NonManifoldID;
             }
 
@@ -1014,6 +1166,76 @@ namespace g3
                 triangle_edges.insert(eid, 3 * tid + j);
             } else
                 triangle_edges.insert(add_edge(v0, v1, tid), 3 * tid + j);
+        }
+
+
+
+
+
+        /// <summary>
+        /// Insert triangle at given index, assuming it is unused.
+        /// If bUnsafe, we use fast id allocation that does not update free list.
+        /// You should only be using this between BeginUnsafeTrianglesInsert() / EndUnsafeTrianglesInsert() calls
+        /// </summary>
+        public MeshResult InsertTriangle(int tid, Index3i tv, int gid = -1, bool bUnsafe = false)
+        {
+            if (triangles_refcount.isValid(tid))
+                return MeshResult.Failed_TriangleAlreadyExists;
+
+            if (IsVertex(tv[0]) == false || IsVertex(tv[1]) == false || IsVertex(tv[2]) == false) {
+                Util.gDevAssert(false);
+                return MeshResult.Failed_NotAVertex;
+            }
+            if (tv[0] == tv[1] || tv[0] == tv[2] || tv[1] == tv[2]) {
+                Util.gDevAssert(false);
+                return MeshResult.Failed_InvalidNeighbourhood;
+            }
+
+            // look up edges. if any already have two triangles, this would 
+            // create non-manifold geometry and so we do not allow it
+            int e0 = find_edge(tv[0], tv[1]);
+            int e1 = find_edge(tv[1], tv[2]);
+            int e2 = find_edge(tv[2], tv[0]);
+            if ((e0 != InvalidID && IsBoundaryEdge(e0) == false)
+                 || (e1 != InvalidID && IsBoundaryEdge(e1) == false)
+                 || (e2 != InvalidID && IsBoundaryEdge(e2) == false)) {
+                return MeshResult.Failed_WouldCreateNonmanifoldEdge;
+            }
+
+            bool bOK = (bUnsafe) ? triangles_refcount.allocate_at_unsafe(tid) :
+                                   triangles_refcount.allocate_at(tid);
+            if (bOK == false)
+                return MeshResult.Failed_CannotAllocateTriangle;
+
+            // now safe to insert triangle
+            int i = 3 * tid;
+            triangles.insert(tv[2], i + 2);
+            triangles.insert(tv[1], i + 1);
+            triangles.insert(tv[0], i);
+            if (triangle_groups != null) {
+                triangle_groups.insert(gid, tid);
+                max_group_id = Math.Max(max_group_id, gid + 1);
+            }
+
+            // increment ref counts and update/create edges
+            vertices_refcount.increment(tv[0]);
+            vertices_refcount.increment(tv[1]);
+            vertices_refcount.increment(tv[2]);
+
+            add_tri_edge(tid, tv[0], tv[1], 0, e0);
+            add_tri_edge(tid, tv[1], tv[2], 1, e1);
+            add_tri_edge(tid, tv[2], tv[0], 2, e2);
+
+            updateTimeStamp(true);
+            return MeshResult.Ok;
+        }
+
+
+        public virtual void BeginUnsafeTrianglesInsert() {
+            // do nothing...
+        }
+        public virtual void EndUnsafeTrianglesInsert() {
+            triangles_refcount.rebuild_free_list();
         }
 
 
@@ -1113,6 +1335,9 @@ namespace g3
         }
 
 
+        /// <summary>
+        /// Enumerate ids of boundary edges
+        /// </summary>
         public IEnumerable<int> BoundaryEdgeIndices() {
             foreach ( int eid in edges_refcount ) {
                 if (edges[4 * eid + 3] == InvalidID)
@@ -1121,12 +1346,19 @@ namespace g3
         }
 
 
+        /// <summary>
+        /// Enumerate vertices
+        /// </summary>
         public IEnumerable<Vector3d> Vertices() {
             foreach (int vid in vertices_refcount) {
                 int i = 3 * vid;
                 yield return new Vector3d(vertices[i], vertices[i + 1], vertices[i + 2]);
             }
         }
+
+        /// <summary>
+        /// Enumerate triangles
+        /// </summary>
         public IEnumerable<Index3i> Triangles() {
             foreach (int tid in triangles_refcount) {
                 int i = 3 * tid;
@@ -1134,7 +1366,9 @@ namespace g3
             }
         }
 
-        // return value is [v0,v1,t0,t1], where t1 will be InvalidID if this is a boundary edge
+        /// <summary>
+        /// Enumerage edges. return value is [v0,v1,t0,t1], where t1 will be InvalidID if this is a boundary edge
+        /// </summary>
         public IEnumerable<Index4i> Edges() {
             foreach (int eid in edges_refcount) {
                 int i = 4 * eid;
@@ -1145,21 +1379,30 @@ namespace g3
 
         // queries
 
-        // linear search through edges of vA
+        /// <summary>
+        /// Find edgeid for edge [a,b]
+        /// </summary>
         public int FindEdge(int vA, int vB) {
             debug_check_is_vertex(vA);
             debug_check_is_vertex(vB);
             return find_edge(vA, vB);
         }
 
-        // faster than FindEdge
-        public int FindEdgeFromTri(int vA, int vB, int t) {
-            return find_edge_from_tri(vA, vB, t);
+        /// <summary>
+        /// Find edgeid for edge [a,b] from triangle that contains the edge.
+        /// This is faster than FindEdge() because it is constant-time
+        /// </summary>
+        public int FindEdgeFromTri(int vA, int vB, int tID) {
+            return find_edge_from_tri(vA, vB, tID);
         }
 
-		// [RMS] this does more work than necessary, see (??? comment never finished...)
+		/// <summary>
+        /// If edge has vertices [a,b], and is connected two triangles [a,b,c] and [a,b,d],
+        /// this returns [c,d], or [c,InvalidID] for a boundary edge
+        /// </summary>
         public Index2i GetEdgeOpposingV(int eID)
         {
+            // [TODO] there was a comment here saying this does more work than necessary??
 			// ** it is important that verts returned maintain [c,d] order!!
 			int i = 4*eID;
             int a = edges[i], b = edges[i + 1];
@@ -1173,6 +1416,9 @@ namespace g3
         }
 
 
+        /// <summary>
+        /// Find triangle made up of any permutation of vertices [a,b,c]
+        /// </summary>
         public int FindTriangle(int a, int b, int c)
         {
             int eid = find_edge(a, b);
@@ -1195,24 +1441,26 @@ namespace g3
 
 
 
+        /// <summary>
+        /// Enumerate "other" vertices of edges connected to vertex (ie vertex one-ring)
+        /// </summary>
 		public IEnumerable<int> VtxVerticesItr(int vID) {
 			if ( vertices_refcount.isValid(vID) ) {
-				List<int> edges = vertex_edges[vID];
-				int N = edges.Count;
-				for ( int i = 0; i < N; ++i )
-					yield return edge_other_v(edges[i], vID);
+                foreach ( int eid in vertex_edges.ValueItr(vID) )
+                    yield return edge_other_v(eid, vID);
 			}
 		}
 
 
+        /// <summary>
+        /// Enumerate edge ids connected to vertex (ie edge one-ring)
+        /// </summary>
 		public IEnumerable<int> VtxEdgesItr(int vID) {
 			if ( vertices_refcount.isValid(vID) ) {
-				List<int> edges = vertex_edges[vID];
-				int N = edges.Count;
-                for (int i = 0; i < N; ++i)
-                    yield return edges[i];
+                return vertex_edges.ValueItr(vID);
 			}
-		}
+            return Enumerable.Empty<int>();
+        }
 
 
         /// <summary>
@@ -1224,10 +1472,7 @@ namespace g3
         {
             if ( vertices_refcount.isValid(vID) ) {
                 int count = 0;
-				List<int> vtx_edges = vertex_edges[vID];
-				int N = vtx_edges.Count;
-                for (int i = 0; i < N; ++i) {
-                    int eid = vtx_edges[i];
+                foreach (int eid in vertex_edges.ValueItr(vID)) {
                     int ei = 4 * eid;
                     if ( edges[ei+3] == InvalidID ) {
                         if (count == 0)
@@ -1244,6 +1489,7 @@ namespace g3
         }
 
         /// <summary>
+        /// Find edge ids of boundary edges connected to vertex.
         /// e needs to be large enough (ie call VtxBoundaryEdges, or as large as max one-ring)
         /// returns count, ie number of elements of e that were filled
         /// </summary>
@@ -1251,10 +1497,7 @@ namespace g3
         {
             if (vertices_refcount.isValid(vID)) {
                 int count = 0;
-				List<int> vtx_edges = vertex_edges[vID];
-				int N = vtx_edges.Count;
-                for (int i = 0; i < N; ++i) {
-                    int eid = vtx_edges[i];
+                foreach (int eid in vertex_edges.ValueItr(vID)) {
                     int ei = 4 * eid;
                     if ( edges[ei+3] == InvalidID ) 
                         e[count++] = eid;
@@ -1266,15 +1509,17 @@ namespace g3
         }
 
 
-
+        /// <summary>
+        /// Get triangle one-ring at vertex. 
+        /// bUseOrientation is more efficient but returns incorrect result if vertex is a bowtie
+        /// </summary>
         public MeshResult GetVtxTriangles(int vID, List<int> vTriangles, bool bUseOrientation)
         {
             if (!IsVertex(vID))
                 return MeshResult.Failed_NotAVertex;
-            List<int> vedges = vertex_edges[vID];
 
             if (bUseOrientation) {
-                foreach (int eid in vedges) {
+                foreach (int eid in vertex_edges.ValueItr(vID)) {
                     int vOther = edge_other_v(eid, vID);
 					int i = 4*eid;
                     int et0 = edges[i + 2];
@@ -1286,7 +1531,7 @@ namespace g3
                 }
             } else {
                 // brute-force method
-                foreach (int eid in vedges) {
+                foreach (int eid in vertex_edges.ValueItr(vID)) {
 					int i = 4*eid;					
                     int t0 = edges[i + 2];
                     if (vTriangles.Contains(t0) == false)
@@ -1316,9 +1561,8 @@ namespace g3
 
             if (!IsVertex(vID))
                 return -1;
-            List<int> vedges = vertex_edges[vID];
             int N = 0;
-            foreach (int eid in vedges) {
+            foreach (int eid in vertex_edges.ValueItr(vID)) {
                 int vOther = edge_other_v(eid, vID);
 				int i = 4*eid;
                 int et0 = edges[i + 2];
@@ -1332,10 +1576,12 @@ namespace g3
         }
 
 
+        /// <summary>
+        /// iterate over triangle IDs of vertex one-ring
+        /// </summary>
 		public IEnumerable<int> VtxTrianglesItr(int vID) {
 			if ( IsVertex(vID) ) {
-				List<int> vedges = vertex_edges[vID];
-				foreach (int eid in vedges) {
+				foreach (int eid in vertex_edges.ValueItr(vID)) {
 					int vOther = edge_other_v(eid, vID);
 					int i = 4*eid;
 					int et0 = edges[i + 2];
@@ -1349,12 +1595,10 @@ namespace g3
 		}
 
 
-		public int GetVtxEdgeValence(int vID) {
-			return vertex_edges[vID].Count;
-		}
-
-		// from edge and vert, returns other vert, two opposing verts, and two triangles
-		public void GetVtxNbrhood(int eID, int vID, ref int vOther, ref int oppV1, ref int oppV2, ref int t1, ref int t2)
+        /// <summary>
+        ///  from edge and vert, returns other vert, two opposing verts, and two triangles
+        /// </summary>
+        public void GetVtxNbrhood(int eID, int vID, ref int vOther, ref int oppV1, ref int oppV2, ref int t1, ref int t2)
 		{
 			int i = 4*eID;
 			vOther = (edges[i] == vID) ? edges[i+1] : edges[i];
@@ -1368,6 +1612,31 @@ namespace g3
 		}
 
 
+        /// <summary>
+        /// Fastest possible one-ring centroid. This is used inside many other algorithms
+        /// so it helps to have it be maximally efficient
+        /// </summary>
+        public void VtxOneRingCentroid(int vID, ref Vector3d centroid)
+        {
+            centroid = Vector3d.Zero;
+            if (vertices_refcount.isValid(vID)) {
+                int n = 0;
+                foreach (int eid in vertex_edges.ValueItr(vID)) {
+                    int other_idx = 3 * edge_other_v(eid, vID);
+                    centroid.x += vertices[other_idx];
+                    centroid.y += vertices[other_idx + 1];
+                    centroid.z += vertices[other_idx + 2];
+                    n++;
+                }
+                if (n > 0) {
+                    double d = 1.0 / n;
+                    centroid.x *= d; centroid.y *= d; centroid.z *= d;
+                }
+            }
+        }
+
+
+
         public bool tri_has_v(int tID, int vID) {
 			int i = 3*tID;
             return triangles[i] == vID 
@@ -1377,9 +1646,9 @@ namespace g3
 
         public bool tri_is_boundary(int tID) {
 			int i = 3*tID;
-            return edge_is_boundary(triangle_edges[i])
-                || edge_is_boundary(triangle_edges[i + 1])
-                || edge_is_boundary(triangle_edges[i + 2]);
+            return IsBoundaryEdge(triangle_edges[i])
+                || IsBoundaryEdge(triangle_edges[i + 1])
+                || IsBoundaryEdge(triangle_edges[i + 2]);
         }
 
         public bool tri_has_neighbour_t(int tCheck, int tNbr) {
@@ -1427,9 +1696,11 @@ namespace g3
         public bool IsBoundaryEdge(int eid) {
             return edges[4 * eid + 3] == InvalidID;
         }
+        [System.Obsolete("edge_is_boundary will be removed in future, use IsBoundaryEdge instead")]
         public bool edge_is_boundary(int eid) {
             return edges[4 * eid + 3] == InvalidID;
         }
+
         public bool edge_has_v(int eid, int vid) {
 			int i = 4*eid;
             return (edges[i] == vid) || (edges[i + 1] == vid);
@@ -1451,19 +1722,27 @@ namespace g3
         }
 
 
-        // ugh need to deprecate this...weird API!
-		public bool vertex_is_boundary(int vid) {
-			foreach ( int e in vertex_edges[vid] )
-				if ( edge_is_boundary(e) )
-					return true;
-			return false;
-		}
-        public bool IsBoundaryVertex(int vid) {
-            foreach (int e in vertex_edges[vid]) {
+        [System.Obsolete("vertex_is_boundary will be removed in future, use IsBoundaryVertex instead")]
+        public bool vertex_is_boundary(int vID) {
+            return IsBoundaryVertex(vID);
+        }
+        public bool IsBoundaryVertex(int vID) {
+            foreach (int e in vertex_edges.ValueItr(vID)) {
                 if (edges[4 * e + 3] == InvalidID)
                     return true;
             }
             return false;
+        }
+
+
+        /// <summary>
+        /// Returns true if any edge of triangle is a boundary edge
+        /// </summary>
+        public bool IsBoundaryTriangle(int tID)
+        {
+            debug_check_is_triangle(tID);
+            int i = 3 * tID;
+            return IsBoundaryEdge(triangle_edges[i]) || IsBoundaryEdge(triangle_edges[i + 1]) || IsBoundaryEdge(triangle_edges[i + 2]);
         }
 
 
@@ -1474,17 +1753,16 @@ namespace g3
             //   that means we only need one index-check in inner loop.
             //   commented out code is robust to incorrect ordering, but slower.
             int vO = Math.Max(vA, vB);
-            List<int> e0 = vertex_edges[Math.Min(vA, vB)];
-            //int vO = vA;
-            //List<int> e0 = vertex_edges[vB];
-            int N = e0.Count;
-            for (int i = 0; i < N; ++i) {
-                int eid = e0[i];
+            int vI = Math.Min(vA, vB);
+            foreach (int eid in vertex_edges.ValueItr(vI)) {
                 if (edges[4 * eid + 1] == vO)
                     //if (edge_has_v(eid, vO))
                     return eid;
             }
             return InvalidID;
+
+            // this is slower, likely because it creates new func<> every time. can we do w/o that?
+            //return vertex_edges.Find(vI, (eid) => { return edges[4 * eid + 1] == vO; }, InvalidID);
         }
 
         int find_edge_from_tri(int vA, int vB, int tID)
@@ -1508,10 +1786,15 @@ namespace g3
         // queries
 
 
+        /// <summary>
+        /// Returns true if the two triangles connected to edge have different group IDs
+        /// </summary>
         public bool IsGroupBoundaryEdge(int eID)
         {
             if ( IsEdge(eID) == false )
                 throw new Exception("DMesh3.IsGroupBoundaryEdge: " + eID + " is not a valid edge");
+            if (triangle_groups == null)
+                throw new Exception("DMesh3.IsGroupBoundaryEdge: no triangle groups!");
             int et1 = edges[4 * eID + 3];
             if (et1 == InvalidID)
                 return false;
@@ -1522,16 +1805,17 @@ namespace g3
         }
 
 
-        // returns true if vertex has more than one tri groups in its tri nbrhood
+        /// <summary>
+        /// returns true if vertex has more than one tri group in its tri nbrhood
+        /// </summary>
         public bool IsGroupBoundaryVertex(int vID)
         {
             if (IsVertex(vID) == false)
                 throw new Exception("DMesh3.IsGroupBoundaryVertex: " + vID + " is not a valid vertex");
             if (triangle_groups == null)
-                return false;
-			List<int> vedges = vertex_edges[vID];
+                throw new Exception("DMesh3.IsGroupBoundaryVertex: no triangle groups!");
             int group_id = int.MinValue;
-            foreach (int eID in vedges) {
+            foreach (int eID in vertex_edges.ValueItr(vID)) {
                 int et0 = edges[4 * eID + 2];
                 int g0 = triangle_groups[et0];
                 if (group_id != g0) {
@@ -1552,16 +1836,17 @@ namespace g3
 
 
 
-        // returns true if more than two group border edges meet at vertex
+        /// <summary>
+        /// returns true if more than two group boundary edges meet at vertex (ie 3+ groups meet at this vertex)
+        /// </summary>
         public bool IsGroupJunctionVertex(int vID)
         {
             if (IsVertex(vID) == false)
                 throw new Exception("DMesh3.IsGroupJunctionVertex: " + vID + " is not a valid vertex");
             if (triangle_groups == null)
-                return false;
-			List<int> vedges = vertex_edges[vID];
+                throw new Exception("DMesh3.IsGroupJunctionVertex: no triangle groups!");
             Index2i groups = Index2i.Max;
-            foreach (int eID in vedges) {
+            foreach (int eID in vertex_edges.ValueItr(vID)) {
                 Index2i et = new Index2i(edges[4 * eID + 2], edges[4 * eID + 3]);
                 for (int k = 0; k < 2; ++k) {
                     if (et[k] == InvalidID)
@@ -1582,7 +1867,7 @@ namespace g3
 
 
         /// <summary>
-        /// returns up to 4 group IDs at input vid. Returns false if > 4 encountered
+        /// returns up to 4 group IDs at vertex. Returns false if > 4 encountered
         /// </summary>
         public bool GetVertexGroups(int vID, out Index4i groups)
         {
@@ -1592,11 +1877,8 @@ namespace g3
             if (IsVertex(vID) == false)
                 throw new Exception("DMesh3.GetVertexGroups: " + vID + " is not a valid vertex");
             if (triangle_groups == null)
-                return false;
-			List<int> vedges = vertex_edges[vID];
-            int ne = vedges.Count;
-            for ( int ei = 0; ei < ne; ++ei ) {
-                int eID = vedges[ei];
+                throw new Exception("DMesh3.GetVertexGroups: no triangle groups!");
+            foreach (int eID in vertex_edges.ValueItr(vID)) {
                 int et0 = edges[4 * eID + 2];
                 int g0 = triangle_groups[et0];
                 if ( groups.Contains(g0) == false )
@@ -1618,18 +1900,15 @@ namespace g3
 
 
         /// <summary>
-        /// returns up to 4 group IDs at input vid. Returns false if > 4 encountered
+        /// returns all group IDs at vertex
         /// </summary>
         public bool GetAllVertexGroups(int vID, ref List<int> groups)
         {
             if (IsVertex(vID) == false)
                 throw new Exception("DMesh3.GetAllVertexGroups: " + vID + " is not a valid vertex");
             if (triangle_groups == null)
-                return false;
-			List<int> vedges = vertex_edges[vID];
-            int ne = vedges.Count;
-            for ( int ei = 0; ei < ne; ++ei ) {
-                int eID = vedges[ei];
+                throw new Exception("DMesh3.GetAllVertexGroups: no triangle groups!");
+            foreach (int eID in vertex_edges.ValueItr(vID)) {
                 int et0 = edges[4 * eID + 2];
                 int g0 = triangle_groups[et0];
                 if (groups.Contains(g0) == false)
@@ -1657,17 +1936,64 @@ namespace g3
         public bool IsBowtieVertex(int vID)
         {
             if (vertices_refcount.isValid(vID)) {
-                int nTris = GetVtxTriangleCount(vID);
-                List<int> edges = vertex_edges[vID];
-                if (!(nTris == GetVtxEdges(vID).Count || nTris == GetVtxEdges(vID).Count - 1))
-                    return true;
-                return false;
+				int nEdges = vertex_edges.Count(vID);
+				if (nEdges == 0)
+					return false;
+
+                // find a boundary edge to start at
+                int start_eid = -1;
+                bool start_at_boundary = false;
+                foreach (int eid in vertex_edges.ValueItr(vID)) {
+                    if (edges[4 * eid + 3] == DMesh3.InvalidID) {
+                        start_at_boundary = true;
+                        start_eid = eid;
+                        break;
+                    }
+                }
+                // if no boundary edge, start at arbitrary edge
+                if (start_eid == -1)
+                    start_eid = vertex_edges.First(vID);
+                // initial triangle
+                int start_tid = edges[4 * start_eid + 2];
+
+                int prev_tid = start_tid;
+                int prev_eid = start_eid;
+
+                // walk forward to next edge. if we hit start edge or boundary edge,
+                // we are done the walk. count number of edges as we go.
+                int count = 1;
+                while (true) {
+                    int i = 3 * prev_tid;
+                    Index3i tv = new Index3i(triangles[i], triangles[i+1], triangles[i+2]);
+                    Index3i te = new Index3i(triangle_edges[i], triangle_edges[i+1], triangle_edges[i+2]);
+                    int vert_idx = IndexUtil.find_tri_index(vID, ref tv);
+                    int e1 = te[vert_idx], e2 = te[(vert_idx+2) % 3];
+                    int next_eid = (e1 == prev_eid) ? e2 : e1;
+                    if (next_eid == start_eid)
+                        break;
+                    Index2i next_eid_tris = GetEdgeT(next_eid);
+                    int next_tid = (next_eid_tris.a == prev_tid) ? next_eid_tris.b : next_eid_tris.a;
+                    if (next_tid == DMesh3.InvalidID) {
+                        break;
+                    }
+                    prev_eid = next_eid;
+                    prev_tid = next_tid;
+                    count++;
+                }
+
+                // if we did not see all edges at vertex, we have a bowtie
+                int target_count = (start_at_boundary) ? nEdges - 1 : nEdges;
+                bool is_bowtie = (target_count != count);
+                return is_bowtie;
+
             } else
                 throw new Exception("DMesh3.IsBowtieVertex: " + vID + " is not a valid vertex");
         }
 
 
-        // compute vertex bounding box
+        /// <summary>
+        /// Computes bounding box of all vertices.
+        /// </summary>
         public AxisAlignedBox3d GetBounds()
         {
             double x = 0, y = 0, z = 0;
@@ -1688,7 +2014,9 @@ namespace g3
         AxisAlignedBox3d cached_bounds;
         int cached_bounds_timestamp = -1;
 
-        //! cached bounding box, lazily re-computed on access if mesh has changed
+        /// <summary>
+        /// cached bounding box, lazily re-computed on access if mesh has changed
+        /// </summary>
         public AxisAlignedBox3d CachedBounds
         {
             get {
@@ -1704,7 +2032,7 @@ namespace g3
 
 
         bool cached_is_closed = false;
-        int cached_is_closed_timstamp = -1;
+        int cached_is_closed_timestamp = -1;
 
         public bool IsClosed() {
             if (TriangleCount == 0)
@@ -1712,12 +2040,12 @@ namespace g3
             // [RMS] under possibly-mistaken belief that foreach() has some overhead...
             if (MaxEdgeID / EdgeCount > 5) {
                 foreach (int eid in edges_refcount)
-                    if (edge_is_boundary(eid))
+                    if (IsBoundaryEdge(eid))
                         return false;
             } else {
                 int N = MaxEdgeID;
                 for (int i = 0; i < N; ++i)
-                    if (edges_refcount.isValid(i) && edge_is_boundary(i))
+                    if (edges_refcount.isValid(i) && IsBoundaryEdge(i))
                         return false;
             }
             return true;            
@@ -1725,9 +2053,9 @@ namespace g3
 
         public bool CachedIsClosed {
             get {
-                if (cached_is_closed_timstamp != Timestamp) {
+                if (cached_is_closed_timestamp != Timestamp) {
                     cached_is_closed = IsClosed();
-                    cached_is_closed_timstamp = Timestamp;
+                    cached_is_closed_timestamp = Timestamp;
                 }
                 return cached_is_closed;
             }
@@ -1736,13 +2064,41 @@ namespace g3
 
 
 
+        /// <summary> returns true if vertices, edges, and triangles are all "dense" (Count == MaxID) </summary>
         public bool IsCompact {
             get { return vertices_refcount.is_dense && edges_refcount.is_dense && triangles_refcount.is_dense; }
         }
+
+        /// <summary> Returns true if vertex count == max vertex id </summary>
         public bool IsCompactV {
             get { return vertices_refcount.is_dense; }
         }
 
+        /// <summary> returns true if triangle count == max triangle id </summary>
+        public bool IsCompactT {
+            get { return triangles_refcount.is_dense; }
+        }
+
+        /// <summary> returns measure of compactness in range [0,1], where 1 is fully compacted </summary>
+        public double CompactMetric {
+            get { return ((double)VertexCount / (double)MaxVertexID + (double)TriangleCount / (double)MaxTriangleID) * 0.5; }
+        }
+
+
+
+        /// <summary>
+        /// Compute mesh winding number, from Jacobson et al, Robust Inside-Outside Segmentation using Generalized Winding Numbers
+        /// http://igl.ethz.ch/projects/winding-number/
+        /// returns ~0 for points outside a closed, consistently oriented mesh, and a positive or negative integer
+        /// for points inside, with value > 1 depending on how many "times" the point inside the mesh (like in 2D polygon winding)
+        /// </summary>
+        public double WindingNumber(Vector3d v)
+        {
+            double sum = 0;
+            foreach ( int tid in triangles_refcount )
+                sum += GetTriSolidAngle(tid, ref v);
+            return sum / (4.0 * Math.PI);
+        }
 
 
 
@@ -1790,42 +2146,58 @@ namespace g3
 
         public DVector<double> VerticesBuffer {
             get { return vertices; }
+            set { vertices = value; }
         }
         public RefCountVector VerticesRefCounts {
             get { return vertices_refcount; }
+            set { vertices_refcount = value; }
         }
         public DVector<float> NormalsBuffer {
             get { return normals; }
+            set { normals = value; }
         }
         public DVector<float> ColorsBuffer {
             get { return colors; }
+            set { colors = value; }
         }
         public DVector<float> UVBuffer {
             get { return uv; }
+            set { uv = value; }
         }
 
         public DVector<int> TrianglesBuffer {
             get { return triangles; }
+            set { triangles = value; }
         }
         public RefCountVector TrianglesRefCounts {
             get { return triangles_refcount; }
+            set { triangles_refcount = value; }
         }
         public DVector<int> GroupsBuffer {
             get { return triangle_groups; }
+            set { triangle_groups = value; }
         }
 
         public DVector<int> EdgesBuffer{
             get { return edges; }
+            set { edges = value; }
         }
         public RefCountVector EdgesRefCounts {
             get { return edges_refcount; }
+            set { edges_refcount = value; }
+        }
+        public SmallListSet VertexEdges {
+            get { return vertex_edges; }
+            set { vertex_edges = value; }
         }
 
 
 
-        // assumes that we have initialized vertices, triangles, and edges buffers,
-        // and edges refcounts. Rebuilds vertex and tri refcounts, triangle edges,
-        // vertex edges
+        /// <summary>
+        /// Rebuild mesh topology.
+        /// assumes that we have initialized vertices, triangles, and edges buffers,
+        /// and edges refcounts. Rebuilds vertex and tri refcounts, triangle edges, vertex edges.
+        /// </summary>
         public void RebuildFromEdgeRefcounts()
         {
             int MaxVID = vertices.Length / 3;
@@ -1834,7 +2206,7 @@ namespace g3
             triangle_edges.resize(triangles.Length);
             triangles_refcount.RawRefCounts.resize(MaxTID);
 
-            vertex_edges.resize(MaxVID);
+            vertex_edges.Resize(MaxVID);
             vertices_refcount.RawRefCounts.resize(MaxVID);
 
             int MaxEID = edges.Length / 4;
@@ -1849,8 +2221,14 @@ namespace g3
                 // set vertex and tri refcounts to 1
                 // find edges [a,b] in each triangle and set its tri-edge to this edge
 
-                vertices_refcount.set_Unsafe(va, 1);
-                vertices_refcount.set_Unsafe(vb, 1);
+                if (vertices_refcount.isValidUnsafe(va) == false) {
+                    allocate_edges_list(va);
+                    vertices_refcount.set_Unsafe(va, 1);
+                }
+                if (vertices_refcount.isValidUnsafe(vb) == false) {
+                    allocate_edges_list(vb);
+                    vertices_refcount.set_Unsafe(vb, 1);
+                }
                 triangles_refcount.set_Unsafe(t0, 1);
                 Index3i tri0 = GetTriangle(t0);
                 int idx0 = IndexUtil.find_edge_index_in_tri(va, vb, ref tri0);
@@ -1864,17 +2242,13 @@ namespace g3
                 }
 
                 // add this edge to both vertices
-
-                if ( vertex_edges[va] == null ) 
-                    vertex_edges[va] = new List<int>();
-                vertex_edges[va].Add(eid);
-
-                if (vertex_edges[vb] == null)
-                    vertex_edges[vb] = new List<int>();
-                vertex_edges[vb].Add(eid);
+                vertex_edges.Insert(va, eid);
+                vertex_edges.Insert(vb, eid);
             }
 
             // iterate over triangles and increment vtx refcount for each tri
+            bool has_groups = HasTriangleGroups;
+            max_group_id = 0;
             for ( int tid = 0; tid < MaxTID; ++tid ) {
                 if (triangles_refcount.isValid(tid) == false)
                     continue;
@@ -1882,7 +2256,11 @@ namespace g3
                 vertices_refcount.increment(a);
                 vertices_refcount.increment(b);
                 vertices_refcount.increment(c);
+
+                if (has_groups)
+                    max_group_id = Math.Max(max_group_id, triangle_groups[tid]);
             }
+            max_group_id++;
 
             vertices_refcount.rebuild_free_list();
             triangles_refcount.rebuild_free_list();
@@ -1891,6 +2269,182 @@ namespace g3
             updateTimeStamp(true);
         }
 
-	}
+
+
+        /// <summary>
+        /// Compact mesh in-place, by moving vertices around and rewriting indices.
+        /// Should be faster if the amount of compacting is not too significant, and
+        /// is useful in some places.
+        /// [TODO] vertex_edges is not compacted. does not affect indices, but does keep memory.
+        /// 
+        /// If bComputeCompactInfo=false, the returned CompactInfo is not initialized
+        /// </summary>
+        public CompactInfo CompactInPlace(bool bComputeCompactInfo = false)
+        {
+            IndexMap mapV = (bComputeCompactInfo) ? new IndexMap(MaxVertexID, VertexCount) : null;
+            CompactInfo ci = new CompactInfo();
+            ci.MapV = mapV;
+
+            // find first free vertex, and last used vertex
+            int iLastV = MaxVertexID - 1, iCurV = 0;
+            while (vertices_refcount.isValidUnsafe(iLastV) == false)
+                iLastV--;
+            while (vertices_refcount.isValidUnsafe(iCurV))
+                iCurV++;
+
+            DVector<short> vref = vertices_refcount.RawRefCounts;
+
+            while (iCurV < iLastV) {
+                int kc = iCurV * 3, kl = iLastV * 3;
+                vertices[kc] = vertices[kl];  vertices[kc+1] = vertices[kl+1];  vertices[kc+2] = vertices[kl+2];
+                if ( normals != null ) {
+                    normals[kc] = normals[kl];  normals[kc+1] = normals[kl+1];  normals[kc+2] = normals[kl+2];
+                }
+                if (colors != null) {
+                    colors[kc] = colors[kl];  colors[kc+1] = colors[kl+1];  colors[kc+2] = colors[kl+2];
+                }
+                if (uv != null) {
+                    int ukc = iCurV * 2, ukl = iLastV * 2;
+                    uv[ukc] = uv[ukl]; uv[ukc+1] = uv[ukl+1];
+                }
+
+                foreach ( int eid in vertex_edges.ValueItr(iLastV) ) {
+                    // replace vertex in edges
+                    replace_edge_vertex(eid, iLastV, iCurV);
+
+                    // replace vertex in triangles
+                    int t0 = edges[4*eid + 2];
+                    replace_tri_vertex(t0, iLastV, iCurV);
+                    int t1 = edges[4*eid + 3];
+                    if ( t1 != DMesh3.InvalidID )
+                        replace_tri_vertex(t1, iLastV, iCurV);
+                }
+
+                // shift vertex refcount to new position
+                vref[iCurV] = vref[iLastV];
+                vref[iLastV] = RefCountVector.invalid;
+
+                // move edge list
+                vertex_edges.Move(iLastV, iCurV);
+
+                if (mapV != null)
+                    mapV[iLastV] = iCurV;
+
+                // move cur forward one, last back one, and  then search for next valid
+                iLastV--; iCurV++;
+                while (vertices_refcount.isValidUnsafe(iLastV) == false)
+                    iLastV--;
+                while (vertices_refcount.isValidUnsafe(iCurV) && iCurV < iLastV)
+                    iCurV++;
+            }
+
+            // trim vertices data structures
+            vertices_refcount.trim(VertexCount);
+            vertices.resize(VertexCount*3);
+            if (normals != null)
+                normals.resize(VertexCount * 3);
+            if (colors != null)
+                colors.resize(VertexCount * 3);
+            if (uv != null)
+                uv.resize(VertexCount * 2);
+
+            // [TODO] vertex_edges!!!
+
+            /** shift triangles **/
+
+            // find first free triangle, and last valid triangle
+            int iLastT = MaxTriangleID - 1, iCurT = 0;
+            while (triangles_refcount.isValidUnsafe(iLastT) == false)
+                iLastT--;
+            while (triangles_refcount.isValidUnsafe(iCurT))
+                iCurT++;
+
+            DVector<short> tref = triangles_refcount.RawRefCounts;
+
+            while (iCurT < iLastT) {
+                int kc = iCurT * 3, kl = iLastT * 3;
+
+                // shift triangle
+                for (int j = 0; j < 3; ++j) {
+                    triangles[kc + j] = triangles[kl + j];
+                    triangle_edges[kc + j] = triangle_edges[kl + j];
+                }
+                if (triangle_groups != null)
+                    triangle_groups[iCurT] = triangle_groups[iLastT];
+
+                // update edges
+                for ( int j = 0; j < 3; ++j ) {
+                    int eid = triangle_edges[kc + j];
+                    replace_edge_triangle(eid, iLastT, iCurT);
+                }
+
+                // shift triangle refcount to new position
+                tref[iCurT] = tref[iLastT];
+                tref[iLastT] = RefCountVector.invalid;
+
+                // move cur forward one, last back one, and  then search for next valid
+                iLastT--; iCurT++;
+                while (triangles_refcount.isValidUnsafe(iLastT) == false)
+                    iLastT--;
+                while (triangles_refcount.isValidUnsafe(iCurT) && iCurT < iLastT)
+                    iCurT++;
+            }
+
+            // trim triangles data structures
+            triangles_refcount.trim(TriangleCount);
+            triangles.resize(TriangleCount*3);
+            triangle_edges.resize(TriangleCount*3);
+            if (triangle_groups != null)
+                triangle_groups.resize(TriangleCount);
+
+            /** shift edges **/
+
+            // find first free edge, and last used edge
+            int iLastE = MaxEdgeID - 1, iCurE = 0;
+            while (edges_refcount.isValidUnsafe(iLastE) == false)
+                iLastE--;
+            while (edges_refcount.isValidUnsafe(iCurE))
+                iCurE++;
+
+            DVector<short> eref = edges_refcount.RawRefCounts;
+
+            while (iCurE < iLastE) {
+                int kc = iCurE * 4, kl = iLastE * 4;
+
+                // shift edge
+                for (int j = 0; j < 4; ++j) {
+                    edges[kc + j] = edges[kl + j];
+                }
+
+                // replace edge in vertex edges lists
+                int v0 = edges[kc], v1 = edges[kc + 1];
+                vertex_edges.Replace(v0, (eid) => { return eid == iLastE; }, iCurE);
+                vertex_edges.Replace(v1, (eid) => { return eid == iLastE; }, iCurE);
+
+                // replace edge in triangles
+                replace_triangle_edge(edges[kc + 2], iLastE, iCurE);
+                if (edges[kc + 3] != DMesh3.InvalidID)
+                    replace_triangle_edge(edges[kc + 3], iLastE, iCurE);
+
+                // shift triangle refcount to new position
+                eref[iCurE] = eref[iLastE];
+                eref[iLastE] = RefCountVector.invalid;
+
+                // move cur forward one, last back one, and  then search for next valid
+                iLastE--; iCurE++;
+                while (edges_refcount.isValidUnsafe(iLastE) == false)
+                    iLastE--;
+                while (edges_refcount.isValidUnsafe(iCurE) && iCurE < iLastE)
+                    iCurE++;
+            }
+
+            // trim edge data structures
+            edges_refcount.trim(EdgeCount);
+            edges.resize(EdgeCount*4);
+
+            return ci;
+        }
+
+    }
 }
 

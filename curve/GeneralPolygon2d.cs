@@ -41,10 +41,10 @@ namespace g3
 		}
 
 
-		public void AddHole(Polygon2d hole, bool bCheck = true) {
+		public void AddHole(Polygon2d hole, bool bCheckContainment = true, bool bCheckOrientation = true) {
 			if ( outer == null )
 				throw new Exception("GeneralPolygon2d.AddHole: outer polygon not set!");
-			if ( bCheck ) {
+			if ( bCheckContainment ) {
 				if ( outer.Contains(hole) == false )
 					throw new Exception("GeneralPolygon2d.AddHole: outer does not contain hole!");
 
@@ -54,16 +54,21 @@ namespace g3
 						throw new Exception("GeneralPolygon2D.AddHole: new hole intersects existing hole!");
 				}
 			}
-
-			if ( (bOuterIsCW && hole.IsClockwise) || (bOuterIsCW == false && hole.IsClockwise == false) )
-				throw new Exception("GeneralPolygon2D.AddHole: new hole has same orientation as outer polygon!");
+            if ( bCheckOrientation ) {
+                if ((bOuterIsCW && hole.IsClockwise) || (bOuterIsCW == false && hole.IsClockwise == false))
+                    throw new Exception("GeneralPolygon2D.AddHole: new hole has same orientation as outer polygon!");
+            }
 
 			holes.Add(hole);
 		}
 
+        public void ClearHoles() {
+            holes.Clear();
+        }
+
 
 		bool HasHoles {
-			get { return Holes.Count > 0; }
+			get { return holes.Count > 0; }
 		}
 
 		public ReadOnlyCollection<Polygon2d> Holes {
@@ -77,7 +82,7 @@ namespace g3
             get {
                 double sign = (bOuterIsCW) ? -1.0 : 1.0;
                 double dArea = sign * Outer.SignedArea;
-                foreach (var h in Holes)
+                foreach (var h in holes)
                     dArea += sign * h.SignedArea;
                 return dArea;
             }
@@ -99,7 +104,7 @@ namespace g3
         {
             get {
                 double dPerim = outer.Perimeter;
-                foreach (var h in Holes)
+                foreach (var h in holes)
                     dPerim += h.Perimeter;
                 return dPerim;
             }
@@ -110,9 +115,18 @@ namespace g3
         {
             get {
                 AxisAlignedBox2d box = outer.GetBounds();
-                foreach (var h in Holes)
+                foreach (var h in holes)
                     box.Contain(h.GetBounds());
                 return box;
+            }
+        }
+
+        public int VertexCount {
+            get {
+                int NV = outer.VertexCount;
+                foreach (var h in holes)
+                    NV += h.VertexCount;
+                return NV;
             }
         }
 
@@ -169,6 +183,22 @@ namespace g3
                 return false;
             foreach (var h in holes) {
                 if (h.Contains(poly))
+                    return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Checks that all points on a segment are within the area defined by the GeneralPolygon2d;
+        /// holes are included in the calculation.
+        /// </summary>
+        public bool Contains(Segment2d seg)
+        {
+            if (outer.Contains(seg) == false)
+                return false;
+            foreach (var h in holes)
+            {
+                if (h.Intersects(seg))
                     return false;
             }
             return true;
@@ -240,13 +270,30 @@ namespace g3
 
 		public IEnumerable<Vector2d> AllVerticesItr()
 		{
-			foreach (Vector2d v in outer)
+			foreach (Vector2d v in outer.Vertices)
 				yield return v;
 			foreach (var hole in holes) {
-				foreach (Vector2d v in hole)
+				foreach (Vector2d v in hole.Vertices)
 					yield return v;
 			}
 		}
 
-	}
+
+
+
+
+
+        public void Simplify(double clusterTol = 0.0001,
+                              double lineDeviationTol = 0.01,
+                              bool bSimplifyStraightLines = true)
+        {
+            // [TODO] should make sure that holes stay inside Outer!!
+            Outer.Simplify(clusterTol, lineDeviationTol, bSimplifyStraightLines);
+            foreach (var hole in holes)
+                hole.Simplify(clusterTol, lineDeviationTol, bSimplifyStraightLines);
+        }
+
+
+
+    }
 }

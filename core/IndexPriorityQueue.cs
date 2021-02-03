@@ -99,10 +99,10 @@ namespace g3
         /// Add id to list w/ given priority
         /// Behavior is undefined if you call w/ same id twice
         /// </summary>
-        public void Enqueue(int id, float priority)
+        public void Insert(int id, float priority)
         {
             if (EnableDebugChecks && Contains(id) == true)
-                throw new Exception("IndexPriorityQueue.Enqueue: tried to add node that is already in queue!");
+                throw new Exception("IndexPriorityQueue.Insert: tried to add node that is already in queue!");
 
             QueueNode node = new QueueNode();
             node.id = id;
@@ -113,7 +113,9 @@ namespace g3
             nodes.insert(node, num_nodes);
             move_up(nodes[num_nodes].index);
         }
-
+        public void Enqueue(int id, float priority) {
+            Insert(id, priority);
+        }
 
         /// <summary>
         /// remove node at head of queue, update queue, and return id for that node
@@ -158,6 +160,18 @@ namespace g3
             nodes[iNode] = n;
 
             on_node_updated(iNode);
+        }
+
+
+        /// <summary>
+        /// Query the priority at node id, assuming it exists in queue
+        /// </summary>
+        public float GetPriority(int id)
+        {
+            if (EnableDebugChecks && Contains(id) == false)
+                throw new Exception("IndexPriorityQueue.Update: tried to get priorty of node that does not exist in queue!");
+            int iNode = id_to_index[id];
+            return nodes[iNode].priority;
         }
 
 

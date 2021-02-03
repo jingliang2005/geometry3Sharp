@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>g3</RootNamespace>
     <AssemblyName>geometry3</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,6 +22,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -30,6 +32,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -48,11 +51,19 @@
     <Compile Include="color\Colorb.cs" />
     <Compile Include="color\Colorf.cs" />
     <Compile Include="color\ColorHSV.cs" />
+    <Compile Include="color\ColorMap.cs" />
     <Compile Include="color\ColorMixer.cs" />
+    <Compile Include="comp_geom\GraphCells2d.cs" />
+    <Compile Include="comp_geom\GraphSplitter2d.cs" />
+    <Compile Include="comp_geom\SphericalFibonacciPointSet.cs" />
+    <Compile Include="containment\ContMinBox2.cs" />
+    <Compile Include="containment\ContMinCircle2.cs" />
+    <Compile Include="comp_geom\ConvexHull2.cs" />
     <Compile Include="core\CommandArgumentSet.cs" />
     <Compile Include="core\DijkstraGraphDistance.cs" />
     <Compile Include="core\DVector.cs" />
     <Compile Include="core\FileSystemUtils.cs" />
+    <Compile Include="core\g3Iterators.cs" />
     <Compile Include="core\gParallel.cs" />
     <Compile Include="core\HashUtil.cs" />
     <Compile Include="core\HBitArray.cs" />
@@ -61,22 +72,32 @@
     <Compile Include="core\IndexPriorityQueue.cs" />
     <Compile Include="core\ProfileUtil.cs" />
     <Compile Include="core\RefCountVector.cs" />
+    <Compile Include="core\SafeCollections.cs" />
+    <Compile Include="core\SmallListSet.cs" />
     <Compile Include="core\Snapping.cs" />
     <Compile Include="core\SparseList.cs" />
     <Compile Include="core\TagSet.cs" />
     <Compile Include="core\Units.cs" />
     <Compile Include="core\DVectorArray.cs" />
     <Compile Include="core\VectorArray.cs" />
+    <Compile Include="core\ProgressCancel.cs" />
     <Compile Include="curve\BaseCurve2.cs" />
+    <Compile Include="curve\BezierCurve2.cs" />
     <Compile Include="curve\BSplineBasis.cs" />
     <Compile Include="curve\Circle2.cs" />
     <Compile Include="curve\CurveResampler.cs" />
+    <Compile Include="comp_geom\Arrangement2d.cs" />
+    <Compile Include="curve\DGraph.cs" />
     <Compile Include="curve\DGraph2Resampler.cs" />
     <Compile Include="curve\DGraph2Util.cs" />
+    <Compile Include="curve\DGraph3.cs" />
+    <Compile Include="curve\DGraph3Util.cs" />
     <Compile Include="curve\Ellipse2.cs" />
+    <Compile Include="curve\LaplacianCurveDeformer.cs" />
     <Compile Include="curve\PlanarSolid2d.cs" />
     <Compile Include="curve\NURBSCurve2.cs" />
     <Compile Include="curve\PolygonFont2d.cs" />
+    <Compile Include="curve\PolySimplification2.cs" />
     <Compile Include="curve\SculptCurveDeformers.cs" />
     <Compile Include="distance\DistPoint2Box2.cs" />
     <Compile Include="distance\DistSegment2Segment2.cs" />
@@ -85,20 +106,30 @@
     <Compile Include="distance\DistPoint2Circle2.cs" />
     <Compile Include="distance\DistPoint3Cylinder3.cs" />
     <Compile Include="distance\DistPoint3Circle3.cs" />
-    <Compile Include="implicit\ImplicitField.cs" />
+    <Compile Include="implicit\CachingGridImplicit3d.cs" />
+    <Compile Include="implicit\CachingMeshSDF.cs" />
+    <Compile Include="implicit\FalloffFunctions.cs" />
+    <Compile Include="implicit\GridImplicits3d.cs" />
+    <Compile Include="implicit\Implicit2d.cs" />
+    <Compile Include="implicit\Implicit3d.cs" />
+    <Compile Include="implicit\ImplicitFieldSampler3d.cs" />
     <Compile Include="implicit\ImplicitOperators.cs" />
     <Compile Include="implicit\MarchingQuads.cs" />
     <Compile Include="intersection\IntrLine3AxisAlignedBox3.cs" />
     <Compile Include="intersection\IntrRay3AxisAlignedBox3.cs" />
+    <Compile Include="intersection\IntrLine2Segment2.cs" />
     <Compile Include="intersection\IntrTriangle3Triangle3.cs" />
+    <Compile Include="io\BinaryG3ReaderWriter.cs" />
     <Compile Include="io\MaterialTypes.cs" />
     <Compile Include="io\OFFReader.cs" />
     <Compile Include="io\OFFWriter.cs" />
     <Compile Include="io\STLReader.cs" />
     <Compile Include="io\STLWriter.cs" />
     <Compile Include="io\gSerialization.cs" />
+    <Compile Include="math\AxisAlignedBox2i.cs" />
     <Compile Include="math\AxisAlignedBox3i.cs" />
     <Compile Include="math\BoundsUtil.cs" />
+    <Compile Include="math\FastWindingMath.cs" />
     <Compile Include="math\Frame3f.cs" />
     <Compile Include="math\IndexTypes.cs" />
     <Compile Include="math\IndexUtil.cs" />
@@ -107,17 +138,31 @@
     <Compile Include="math\MathUtil.cs" />
     <Compile Include="math\Matrix2f.cs" />
     <Compile Include="math\Matrix2d.cs" />
+    <Compile Include="math\Matrix3d.cs" />
     <Compile Include="math\Matrix3f.cs" />
     <Compile Include="math\MatrixUtil.cs" />
     <Compile Include="math\Plane3.cs" />
     <Compile Include="math\PrimalQuery2d.cs" />
+    <Compile Include="math\Quaterniond.cs" />
     <Compile Include="math\Quaternionf.cs" />
+    <Compile Include="math\Query2.cs" />
+    <Compile Include="math\Query2Integer.cs" />
     <Compile Include="math\QueryTuple2d.cs" />
+    <Compile Include="math\ScalarMap.cs" />
+    <Compile Include="math\TransformSequence2.cs" />
     <Compile Include="math\TransformSequence.cs" />
     <Compile Include="math\Vector2d.cs" />
     <Compile Include="math\Vector2f.cs" />
     <Compile Include="math\Vector2i.cs" />
+    <Compile Include="math\Vector4d.cs" />
+    <Compile Include="math\Vector4f.cs" />
     <Compile Include="math\VectorTuple.cs" />
+    <Compile Include="mesh\DMesh3Changes.cs" />
+    <Compile Include="mesh\DSubmesh3Set.cs" />
+    <Compile Include="mesh\MeshCaches.cs" />
+    <Compile Include="mesh\MeshPointSets.cs" />
+    <Compile Include="mesh\MeshRefinerBase.cs" />
+    <Compile Include="mesh\NTMesh3.cs" />
     <Compile Include="mesh\DSubmesh3.cs" />
     <Compile Include="mesh\EdgeLoop.cs" />
     <Compile Include="mesh\EdgeLoopRemesher.cs" />
@@ -131,7 +176,10 @@
     <Compile Include="mesh\MeshNormals.cs" />
     <Compile Include="mesh\MeshUVSet.cs" />
     <Compile Include="mesh\RegionRemesher.cs" />
+    <Compile Include="mesh\SimpleQuadMesh.cs" />
     <Compile Include="mesh_generators\ArrowGenerators.cs" />
+    <Compile Include="mesh_generators\PointsMeshGenerators.cs" />
+    <Compile Include="mesh_generators\SphereGenerators.cs" />
     <Compile Include="mesh_generators\BoxGenerators.cs" />
     <Compile Include="mesh_generators\CylinderGenerators.cs" />
     <Compile Include="mesh_generators\DiscGenerators.cs" />
@@ -145,10 +193,14 @@
     <Compile Include="io\OBJWriter.cs" />
     <Compile Include="io\StandardMeshReader.cs" />
     <Compile Include="io\StandardMeshWriter.cs" />
+    <Compile Include="mesh_generators\MarchingCubes.cs" />
+    <Compile Include="mesh_generators\TriangulatedPolygonGenerator.cs" />
     <Compile Include="mesh_generators\VoxelSurfaceGenerator.cs" />
     <Compile Include="mesh_ops\MeshExtrudeMesh.cs" />
     <Compile Include="mesh_ops\MeshExtrudeFaces.cs" />
+    <Compile Include="mesh_ops\MeshInsertPolygon.cs" />
     <Compile Include="mesh_ops\MeshInsertUVPolyCurve.cs" />
+    <Compile Include="mesh_ops\MeshIsoCurves.cs" />
     <Compile Include="mesh_ops\MeshLocalParam.cs" />
     <Compile Include="mesh_ops\LaplacianMeshSmoother.cs" />
     <Compile Include="mesh_ops\LaplacianMeshDeformer.cs" />
@@ -163,10 +215,12 @@
     <Compile Include="mesh_ops\MeshLoopClosure.cs" />
     <Compile Include="mesh_ops\MeshLoopSmooth.cs" />
     <Compile Include="mesh_ops\MeshOps.cs" />
+    <Compile Include="mesh_ops\PlanarHoleFiller.cs" />
     <Compile Include="mesh_ops\RegionOperator.cs" />
     <Compile Include="mesh_ops\SimpleHoleFiller.cs" />
     <Compile Include="mesh_selection\MeshBoundaryLoops.cs" />
     <Compile Include="mesh_selection\MeshConnectedComponents.cs" />
+    <Compile Include="mesh_selection\MeshEdgeSelection.cs" />
     <Compile Include="mesh_selection\MeshFaceSelection.cs" />
     <Compile Include="mesh_selection\MeshFacesFromLoop.cs" />
     <Compile Include="mesh_selection\MeshRegionBoundaryLoops.cs" />
@@ -183,6 +237,7 @@
     <Compile Include="solvers\DenseVector.cs" />
     <Compile Include="solvers\IMatrix.cs" />
     <Compile Include="solvers\PackedSparseMatrix.cs" />
+    <Compile Include="solvers\FastQuaternionSVD.cs" />
     <Compile Include="solvers\SingularValueDecomposition.cs" />
     <Compile Include="solvers\SparseMatrix.cs" />
     <Compile Include="solvers\SparseSymmetricCG.cs" />
@@ -227,7 +282,6 @@
     <Compile Include="distance\DistPoint3Triangle3.cs" />
     <Compile Include="distance\DistSegment3Triangle3.cs" />
     <Compile Include="distance\DistTriangle3Triangle3.cs" />
-    <Compile Include="queries\Intersection.cs" />
     <Compile Include="intersection\IntrRay3Triangle3.cs" />
     <Compile Include="math\Triangle3.cs" />
     <Compile Include="intersection\IntrSegment2Segment2.cs" />
@@ -249,14 +303,26 @@
     <Compile Include="shapes3\Circle3.cs" />
     <Compile Include="spatial\BiGrid3.cs" />
     <Compile Include="spatial\Bitmap3.cs" />
+    <Compile Include="spatial\DCurveBoxTree.cs" />
     <Compile Include="spatial\DCurveProjection.cs" />
+    <Compile Include="spatial\DenseGrid2.cs" />
+    <Compile Include="spatial\DenseGrid3.cs" />
+    <Compile Include="spatial\EditMeshSpatial.cs" />
+    <Compile Include="spatial\MeshScalarSamplingGrid.cs" />
+    <Compile Include="spatial\MeshWindingNumberGrid.cs" />
+    <Compile Include="spatial\PointAABBTree3.cs" />
     <Compile Include="spatial\DMeshAABBTree.cs" />
     <Compile Include="spatial\DSparseGrid3.cs" />
     <Compile Include="spatial\GridIndexing2.cs" />
     <Compile Include="spatial\GridIndexing.cs" />
-    <Compile Include="spatial\NarrowBandLevelSet.cs" />
-    <Compile Include="spatial\PointHashGrid.cs" />
+    <Compile Include="spatial\MeshSignedDistanceGrid.cs" />
+    <Compile Include="spatial\NormalHistogram.cs" />
+    <Compile Include="spatial\PointSetHashtable.cs" />
+    <Compile Include="spatial\TriangleBinsGrid2d.cs" />
+    <Compile Include="spatial\PointHashGrid2d.cs" />
+    <Compile Include="spatial\PointHashGrid3d.cs" />
     <Compile Include="spatial\Polygon2dBoxTree.cs" />
+    <Compile Include="spatial\SegmentHashGrid.cs" />
     <Compile Include="spatial\SpatialFunctions.cs" />
     <Compile Include="spatial\SpatialInterfaces.cs" />
     <Compile Include="io\MeshIOUtil.cs" />
@@ -272,6 +338,12 @@
     <Compile Include="core\MemoryPool.cs" />
     <Compile Include="approximation\QuadraticFit2.cs" />
     <Compile Include="io\SVGWriter.cs" />
+    <Compile Include="containment\ContBox3.cs" />
+    <Compile Include="queries\IntersectionUtil.cs" />
+    <Compile Include="containment\TilingUtil.cs" />
+    <Compile Include="curve\Hexagon2.cs" />
+    <Compile Include="solvers\CholeskyDecomposition.cs" />
+    <Compile Include="spatial\Bitmap2.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="interfaces\" />

@@ -10,12 +10,9 @@ namespace g3
     /// Mesh Simplication - implementation of Garland & Heckbert Quadric Error Metric (QEM) Simplification
     /// 
     /// </summary>
-	public class Reducer
+	public class Reducer : MeshRefinerBase
 	{
-
-		protected DMesh3 mesh;
-		MeshConstraints constraints = null;
-		IProjectionTarget target = null;
+        protected IProjectionTarget target = null;
 
 		// other options
 
@@ -26,12 +23,8 @@ namespace g3
 		// (Also results in more invalid collapses, not sure why though...)
 		public bool MinimizeQuadricPositionError = true;
 
-		// if true, then when two Fixed vertices have the same non-invalid SetID,
-		// we treat them as not fixed and allow collapse
-		public bool AllowCollapseFixedVertsWithSameSetID = true;
-
         // if true, we try to keep boundary vertices on boundary. You probably want this.
-        public bool PreserveBoundary = true;
+        public bool PreserveBoundaryShape = true;
 
 		// [RMS] this is a debugging aid, will break to debugger if these edges are touched, in debug builds
 		public List<int> DebugEdges = new List<int>();
@@ -53,27 +46,11 @@ namespace g3
 		public bool ENABLE_PROFILING = false;
 
 
-		public Reducer(DMesh3 m)
+		public Reducer(DMesh3 m) : base(m)
 		{
-			mesh = m;
 		}
 		protected Reducer()        // for subclasses that extend our behavior
 		{
-		}
-
-
-		public DMesh3 Mesh {
-			get { return mesh; }
-		}
-		public MeshConstraints Constraints {
-			get { return constraints; }
-		}
-
-
-		//! This object will be modified !!!
-		public void SetExternalConstraints(MeshConstraints cons)
-		{
-			constraints = cons;
 		}
 
 
@@ -85,49 +62,235 @@ namespace g3
 
 
 
+        protected double MinEdgeLength = double.MaxValue;
+        protected int TargetCount = int.MaxValue;
+        protected enum TargetModes
+        {
+            TriangleCount, VertexCount, MinEdgeLength
+        }
+        protected TargetModes ReduceMode = TargetModes.TriangleCount;
 
-		QuadricError[] vertQuadrics;
+
+
+        public virtual void DoReduce()
+        {
+            if (mesh.TriangleCount == 0)    // badness if we don't catch this...
+                return;
+
+            begin_pass();
+
+            begin_setup();
+            Precompute();
+            if (Cancelled())
+                return;
+            InitializeVertexQuadrics();
+            if (Cancelled())
+                return;
+            InitializeQueue();
+            if (Cancelled())
+                return;
+            end_setup();
+
+            begin_ops();
+
+            begin_collapse();
+            while (EdgeQueue.Count > 0) {
+
+                // termination criteria
+                if ( ReduceMode == TargetModes.VertexCount ) {
+                    if (mesh.VertexCount <= TargetCount)
+                        break;
+                } else {
+                    if (mesh.TriangleCount <= TargetCount)
+                        break;
+                }
+
+                COUNT_ITERATIONS++;
+                int eid = EdgeQueue.Dequeue();
+                if (!mesh.IsEdge(eid))
+                    continue;
+                if (Cancelled())
+                    return;
+
+                int vKept;
+                ProcessResult result = CollapseEdge(eid, EdgeQuadrics[eid].collapse_pt, out vKept);
+                if (result == ProcessResult.Ok_Collapsed) {
+                    vertQuadrics[vKept] = EdgeQuadrics[eid].q;
+                    UpdateNeighbours(vKept);
+                }
+            }
+            end_collapse();
+            end_ops();
+
+            if (Cancelled())
+                return;
+
+            Reproject();
+
+            end_pass();
+        }
+
+
+
+        public virtual void ReduceToTriangleCount(int nCount)
+        {
+            ReduceMode = TargetModes.TriangleCount;
+            TargetCount = Math.Max(1,nCount);
+            MinEdgeLength = double.MaxValue;
+            DoReduce();
+        }
+
+        public virtual void ReduceToVertexCount(int nCount)
+        {
+            ReduceMode = TargetModes.VertexCount;
+            TargetCount = Math.Max(3,nCount);
+            MinEdgeLength = double.MaxValue;
+            DoReduce();
+        }
+
+        public virtual void ReduceToEdgeLength(double minEdgeLen)
+        {
+            ReduceMode = TargetModes.MinEdgeLength;
+            TargetCount = 1;
+            MinEdgeLength = minEdgeLen;
+            DoReduce();
+        }
+
+
+
+
+
+
+
+
+
+
+
+        public virtual void FastCollapsePass(double fMinEdgeLength, int nRounds = 1, bool MeshIsClosedHint = false)
+        {
+            if (mesh.TriangleCount == 0)    // badness if we don't catch this...
+                return;
+
+            MinEdgeLength = fMinEdgeLength;
+            double min_sqr = MinEdgeLength * MinEdgeLength;
+
+            // we don't collapse on the boundary
+            HaveBoundary = false;
+
+            begin_pass();
+
+            begin_setup();
+            Precompute(MeshIsClosedHint);
+            if (Cancelled())
+                return;
+            end_setup();
+
+            begin_ops();
+
+            begin_collapse();
+
+            int N = mesh.MaxEdgeID;
+            int num_last_pass = 0;
+            for (int ri = 0; ri < nRounds; ++ri) {
+                num_last_pass = 0;
+
+                Vector3d va = Vector3d.Zero, vb = Vector3d.Zero;
+                for (int eid = 0; eid < N; ++eid) {
+                    if (!mesh.IsEdge(eid))
+                        continue;
+                    if (mesh.IsBoundaryEdge(eid))
+                        continue;
+                    if (Cancelled())
+                        return;
+
+                    mesh.GetEdgeV(eid, ref va, ref vb);
+                    if (va.DistanceSquared(ref vb) > min_sqr)
+                        continue;
+
+                    COUNT_ITERATIONS++;
+
+                    Vector3d midpoint = (va + vb) * 0.5;
+                    int vKept;
+                    ProcessResult result = CollapseEdge(eid, midpoint, out vKept);
+                    if (result == ProcessResult.Ok_Collapsed) {
+                        ++num_last_pass;
+                    }
+                }
+
+                if (num_last_pass == 0)     // converged
+                    break;
+            }
+            end_collapse();
+            end_ops();
+
+            if (Cancelled())
+                return;
+
+            Reproject();
+
+            end_pass();
+        }
+
+
+
+
+
+
+
+
+
+
+
+        protected QuadricError[] vertQuadrics;
 		protected virtual void InitializeVertexQuadrics()
 		{
 
 			int NT = mesh.MaxTriangleID;
 			QuadricError[] triQuadrics = new QuadricError[NT];
 			double[] triAreas = new double[NT];
-			gParallel.ForEach(mesh.TriangleIndices(), (tid) => {
-				Vector3d c, n;
-				mesh.GetTriInfo(tid, out n, out triAreas[tid], out c);
-				triQuadrics[tid] = new QuadricError(n, c);
+            gParallel.BlockStartEnd(0, mesh.MaxTriangleID-1, (start_tid, end_tid) => {
+                Vector3d c, n;
+                for (int tid = start_tid; tid <= end_tid; tid++) {
+                    if (mesh.IsTriangle(tid)) {
+                        mesh.GetTriInfo(tid, out n, out triAreas[tid], out c);
+                        triQuadrics[tid] = new QuadricError(ref n, ref c);
+                    }
+                }
 			});
 
 
 			int NV = mesh.MaxVertexID;
 			vertQuadrics = new QuadricError[NV];
-			gParallel.ForEach(mesh.VertexIndices(), (vid) => {
-				vertQuadrics[vid] = QuadricError.Zero;
-				foreach (int tid in mesh.VtxTrianglesItr(vid)) {
-					vertQuadrics[vid].Add(triAreas[tid], ref triQuadrics[tid]);
-				}
-				//Util.gDevAssert(MathUtil.EpsilonEqual(0, vertQuadrics[i].Evaluate(mesh.GetVertex(i)), MathUtil.Epsilon * 10));
+            gParallel.BlockStartEnd(0, mesh.MaxVertexID-1, (start_vid, end_vid) => {
+                for (int vid = start_vid; vid <= end_vid; vid++) {
+                    vertQuadrics[vid] = QuadricError.Zero;
+                    if (mesh.IsVertex(vid)) {
+                        foreach (int tid in mesh.VtxTrianglesItr(vid)) {
+                            vertQuadrics[vid].Add(triAreas[tid], ref triQuadrics[tid]);
+                        }
+                        //Util.gDevAssert(MathUtil.EpsilonEqual(0, vertQuadrics[i].Evaluate(mesh.GetVertex(i)), MathUtil.Epsilon * 10));
+                    }
+                }
 			});
 
 		}
 
 
-		// internal class for priority queue
-        struct QEdge { 
+        // internal class for priority queue
+        protected struct QEdge { 
 			public int eid;
 			public QuadricError q;
 			public Vector3d collapse_pt;
 
-			public QEdge(int edge_id, QuadricError qin, Vector3d pt) {
+			public QEdge(int edge_id, ref QuadricError qin, ref Vector3d pt) {
 				eid = edge_id;
 				q = qin;
 				collapse_pt = pt;
 			}
 		}
 
-        QEdge[] EdgeQuadrics;
-        IndexPriorityQueue EdgeQueue;
+        protected QEdge[] EdgeQuadrics;
+        protected IndexPriorityQueue EdgeQueue;
 
 		protected virtual void InitializeQueue()
 		{
@@ -139,12 +302,16 @@ namespace g3
             float[] edgeErrors = new float[MaxEID];
 
             // vertex quadrics can be computed in parallel
-            gParallel.ForEach(mesh.EdgeIndices(), (eid) => {
-				Index2i ev = mesh.GetEdgeV(eid);
-				QuadricError Q = new QuadricError(ref vertQuadrics[ev.a], ref vertQuadrics[ev.b]);
-				Vector3d opt = OptimalPoint(eid, ref Q, ev.a, ev.b);
-				edgeErrors[eid] = (float)Q.Evaluate(opt);
-                EdgeQuadrics[eid] = new QEdge(eid, Q, opt);
+            gParallel.BlockStartEnd(0, MaxEID-1, (start_eid, end_eid) => {
+                for (int eid = start_eid; eid <= end_eid; eid++) {
+                    if (mesh.IsEdge(eid)) {
+                        Index2i ev = mesh.GetEdgeV(eid);
+                        QuadricError Q = new QuadricError(ref vertQuadrics[ev.a], ref vertQuadrics[ev.b]);
+                        Vector3d opt = OptimalPoint(eid, ref Q, ev.a, ev.b);
+                        edgeErrors[eid] = (float)Q.Evaluate(ref opt);
+                        EdgeQuadrics[eid] = new QEdge(eid, ref Q, ref opt);
+                    }
+                }
             });
 
             // sorted pq insert is faster, so sort edge errors array and index map
@@ -158,7 +325,7 @@ namespace g3
                 int eid = indices[i];
                 if ( mesh.IsEdge(eid) ) {
                     QEdge edge = EdgeQuadrics[eid];
-                    EdgeQueue.Enqueue(edge.eid, edgeErrors[i]);
+                    EdgeQueue.Insert(edge.eid, edgeErrors[i]);
                 }
             }
 
@@ -180,12 +347,12 @@ namespace g3
         }
 
 
-		// return point that minimizes quadric error for edge [ea,eb]
-		Vector3d OptimalPoint(int eid, ref QuadricError q, int ea, int eb) {
+        // return point that minimizes quadric error for edge [ea,eb]
+        protected Vector3d OptimalPoint(int eid, ref QuadricError q, int ea, int eb) {
 
             // if we would like to preserve boundary, we need to know that here
             // so that we properly score these edges
-            if (HaveBoundary && PreserveBoundary) {
+            if (HaveBoundary && PreserveBoundaryShape) {
                 if (mesh.IsBoundaryEdge(eid)) {
                     return (mesh.GetVertex(ea) + mesh.GetVertex(eb)) * 0.5;
                 } else {
@@ -210,9 +377,9 @@ namespace g3
 				Vector3d va = mesh.GetVertex(ea);
 				Vector3d vb = mesh.GetVertex(eb);
 				Vector3d c = project((va + vb) * 0.5);
-				double fa = q.Evaluate(va);
-				double fb = q.Evaluate(vb);
-				double fc = q.Evaluate(c);
+				double fa = q.Evaluate(ref va);
+				double fb = q.Evaluate(ref vb);
+				double fc = q.Evaluate(ref c);
 				double m = MathUtil.Min(fa, fb, fc);
 				if (m == fa) return va;
 				else if (m == fb) return vb;
@@ -237,12 +404,12 @@ namespace g3
 				Index2i nev = mesh.GetEdgeV(eid);
 				QuadricError Q = new QuadricError(ref vertQuadrics[nev.a], ref vertQuadrics[nev.b]);
 				Vector3d opt = OptimalPoint(eid, ref Q, nev.a, nev.b);
-				double err = Q.Evaluate(opt);
-                EdgeQuadrics[eid] = new QEdge(eid, Q, opt);
+				double err = Q.Evaluate(ref opt);
+                EdgeQuadrics[eid] = new QEdge(eid, ref Q, ref opt);
 				if ( EdgeQueue.Contains(eid) ) {
 					EdgeQueue.Update(eid, (float)err);
 				} else {
-					EdgeQueue.Enqueue(eid, (float)err);
+					EdgeQueue.Insert(eid, (float)err);
 				}
 			}			
 		}
@@ -259,83 +426,25 @@ namespace g3
 
 
 
-        bool HaveBoundary;
-        bool[] IsBoundaryVtxCache;
-        protected virtual void Precompute()
+        protected bool HaveBoundary;
+        protected bool[] IsBoundaryVtxCache;
+        protected virtual void Precompute(bool bMeshIsClosed = false)
         {
             HaveBoundary = false;
             IsBoundaryVtxCache = new bool[mesh.MaxVertexID];
-            foreach ( int eid in mesh.BoundaryEdgeIndices()) {
-                Index2i ev = mesh.GetEdgeV(eid);
-                IsBoundaryVtxCache[ev.a] = true;
-                IsBoundaryVtxCache[ev.b] = true;
-                HaveBoundary = true;
+            if (bMeshIsClosed == false) {
+                foreach (int eid in mesh.BoundaryEdgeIndices()) {
+                    Index2i ev = mesh.GetEdgeV(eid);
+                    IsBoundaryVtxCache[ev.a] = true;
+                    IsBoundaryVtxCache[ev.b] = true;
+                    HaveBoundary = true;
+                }
             }
         }
         protected bool IsBoundaryV(int vid)
         {
             return IsBoundaryVtxCache[vid];
         }
-
-
-
-		protected double MinEdgeLength = double.MaxValue;
-		protected int TargetTriangleCount = int.MaxValue;
-
-
-
-		public virtual void DoReduce()
-		{
-			if (mesh.TriangleCount == 0)    // badness if we don't catch this...
-				return;
-
-			begin_pass();
-
-			begin_setup();
-            Precompute();
-			InitializeVertexQuadrics();
-			InitializeQueue();
-			end_setup();
-
-			begin_ops();
-
-			begin_collapse();
-			while (EdgeQueue.Count > 0 && mesh.TriangleCount > TargetTriangleCount) {
-				COUNT_ITERATIONS++;
-                int eid = EdgeQueue.Dequeue();
-				if (!mesh.IsEdge(eid))
-					continue;
-
-				int vKept;
-				ProcessResult result = CollapseEdge(eid, EdgeQuadrics[eid].collapse_pt, out vKept);
-				if (result == ProcessResult.Ok_Collapsed) {
-					vertQuadrics[vKept] = EdgeQuadrics[eid].q;
-					UpdateNeighbours(vKept);
-				}
-			}
-			end_collapse();
-			end_ops();
-
-			Reproject();
-
-			end_pass();
-		}
-
-
-
-		public virtual void ReduceToTriangleCount(int nCount) {
-			TargetTriangleCount = nCount;
-			MinEdgeLength = double.MaxValue;
-			DoReduce();
-		}
-
-
-
-		public virtual void ReduceToEdgeLength(double minEdgeLen) {
-			TargetTriangleCount = 1;
-			MinEdgeLength = minEdgeLen;
-			DoReduce();
-		}
 
 
 
@@ -432,7 +541,7 @@ namespace g3
 				return ProcessResult.Ignored_Constrained;
 
             // if we have a boundary, we want to collapse to boundary
-            if (PreserveBoundary && HaveBoundary) {
+            if (PreserveBoundaryShape && HaveBoundary) {
                 if (collapse_to != -1) {
                     if (( IsBoundaryV(b) && collapse_to != b) ||
                          ( IsBoundaryV(a) && collapse_to != a))
@@ -463,7 +572,7 @@ namespace g3
             // check if this collapse will create a normal flip. Also checks
             // for invalid collapse nbrhood, since we are doing one-ring iter anyway.
             // [TODO] could we skip this one-ring check in CollapseEdge? pass in hints?
-			if ( creates_flip_or_invalid(a, b, vNewPos, t0, t1) ||  creates_flip_or_invalid(b, a, vNewPos, t0,t1) ) {
+			if ( collapse_creates_flip_or_invalid(a, b, ref vNewPos, t0, t1) ||  collapse_creates_flip_or_invalid(b, a, ref vNewPos, t0,t1) ) {
 				retVal = ProcessResult.Ignored_CreatesFlip;
 				goto skip_to_end;
 			}
@@ -496,150 +605,9 @@ skip_to_end:
 
 
 
-		bool creates_flip_or_invalid(int vid, int vother, Vector3d newv, int tc, int td) {
-			foreach ( int tid in mesh.VtxTrianglesItr(vid)) {
-				if (tid == tc || tid == td)
-					continue;
-				Index3i curt = mesh.GetTriangle(tid);
-				if (curt.a == vother || curt.b == vother || curt.c == vother)
-					return true;		// invalid nbrhood for collapse
-				Vector3d va = mesh.GetVertex(curt.a);
-				Vector3d vb = mesh.GetVertex(curt.b);
-				Vector3d vc = mesh.GetVertex(curt.c);
-				Vector3d ncur = (vb - va).Cross(vc - va);
-				double sign = 0;
-				if (curt.a == vid) {
-					Vector3d nnew = (vb - newv).Cross(vc - newv);
-					sign = ncur.Dot(nnew);
-				} else if (curt.b == vid) {
-					Vector3d nnew = (newv - va).Cross(vc - va);
-					sign = ncur.Dot(nnew);
-				} else if (curt.c == vid) {
-					Vector3d nnew = (vb - va).Cross(newv - va);
-					sign = ncur.Dot(nnew);
-				} else
-					throw new Exception("should never be here!");
-				if (sign <= 0.0)
-					return true;
-			}
-			return false;
-		}
 
 
-        // Figure out if we can collapse edge eid=[a,b] under current constraint set.
-        // First we resolve vertex constraints using can_collapse_vtx(). However this
-        // does not catch some topological cases at the edge-constraint level, which 
-        // which we will only be able to detect once we know if we are losing a or b.
-        // See comments on can_collapse_vtx() for what collapse_to is for.
-        bool can_collapse_constraints(int eid, int a, int b, int c, int d, int tc, int td, out int collapse_to)
-        {
-            collapse_to = -1;
-            if (constraints == null)
-                return true;
-            bool bVtx = can_collapse_vtx(eid, a, b, out collapse_to);
-            if (bVtx == false)
-                return false;
-
-            // when we lose a vtx in a collapse, we also lose two edges [iCollapse,c] and [iCollapse,d].
-            // If either of those edges is constrained, we would lose that constraint.
-            // This would be bad.
-            int iCollapse = (collapse_to == a) ? b : a;
-            if (c != DMesh3.InvalidID) {
-                int ec = mesh.FindEdgeFromTri(iCollapse, c, tc);
-                if (constraints.GetEdgeConstraint(ec).IsUnconstrained == false)
-                    return false;
-            }
-            if (d != DMesh3.InvalidID) {
-                int ed = mesh.FindEdgeFromTri(iCollapse, d, td);
-                if (constraints.GetEdgeConstraint(ed).IsUnconstrained == false)
-                    return false;
-            }
-
-            return true;
-        }
-
-
-        // resolve vertex constraints for collapsing edge eid=[a,b]. Generally we would
-        // collapse a to b, and set the new position as 0.5*(v_a+v_b). However if a *or* b
-        // are constrained, then we want to keep that vertex and collapse to its position.
-        // This vertex (a or b) will be returned in collapse_to, which is -1 otherwise.
-        // If a *and* b are constrained, then things are complicated (and documented below).
-        bool can_collapse_vtx(int eid, int a, int b, out int collapse_to)
-        {
-            collapse_to = -1;
-            if (constraints == null)
-                return true;
-            VertexConstraint ca = constraints.GetVertexConstraint(a);
-            VertexConstraint cb = constraints.GetVertexConstraint(b);
-
-            // no constraint at all
-            if (ca.Fixed == false && cb.Fixed == false && ca.Target == null && cb.Target == null)
-                return true;
-
-            // handle a or b fixed
-            if ( ca.Fixed == true && cb.Fixed == false ) {
-                collapse_to = a;
-                return true;
-            }
-            if ( cb.Fixed == true && ca.Fixed == false) {
-                collapse_to = b;
-                return true;
-            }
-            // if both fixed, and options allow, treat this edge as unconstrained (eg collapse to midpoint)
-            // [RMS] tried picking a or b here, but something weird happens, where
-            //   eg cylinder cap will entirely erode away. Somehow edge lengths stay below threshold??
-            if ( AllowCollapseFixedVertsWithSameSetID 
-                    && ca.FixedSetID >= 0 
-                    && ca.FixedSetID == cb.FixedSetID) {
-                return true;
-            }
-
-            // handle a or b w/ target
-            if ( ca.Target != null && cb.Target == null ) {
-                collapse_to = a;
-                return true;
-            }
-            if ( cb.Target != null && ca.Target == null ) {
-                collapse_to = b;
-                return true;
-            }
-            // if both vertices are on the same target, and the edge is on that target,
-            // then we can collapse to either and use the midpoint (which will be projected
-            // to the target). *However*, if the edge is not on the same target, then we 
-            // cannot collapse because we would be changing the constraint topology!
-            if ( cb.Target != null && ca.Target != null && ca.Target == cb.Target ) {
-                if ( constraints.GetEdgeConstraint(eid).Target == ca.Target )
-                    return true;
-            }
-
-            return false;            
-        }
-
-
-        bool vertex_is_fixed(int vid)
-        {
-            if (constraints != null && constraints.GetVertexConstraint(vid).Fixed)
-                return true;
-            return false;
-        }
-        bool vertex_is_constrained(int vid)
-        {
-            if ( constraints != null ) {
-                VertexConstraint vc = constraints.GetVertexConstraint(vid);
-                if (vc.Fixed || vc.Target != null)
-                    return true;
-            }
-            return false;
-        }
-
-        VertexConstraint get_vertex_constraint(int vid)
-        {
-            if (constraints != null)
-                return constraints.GetVertexConstraint(vid);
-            return VertexConstraint.Unconstrained;
-        }
-
-        void project_vertex(int vID, IProjectionTarget targetIn)
+        protected void project_vertex(int vID, IProjectionTarget targetIn)
         {
             Vector3d curpos = mesh.GetVertex(vID);
             Vector3d projected = targetIn.Project(curpos, vID);
@@ -647,7 +615,7 @@ skip_to_end:
         }
 
         // used by collapse-edge to get projected position for new vertex
-        Vector3d get_projected_collapse_position(int vid, Vector3d vNewPos)
+        protected Vector3d get_projected_collapse_position(int vid, Vector3d vNewPos)
         {
             if (constraints != null) {
                 VertexConstraint vc = constraints.GetVertexConstraint(vid);
@@ -667,7 +635,7 @@ skip_to_end:
 
 
         // we can do projection in parallel if we have .net 
-        void FullProjectionPass()
+        protected virtual void FullProjectionPass()
         {
             Action<int> project = (vID) => {
                 if (vertex_is_constrained(vID))
@@ -683,8 +651,8 @@ skip_to_end:
 
 
 
-        [Conditional("DEBUG")] 
-        void RuntimeDebugCheck(int eid)
+        [Conditional("DEBUG")]
+        protected virtual void RuntimeDebugCheck(int eid)
         {
             if (DebugEdges.Contains(eid))
                 System.Diagnostics.Debugger.Break();
@@ -692,7 +660,7 @@ skip_to_end:
 
 
         public bool ENABLE_DEBUG_CHECKS = false;
-        void DoDebugChecks()
+        protected virtual void DoDebugChecks()
         {
             if (ENABLE_DEBUG_CHECKS == false)
                 return;
@@ -714,7 +682,7 @@ skip_to_end:
             //}
         }
 
-        void DebugCheckVertexConstraints()
+        protected virtual void DebugCheckVertexConstraints()
         {
             if (constraints == null)
                 return;
@@ -812,7 +780,7 @@ skip_to_end:
 			Axx = 0, Axy = 0, Axz = 0, Ayy = 0, Ayz = 0, Azz = 0, bx = 0, by = 0, bz = 0, c = 0
 		};
 
-		public QuadricError(Vector3d n, Vector3d p) {
+		public QuadricError(ref Vector3d n, ref Vector3d p) {
 			Axx = n.x * n.x;
 			Axy = n.x * n.y;
 			Axz = n.x * n.z;
@@ -820,9 +788,9 @@ skip_to_end:
 			Ayz = n.y * n.z;
 			Azz = n.z * n.z;
 			bx = by = bz = c = 0;
-			Vector3d v = multiplyA(p);
+			Vector3d v = multiplyA(ref p);
 			bx = -v.x; by = -v.y; bz = -v.z;
-			c = p.Dot(v);
+			c = p.Dot(ref v);
 		}
 		public QuadricError(ref QuadricError a, ref QuadricError b) {
 			Axx = a.Axx + b.Axx;
@@ -855,7 +823,7 @@ skip_to_end:
 		/// <summary>
 		/// returns pAp + 2*dot(p,b) + c
 		/// </summary>
-		public double Evaluate(Vector3d pt) {
+		public double Evaluate(ref Vector3d pt) {
 			double x = Axx * pt.x + Axy * pt.y + Axz * pt.z;
 			double y = Axy * pt.x + Ayy * pt.y + Ayz * pt.z;
 			double z = Axz * pt.x + Ayz * pt.y + Azz * pt.z;
@@ -864,7 +832,7 @@ skip_to_end:
 		}
 
 
-		Vector3d multiplyA(Vector3d pt) {
+		Vector3d multiplyA(ref Vector3d pt) {
 			double x = Axx * pt.x + Axy * pt.y + Axz * pt.z;
 			double y = Axy * pt.x + Ayy * pt.y + Ayz * pt.z;
 			double z = Axz * pt.x + Ayz * pt.y + Azz * pt.z;

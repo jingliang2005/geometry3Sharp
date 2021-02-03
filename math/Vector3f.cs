@@ -26,6 +26,7 @@ namespace g3
 
         static public readonly Vector3f Zero = new Vector3f(0.0f, 0.0f, 0.0f);
         static public readonly Vector3f One = new Vector3f(1.0f, 1.0f, 1.0f);
+        static public readonly Vector3f OneNormalized = new Vector3f(1.0f, 1.0f, 1.0f).Normalized;
         static public readonly Vector3f Invalid = new Vector3f(float.MaxValue, float.MaxValue, float.MaxValue);
         static public readonly Vector3f AxisX = new Vector3f(1.0f, 0.0f, 0.0f);
         static public readonly Vector3f AxisY = new Vector3f(0.0f, 1.0f, 0.0f);
@@ -289,15 +290,9 @@ namespace g3
 
 
         public bool EpsilonEqual(Vector3f v2, float epsilon) {
-            return (float)Math.Abs(x - v2.x) < epsilon && 
-                   (float)Math.Abs(y - v2.y) < epsilon &&
-                   (float)Math.Abs(z - v2.z) < epsilon;
-        }
-        public bool PrecisionEqual(Vector3f v2, int nDigits)
-        {
-            return Math.Round(x, nDigits) == Math.Round(v2.x, nDigits) &&
-                   Math.Round(y, nDigits) == Math.Round(v2.y, nDigits) &&
-                   Math.Round(z, nDigits) == Math.Round(v2.z, nDigits);
+            return (float)Math.Abs(x - v2.x) <= epsilon && 
+                   (float)Math.Abs(y - v2.y) <= epsilon &&
+                   (float)Math.Abs(z - v2.z) <= epsilon;
         }
 
 

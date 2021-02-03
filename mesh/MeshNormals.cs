@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace g3
 {
@@ -39,6 +40,11 @@ namespace g3
         }
 
 
+        public Vector3d this[int vid] {
+            get { return Normals[vid]; }
+        }
+
+
         public void CopyTo(DMesh3 SetMesh)
         {
             if (SetMesh.MaxVertexID < Mesh.MaxVertexID)
@@ -65,24 +71,28 @@ namespace g3
             for (int i = 0; i < NV; ++i)
                 Normals[i] = Vector3d.Zero;
 
-            int NT = Mesh.MaxTriangleID;
-            for (int ti = 0; ti < NT; ++ti) {
-                if (Mesh.IsTriangle(ti) == false)
-                    continue;
+            SpinLock Normals_lock = new SpinLock();
+
+            gParallel.ForEach(Mesh.TriangleIndices(), (ti) => {
                 Index3i tri = Mesh.GetTriangle(ti);
                 Vector3d va = Mesh.GetVertex(tri.a);
                 Vector3d vb = Mesh.GetVertex(tri.b);
                 Vector3d vc = Mesh.GetVertex(tri.c);
-                Vector3d N = MathUtil.Normal(va, vb, vc);
-                double a = MathUtil.Area(va, vb, vc);
+                Vector3d N = MathUtil.Normal(ref va, ref vb, ref vc);
+                double a = MathUtil.Area(ref va, ref vb, ref vc);
+                bool taken = false;
+                Normals_lock.Enter(ref taken);
                 Normals[tri.a] += a * N;
                 Normals[tri.b] += a * N;
                 Normals[tri.c] += a * N;
-            }
+                Normals_lock.Exit();
+            });
 
-            gParallel.ForEach(Interval1i.Range(NV), (vi) => {
-                if (Normals[vi].LengthSquared > MathUtil.ZeroTolerancef)
-                    Normals[vi] = Normals[vi].Normalized;
+            gParallel.BlockStartEnd(0, NV - 1, (vi_start, vi_end) => {
+                for (int vi = vi_start; vi <= vi_end; vi++) {
+                    if (Normals[vi].LengthSquared > MathUtil.ZeroTolerancef)
+                        Normals[vi] = Normals[vi].Normalized;
+                }
             });
         }
 
@@ -96,6 +106,17 @@ namespace g3
             normals.CopyTo(mesh);
         }
 
+
+        public static Vector3d QuickCompute(DMesh3 mesh, int vid, NormalsTypes type = NormalsTypes.Vertex_OneRingFaceAverage_AreaWeighted)
+        {
+            Vector3d sum = Vector3d.Zero;
+            Vector3d n, c; double a;
+            foreach ( int tid in mesh.VtxTrianglesItr(vid)) {
+                mesh.GetTriInfo(tid, out n, out a, out c);
+                sum += a * n;
+            }
+            return sum.Normalized;
+        }
 
 
     }

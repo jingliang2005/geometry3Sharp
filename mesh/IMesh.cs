@@ -22,6 +22,8 @@ namespace g3
 
         // iterators allow us to work with gaps in index space
         System.Collections.Generic.IEnumerable<int> VertexIndices();
+
+        int Timestamp { get; }
     }
 
 
@@ -89,6 +91,8 @@ namespace g3
     {
         // return ID of new mesh
         int AppendNewMesh(bool bHaveVtxNormals, bool bHaveVtxColors, bool bHaveVtxUVs, bool bHaveFaceGroups);
+        int AppendNewMesh(DMesh3 existingMesh);
+
         void SetActiveMesh(int id);
 
         int AppendVertex(double x, double y, double z);

@@ -15,7 +15,8 @@ namespace g3
 	///    1) find all edge crossings
 	///    2) Do edge splits at crossings
 	///    3) delete all vertices on positive side
-	///    4) find loops through valid boundary edges (ie connected to splits, or on-plane edges)
+    ///    4) (optionally) collapse any degenerate boundary edges 
+	///    5) find loops through valid boundary edges (ie connected to splits, or on-plane edges)
 	/// 
 	/// [TODO] could run into trouble w/ on-plane degenerate triangles. Should optionally
 	///   discard any triangles with all vertex distances < epsilon. But this complicates
@@ -24,10 +25,23 @@ namespace g3
 	/// </summary>
 	public class MeshPlaneCut
 	{
+        // Inputs
 		public DMesh3 Mesh;
 		public Vector3d PlaneOrigin;
 		public Vector3d PlaneNormal;
 
+        // a plane cut very near a vertex can result in degenerate edges on the open loops/spans, which 
+        // can cause problems downstream (eg if hole-filling). It is easy for us to collapse these before
+        // we construct the loops.
+        public bool CollapseDegenerateEdgesOnCut = true;
+
+        // the min-edge-length if we are collapsing degenerate edges
+        public double DegenerateEdgeTol = MathUtil.ZeroTolerancef;
+
+        // if non-null, we will only iterate through these edges
+        public MeshFaceSelection CutFaceSet = null;
+
+        // Outputs
 		public List<EdgeLoop> CutLoops;
         public List<EdgeSpan> CutSpans;
         public bool CutLoopsFailed = false;		// set to true if we could not compute cut loops/spans
@@ -57,6 +71,13 @@ namespace g3
 		{
 			double invalidDist = double.MinValue;
 
+            MeshEdgeSelection CutEdgeSet = null;
+            MeshVertexSelection CutVertexSet = null;
+            if (CutFaceSet != null) {
+                CutEdgeSet = new MeshEdgeSelection(Mesh, CutFaceSet);
+                CutVertexSet = new MeshVertexSelection(Mesh, CutEdgeSet);
+            }
+
 			// compute signs
 			int MaxVID = Mesh.MaxVertexID;
 			double[] signs = new double[MaxVID];
@@ -77,8 +98,12 @@ namespace g3
 			int MaxEID = Mesh.MaxEdgeID;
 			HashSet<int> NewEdges = new HashSet<int>();
 
-			// cut existing edges with plane, using edge split
-			for (int eid = 0; eid < MaxEID; ++eid) {
+            IEnumerable<int> edgeItr = Interval1i.Range(MaxEID);
+            if (CutEdgeSet != null)
+                edgeItr = CutEdgeSet;
+
+            // cut existing edges with plane, using edge split
+            foreach (int eid in edgeItr) { 
 				if (Mesh.IsEdge(eid) == false)
 					continue;
 				if (eid >= MaxEID || NewEdges.Contains(eid))
@@ -124,11 +149,20 @@ namespace g3
 				}
 			}
 
-			// remove one-rings of all positive-side vertices. 
-			for (int i = 0; i < signs.Length; ++i ) {
-				if (signs[i] > 0 && Mesh.IsVertex(i))
-					Mesh.RemoveVertex(i, true, false);
+            // remove one-rings of all positive-side vertices. 
+            IEnumerable<int> vertexSet = Interval1i.Range(MaxVID);
+            if (CutVertexSet != null)
+                vertexSet = CutVertexSet;
+            foreach ( int vid in vertexSet ) { 
+				if (signs[vid] > 0 && Mesh.IsVertex(vid))
+					Mesh.RemoveVertex(vid, true, false);
 			}
+
+            // collapse degenerate edges if we got em
+            if (CollapseDegenerateEdgesOnCut) {
+                collapse_degenerate_edges(OnCutEdges, ZeroEdges);
+            }
+
 
 			// ok now we extract boundary loops, but restricted
 			// to either the zero-edges we found, or the edges we created! bang!!
@@ -152,9 +186,38 @@ namespace g3
 				CutLoopsFailed = true;
 			}
 
-			return true;
+            return true;
 
 		} // Cut()
+
+
+
+        protected void collapse_degenerate_edges(HashSet<int> OnCutEdges, HashSet<int> ZeroEdges)
+        {
+            HashSet<int>[] sets = new HashSet<int>[2] { OnCutEdges, ZeroEdges };
+
+            double tol2 = DegenerateEdgeTol * DegenerateEdgeTol;
+            Vector3d a = Vector3d.Zero, b = Vector3d.Zero;
+            int collapsed = 0;
+            do {
+                collapsed = 0;
+                foreach (var edge_set in sets) {
+                    foreach (int eid in edge_set) {
+                        if (Mesh.IsEdge(eid) == false)
+                            continue;
+                        Mesh.GetEdgeV(eid, ref a, ref b);
+                        if (a.DistanceSquared(b) > tol2)
+                            continue;
+
+                        Index2i ev = Mesh.GetEdgeV(eid);
+                        DMesh3.EdgeCollapseInfo collapseInfo;
+                        MeshResult result = Mesh.CollapseEdge(ev.a, ev.b, out collapseInfo);
+                        if (result == MeshResult.Ok)
+                            collapsed++;
+                    }
+                }
+            } while (collapsed != 0);
+        }
 
 
 

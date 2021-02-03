@@ -30,19 +30,25 @@ namespace g3
 
         int[] cur_base_tris;
 
-        public RegionOperator(DMesh3 mesh, int[] regionTris)
+        public RegionOperator(DMesh3 mesh, int[] regionTris, Action<DSubmesh3> submeshConfigF = null)
         {
             BaseMesh = mesh;
-            Region = new DSubmesh3(mesh, regionTris);
+            Region = new DSubmesh3(mesh);
+            if (submeshConfigF != null)
+                submeshConfigF(Region);
+            Region.Compute(regionTris);
             Region.ComputeBoundaryInfo(regionTris);
 
             cur_base_tris = (int[])regionTris.Clone();
         }
 
-        public RegionOperator(DMesh3 mesh, IEnumerable<int> regionTris)
+        public RegionOperator(DMesh3 mesh, IEnumerable<int> regionTris, Action<DSubmesh3> submeshConfigF = null)
         {
             BaseMesh = mesh;
-            Region = new DSubmesh3(mesh, regionTris);
+            Region = new DSubmesh3(mesh);
+            if (submeshConfigF != null)
+                submeshConfigF(Region);
+            Region.Compute(regionTris);
             int count = regionTris.Count();
             Region.ComputeBoundaryInfo(regionTris, count);
 
@@ -58,6 +64,22 @@ namespace g3
             get { return cur_base_tris; }
         }
 
+
+        /// <summary>
+        /// find base-mesh interior vertices of region (ie does not include region boundary vertices)
+        /// </summary>
+        public HashSet<int> CurrentBaseInteriorVertices()
+        {
+            HashSet<int> verts = new HashSet<int>();
+            IndexHashSet borderv = Region.BaseBorderV;
+            foreach ( int tid in cur_base_tris ) {
+                Index3i tv = BaseMesh.GetTriangle(tid);
+                if (borderv[tv.a] == false) verts.Add(tv.a);
+                if (borderv[tv.b] == false) verts.Add(tv.b);
+                if (borderv[tv.c] == false) verts.Add(tv.c);
+            }
+            return verts;
+        }
 
         // After remeshing we may create an internal edge between two boundary vertices [a,b].
         // Those vertices will be merged with vertices c and d in the base mesh. If the edge
@@ -84,7 +106,7 @@ namespace g3
                 if (Region.SubMesh.IsBoundaryEdge(eid))
                     continue;
                 Index2i edgev = Region.SubMesh.GetEdgeV(eid);
-                if (Region.SubMesh.vertex_is_boundary(edgev.a) && Region.SubMesh.vertex_is_boundary(edgev.b)) {
+                if (Region.SubMesh.IsBoundaryVertex(edgev.a) && Region.SubMesh.IsBoundaryVertex(edgev.b)) {
                     // ok, we have an internal edge where both verts are on the boundary
                     // now check if it is an edge in the base mesh
                     int base_a = Region.MapVertexToBaseMesh(edgev.a);
@@ -157,7 +179,33 @@ namespace g3
             return bOK;
         }
 
-        
+
+
+
+
+        // transfer vertex positions in submesh back to base mesh
+        public bool BackPropropagateVertices(bool bRecomputeBoundaryNormals = false)
+        {
+            bool bNormals = (Region.SubMesh.HasVertexNormals && Region.BaseMesh.HasVertexNormals);
+            foreach ( int subvid in Region.SubMesh.VertexIndices() ) {
+                int basevid = Region.SubToBaseV[subvid];
+                Vector3d v = Region.SubMesh.GetVertex(subvid);
+                Region.BaseMesh.SetVertex(basevid, v);
+                if (bNormals)
+                    Region.BaseMesh.SetVertexNormal(basevid, Region.SubMesh.GetVertexNormal(subvid));
+            }
+
+            if (bRecomputeBoundaryNormals) {
+                foreach ( int basevid in Region.BaseBorderV ) {
+                    Vector3d n = MeshNormals.QuickCompute(Region.BaseMesh, basevid);
+                    Region.BaseMesh.SetVertexNormal(basevid, (Vector3f)n);
+                }
+            }
+
+            return true;
+        }
+
+
 
     }
 }

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Diagnostics;
 
 namespace g3
@@ -11,7 +9,7 @@ namespace g3
         public DMesh3 Mesh;
 
         // info that is fixed based on mesh
-        SymmetricSparseMatrix M;
+        PackedSparseMatrix PackedM;
         int N;
         int[] ToMeshV, ToIndex;
         double[] Px, Py, Pz;
@@ -37,6 +35,10 @@ namespace g3
         DiagonalMatrix Preconditioner;
 
 
+        // Appendix C from http://sites.fas.harvard.edu/~cs277/papers/deformation_survey.pdf
+        public bool UseSoftConstraintNormalEquations = true;
+
+
         // result
         double[] Sx, Sy, Sz;
 
@@ -44,6 +46,7 @@ namespace g3
         public LaplacianMeshDeformer(DMesh3 mesh)
         {
             Mesh = mesh;
+            Util.gDevAssert(mesh.IsCompact);
         }
 
 
@@ -81,7 +84,7 @@ namespace g3
             Py = new double[N];
             Pz = new double[N];
             nbr_counts = new int[N];
-            M = new SymmetricSparseMatrix();
+            SymmetricSparseMatrix M = new SymmetricSparseMatrix();
 
             for (int i = 0; i < N; ++i) {
                 int vid = ToMeshV[i];
@@ -112,13 +115,22 @@ namespace g3
                 M.Set(vid, vid, sum_w);
             }
 
+            // transpose(L) * L, but matrix is symmetric...
+            if (UseSoftConstraintNormalEquations) {
+                //M = M.Multiply(M);
+                // only works if M is symmetric!!
+                PackedM = M.SquarePackedParallel();
+            } else {
+                PackedM = new PackedSparseMatrix(M);
+            }
+
             // compute laplacian vectors of initial mesh positions
             MLx = new double[N];
             MLy = new double[N];
             MLz = new double[N];
-            M.Multiply(Px, MLx);
-            M.Multiply(Py, MLy);
-            M.Multiply(Pz, MLz);
+            PackedM.Multiply(Px, MLx);
+            PackedM.Multiply(Py, MLy);
+            PackedM.Multiply(Pz, MLz);
 
             // allocate memory for internal buffers
             Preconditioner = new DiagonalMatrix(N);
@@ -127,6 +139,7 @@ namespace g3
             Bx = new double[N]; By = new double[N]; Bz = new double[N];
             Sx = new double[N]; Sy = new double[N]; Sz = new double[N];
 
+            need_solve_update = true;
             UpdateForSolve();
         }
 
@@ -147,6 +160,10 @@ namespace g3
                 int vid = constraint.Key;
                 int i = ToIndex[vid];
                 double w = constraint.Value.Weight;
+
+                if (UseSoftConstraintNormalEquations)
+                    w = w * w;
+
                 WeightsM.Set(i, i, w);
                 Vector3d pos = constraint.Value.Position;
                 Cx[i] = w * pos.x;
@@ -162,13 +179,10 @@ namespace g3
             }
 
             // update basic preconditioner
-            // [RMS] currently not using this...it actually seems to make things
-            //   worse!! 
+            // [RMS] currently not using this...it actually seems to make things worse!! 
             for ( int i = 0; i < N; i++ ) {
-                //double diag_value = M[i, i] + WeightsM[i, i];
-                double diag_value = M[i, i];
-                //Preconditioner.Set(i, i, 1.0 / diag_value);
-                Preconditioner.Set(i, i, diag_value);
+                double diag_value = PackedM[i, i] + WeightsM[i, i];
+                Preconditioner.Set(i, i, 1.0 / diag_value);
             }
 
             need_solve_update = false;
@@ -177,8 +191,11 @@ namespace g3
 
 
         // Result must be as large as Mesh.MaxVertexID
-        public bool Solve(Vector3d[] Result)
+        public bool SolveMultipleCG(Vector3d[] Result)
         {
+            if (WeightsM == null)
+                Initialize();       // force initialize...
+
             UpdateForSolve();
 
             // use initial positions as initial solution. 
@@ -188,7 +205,9 @@ namespace g3
 
 
             Action<double[], double[]> CombinedMultiply = (X, B) => {
-                M.Multiply(X, B);
+                //PackedM.Multiply(X, B);
+                PackedM.Multiply_Parallel(X, B);
+
                 for (int i = 0; i < N; ++i)
                     B[i] += WeightsM[i, i] * X[i];
             };
@@ -230,6 +249,86 @@ namespace g3
                 }
             }
 
+            return true;
+        }
+
+
+
+
+        // Result must be as large as Mesh.MaxVertexID
+        public bool SolveMultipleRHS(Vector3d[] Result)
+        {
+            if (WeightsM == null)
+                Initialize();       // force initialize...
+
+            UpdateForSolve();
+
+            // use initial positions as initial solution. 
+            double[][] B = BufferUtil.InitNxM(3, N, new double[][] { Bx, By, Bz });
+            double[][] X = BufferUtil.InitNxM(3, N, new double[][] { Px, Py, Pz });
+
+            Action<double[][], double[][]> CombinedMultiply = (Xt, Bt) => {
+                PackedM.Multiply_Parallel_3(Xt, Bt);
+                gParallel.ForEach(Interval1i.Range(3), (j) => {
+                    BufferUtil.MultiplyAdd(Bt[j], WeightsM.D, Xt[j]);
+                });
+            };
+
+            SparseSymmetricCGMultipleRHS Solver = new SparseSymmetricCGMultipleRHS() {
+                B = B, X = X,
+                MultiplyF = CombinedMultiply, PreconditionMultiplyF = null,
+                UseXAsInitialGuess = true
+            };
+
+            bool ok = Solver.Solve();
+
+            if (ok == false)
+                return false;
+
+            for (int i = 0; i < N; ++i) {
+                int vid = ToMeshV[i];
+                Result[vid] = new Vector3d(X[0][i], X[1][i], X[2][i]);
+            }
+
+            // apply post-fixed constraints
+            if (HavePostFixedConstraints) {
+                foreach (var constraint in SoftConstraints) {
+                    if (constraint.Value.PostFix) {
+                        int vid = constraint.Key;
+                        Result[vid] = constraint.Value.Position;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+
+
+
+
+        public bool Solve(Vector3d[] Result)
+        {
+            // for small problems, faster to use separate CGs?
+            if ( Mesh.VertexCount < 10000 )
+                return SolveMultipleCG(Result);
+            else
+                return SolveMultipleRHS(Result);
+        }
+
+
+
+        public bool SolveAndUpdateMesh()
+        {
+            int N = Mesh.MaxVertexID;
+            Vector3d[] Result = new Vector3d[N];
+            if ( Solve(Result) == false )
+                return false;
+            for (int i = 0; i < N; ++i) {
+                if (Mesh.IsVertex(i)) {
+                    Mesh.SetVertex(i, Result[i]);
+                }
+            }
             return true;
         }
 

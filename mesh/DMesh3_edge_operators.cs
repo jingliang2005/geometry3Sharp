@@ -47,7 +47,7 @@ namespace g3
         /// (if false, them throws exception if there are still any triangles!)
         /// if bPreserveManifold, checks that we will not create a bowtie vertex first
         /// </summary>
-        public MeshResult RemoveVertex(int vID, bool bRemoveAllTriangles = true, bool bPreserveManifold = true)
+        public MeshResult RemoveVertex(int vID, bool bRemoveAllTriangles = true, bool bPreserveManifold = false)
         {
             if (vertices_refcount.isValid(vID) == false)
                 return MeshResult.Failed_NotAVertex;
@@ -59,12 +59,12 @@ namespace g3
                 if ( bPreserveManifold ) {
                     foreach ( int tid in VtxTrianglesItr(vID) ) {
                         Index3i tri = GetTriangle(tid);
-                        int j = IndexUtil.find_tri_index(vID, tri);
+                        int j = IndexUtil.find_tri_index(vID, ref tri);
                         int oa = tri[(j + 1) % 3], ob = tri[(j + 2) % 3];
                         int eid = find_edge(oa,ob);
-                        if (edge_is_boundary(eid))
+                        if (IsBoundaryEdge(eid))
                             continue;
-                        if (vertex_is_boundary(oa) || vertex_is_boundary(ob))
+                        if (IsBoundaryVertex(oa) || IsBoundaryVertex(ob))
                             return MeshResult.Failed_WouldCreateBowtie;
                     }
                 }
@@ -83,7 +83,7 @@ namespace g3
 
             vertices_refcount.decrement(vID);
             Debug.Assert(vertices_refcount.isValid(vID) == false);
-            vertex_edges[vID] = null;
+            vertex_edges.Clear(vID);
 
             updateTimeStamp(true);
             return MeshResult.Ok;
@@ -98,7 +98,7 @@ namespace g3
         ///   If this check is not done, you have to make sure you don't create a bowtie, because other
         ///   code assumes we don't have bowties, and will not handle it properly
         /// </summary>
-        public MeshResult RemoveTriangle(int tID, bool bRemoveIsolatedVertices = true, bool bPreserveManifold = true)
+        public MeshResult RemoveTriangle(int tID, bool bRemoveIsolatedVertices = true, bool bPreserveManifold = false)
         {
             if ( ! triangles_refcount.isValid(tID) ) {
                 Debug.Assert(false);
@@ -113,8 +113,8 @@ namespace g3
             // (that vtx already has 2 boundary edges, and we would add two more)
             if (bPreserveManifold) {
                 for (int j = 0; j < 3; ++j) {
-                    if (vertex_is_boundary(tv[j])) {
-                        if (edge_is_boundary(te[j]) == false && edge_is_boundary(te[(j + 2) % 3]) == false)
+                    if (IsBoundaryVertex(tv[j])) {
+                        if (IsBoundaryEdge(te[j]) == false && IsBoundaryEdge(te[(j + 2) % 3]) == false)
                             return MeshResult.Failed_WouldCreateBowtie;
                     }
                 }
@@ -127,12 +127,10 @@ namespace g3
                 replace_edge_triangle(eid, tID, InvalidID);
                 if (edges[4 * eid + 2] == InvalidID) {
                     int a = edges[4 * eid];
-                    List<int> edges_a = vertex_edges[a];
-                    edges_a.Remove(eid);
+                    vertex_edges.Remove(a, eid);
 
                     int b = edges[4 * eid + 1];
-                    List<int> edges_b = vertex_edges[b];
-                    edges_b.Remove(eid);
+                    vertex_edges.Remove(b, eid);
 
                     edges_refcount.decrement(eid);
                 }
@@ -150,7 +148,7 @@ namespace g3
                 if ( bRemoveIsolatedVertices && vertices_refcount.refCount(vid) == 1) {
                     vertices_refcount.decrement(vid);
                     Debug.Assert(vertices_refcount.isValid(vid) == false);
-                    vertex_edges[vid] = null;
+                    vertex_edges.Clear(vid);
                 }
             }
 
@@ -191,9 +189,9 @@ namespace g3
             int e0 = find_edge(newv[0], newv[1]);
             int e1 = find_edge(newv[1], newv[2]);
             int e2 = find_edge(newv[2], newv[0]);
-            if ((te.a != -1 && e0 != InvalidID && edge_is_boundary(e0) == false)
-                 || (te.b != -1 && e1 != InvalidID && edge_is_boundary(e1) == false)
-                 || (te.c != -1 && e2 != InvalidID && edge_is_boundary(e2) == false)) {
+            if ((te.a != -1 && e0 != InvalidID && IsBoundaryEdge(e0) == false)
+                 || (te.b != -1 && e1 != InvalidID && IsBoundaryEdge(e1) == false)
+                 || (te.c != -1 && e2 != InvalidID && IsBoundaryEdge(e2) == false)) {
                 return MeshResult.Failed_BrokenTopology;
             }
 
@@ -208,12 +206,10 @@ namespace g3
                 replace_edge_triangle(eid, tID, InvalidID);
                 if (edges[4 * eid + 2] == InvalidID) {
                     int a = edges[4 * eid];
-                    List<int> edges_a = vertex_edges[a];
-                    edges_a.Remove(eid);
+                    vertex_edges.Remove(a, eid);
 
                     int b = edges[4 * eid + 1];
-                    List<int> edges_b = vertex_edges[b];
-                    edges_b.Remove(eid);
+                    vertex_edges.Remove(b, eid);
 
                     edges_refcount.decrement(eid);
                 }
@@ -229,7 +225,7 @@ namespace g3
                 if (bRemoveIsolatedVertices && vertices_refcount.refCount(vid) == 1) {
                     vertices_refcount.decrement(vid);
                     Debug.Assert(vertices_refcount.isValid(vid) == false);
-                    vertex_edges[vid] = null;
+                    vertex_edges.Clear(vid);
                 }
             }
 
@@ -266,6 +262,8 @@ namespace g3
 			public int eNewBN;      // new edge [vNew,vB] (original was AB)
 			public int eNewCN;      // new edge [vNew,vC] (C is "first" other vtx in ring)
 			public int eNewDN;		// new edge [vNew,vD] (D is "second" other, which doesn't exist on bdry)
+            public int eNewT2;
+            public int eNewT3;
 		}
 		public MeshResult SplitEdge(int vA, int vB, out EdgeSplitInfo split)
 		{
@@ -276,7 +274,11 @@ namespace g3
 			}
 			return SplitEdge(eid, out split);
 		}
-		public MeshResult SplitEdge(int eab, out EdgeSplitInfo split)
+        /// <summary>
+        /// Split edge eab. 
+        /// split_t defines position along edge, and is assumed to be based on order of vertices returned by GetEdgeV()
+        /// </summary>
+		public MeshResult SplitEdge(int eab, out EdgeSplitInfo split, double split_t = 0.5)
 		{
 			split = new EdgeSplitInfo();
 			if (! IsEdge(eab) )
@@ -291,24 +293,27 @@ namespace g3
 			Index3i T0tv = GetTriangle(t0);
 			int[] T0tv_array = T0tv.array;
 			int c = IndexUtil.orient_tri_edge_and_find_other_vtx(ref a, ref b, T0tv_array);
-
-			// create new vertex
-			Vector3d vNew = 0.5 * ( GetVertex(a) + GetVertex(b) );
-			int f = AppendVertex( vNew );
-            if (HasVertexNormals) 
-                SetVertexNormal(f, (GetVertexNormal(a) + GetVertexNormal(b)).Normalized);
-            if (HasVertexColors)
-                SetVertexColor(f, 0.5f * (GetVertexColor(a) + GetVertexColor(b)) );
-            if (HasVertexUVs)
-                SetVertexUV(f, 0.5f * (GetVertexUV(a) + GetVertexUV(b)));
-
+            if (vertices_refcount.rawRefCount(c) > 32764)
+                return MeshResult.Failed_HitValenceLimit;
+            if (a != edges[eab_i])
+                split_t = 1.0 - split_t;    // if we flipped a/b order we need to reverse t
 
             // quite a bit of code is duplicated between boundary and non-boundary case, but it
             //  is too hard to follow later if we factor it out...
-            if ( edge_is_boundary(eab) ) {
+            if ( IsBoundaryEdge(eab) ) {
 
-				// look up edge bc, which needs to be modified
-				Index3i T0te = GetTriEdges(t0);
+                // create new vertex
+                Vector3d vNew = Vector3d.Lerp(GetVertex(a), GetVertex(b), split_t);
+                int f = AppendVertex(vNew);
+                if (HasVertexNormals)
+                    SetVertexNormal(f, Vector3f.Lerp(GetVertexNormal(a), GetVertexNormal(b), (float)split_t).Normalized);
+                if (HasVertexColors)
+                    SetVertexColor(f, Colorf.Lerp(GetVertexColor(a), GetVertexColor(b), (float)split_t));
+                if (HasVertexUVs)
+                    SetVertexUV(f, Vector2f.Lerp(GetVertexUV(a), GetVertexUV(b), (float)split_t));
+
+                // look up edge bc, which needs to be modified
+                Index3i T0te = GetTriEdges(t0);
 				int ebc = T0te[ IndexUtil.find_edge_index_in_tri(b, c, T0tv_array) ];
 
 				// rewrite existing triangle
@@ -323,8 +328,8 @@ namespace g3
 				replace_edge_triangle(ebc, t0, t2);
 				int eaf = eab; 
 				replace_edge_vertex(eaf, b, f);
-				vertex_edges[b].Remove(eab);
-				vertex_edges[f].Add(eaf);
+                vertex_edges.Remove(b, eab);
+                vertex_edges.Insert(f, eaf);
 
 				// create new edges fb and fc 
 				int efb = add_edge(f, b, t2);
@@ -343,6 +348,8 @@ namespace g3
                 split.eNewBN = efb;
 				split.eNewCN = efc;
 				split.eNewDN = InvalidID;
+                split.eNewT2 = t2;
+                split.eNewT3 = InvalidID;
 
 				updateTimeStamp(true);
 				return MeshResult.Ok;
@@ -354,10 +361,22 @@ namespace g3
 				Index3i T1tv = GetTriangle(t1);
 				int[] T1tv_array = T1tv.array;
 				int d = IndexUtil.find_tri_other_vtx( a, b, T1tv_array );
+                if (vertices_refcount.rawRefCount(d) > 32764) 
+                    return MeshResult.Failed_HitValenceLimit;
 
-				// look up edges that we are going to need to update
-				// [TODO OPT] could use ordering to reduce # of compares here
-				Index3i T0te = GetTriEdges(t0);
+                // create new vertex
+                Vector3d vNew = Vector3d.Lerp(GetVertex(a), GetVertex(b), split_t);
+                int f = AppendVertex(vNew);
+                if (HasVertexNormals)
+                    SetVertexNormal(f, Vector3f.Lerp(GetVertexNormal(a), GetVertexNormal(b), (float)split_t).Normalized);
+                if (HasVertexColors)
+                    SetVertexColor(f, Colorf.Lerp(GetVertexColor(a), GetVertexColor(b), (float)split_t));
+                if (HasVertexUVs)
+                    SetVertexUV(f, Vector2f.Lerp(GetVertexUV(a), GetVertexUV(b), (float)split_t));
+
+                // look up edges that we are going to need to update
+                // [TODO OPT] could use ordering to reduce # of compares here
+                Index3i T0te = GetTriEdges(t0);
 				int ebc = T0te[IndexUtil.find_edge_index_in_tri( b, c, T0tv_array )];
 				Index3i T1te = GetTriEdges(t1);
 				int edb = T1te[IndexUtil.find_edge_index_in_tri( d, b, T1tv_array )];
@@ -382,9 +401,9 @@ namespace g3
 				int eaf = eab; //Edge * eAF = eAB;
 				replace_edge_vertex(eaf, b, f);
 
-				// update a/b/f vertex-edges
-				vertex_edges[b].Remove( eab );
-				vertex_edges[f].Add( eaf );
+                // update a/b/f vertex-edges
+                vertex_edges.Remove(b, eab);
+                vertex_edges.Insert(f, eaf);
 
 				// create new edges connected to f  (also updates vertex-edges)
 				int efb = add_edge( f, b, t2, t3 );
@@ -407,8 +426,10 @@ namespace g3
                 split.eNewBN = efb;
 				split.eNewCN = efc;
 				split.eNewDN = edf;
+                split.eNewT2 = t2;
+                split.eNewT3 = t3;
 
-				updateTimeStamp(true);
+                updateTimeStamp(true);
 				return MeshResult.Ok;
 			}
 
@@ -438,7 +459,7 @@ namespace g3
 			flip = new EdgeFlipInfo();
 			if (! IsEdge(eab) )
 				return MeshResult.Failed_NotAnEdge;
-			if ( edge_is_boundary(eab) )
+			if ( IsBoundaryEdge(eab) )
 				return MeshResult.Failed_IsBoundaryEdge;
 
 			// find oriented edge [a,b], tris t0,t1, and other verts c in t0, d in t1
@@ -483,18 +504,18 @@ namespace g3
 			set_triangle_edges(t1, ecd, eca, ead);
 
 			// remove old eab from verts a and b, and decrement ref counts
-			if ( vertex_edges[a].Remove(eab) == false ) 
-				throw new ArgumentException("DMesh3.FlipEdge: first vertex_edges remove failed");
-			if ( vertex_edges[b].Remove(eab) == false ) 
-				throw new ArgumentException("DMesh3.FlipEdge: second vertex_edges remove failed");
+			if ( vertex_edges.Remove(a, eab) == false ) 
+				throw new ArgumentException("DMesh3.FlipEdge: first edge list remove failed");
+			if ( vertex_edges.Remove(b, eab) == false ) 
+				throw new ArgumentException("DMesh3.FlipEdge: second edge list remove failed");
 			vertices_refcount.decrement(a);
 			vertices_refcount.decrement(b);
 			if ( IsVertex(a) == false || IsVertex(b) == false )
 				throw new ArgumentException("DMesh3.FlipEdge: either a or b is not a vertex?");
 
-			// add new edge ecd to verts c and d, and increment ref counts
-			vertex_edges[c].Add(ecd);
-			vertex_edges[d].Add(ecd);
+            // add new edge ecd to verts c and d, and increment ref counts
+            vertex_edges.Insert(c, ecd);
+            vertex_edges.Insert(d, ecd);
 			vertices_refcount.increment(c);
 			vertices_refcount.increment(d);
 
@@ -550,7 +571,6 @@ namespace g3
 
 			int b = vKeep;		// renaming for sanity. We remove a and keep b
 			int a = vRemove;
-			List<int> edges_b = vertex_edges[b];
 
 			int eab = find_edge( a, b );
 			if (eab == InvalidID)
@@ -579,12 +599,9 @@ namespace g3
 			//  than c and d  (because then we will make a triangle [x b b].
 			//  Unfortunately I cannot see a way to do this more efficiently than brute-force search
 			//  [TODO] if we had tri iterator for a, couldn't we check each tri for b  (skipping t0 and t1) ?
-			List<int> edges_a = vertex_edges[a];
-            int edges_a_count = edges_a.Count;
-            int edges_b_count = edges_b.Count;
+            int edges_a_count = vertex_edges.Count(a); 
             int eac = InvalidID, ead = InvalidID, ebc = InvalidID, ebd = InvalidID;
-            for ( int ai = 0; ai < edges_a_count; ai++ ) {
-                int eid_a = edges_a[ai];
+            foreach ( int eid_a in vertex_edges.ValueItr(a) ) { 
 				int vax =  edge_other_v(eid_a, a);
                 if ( vax == c ) {
                     eac = eid_a;
@@ -596,8 +613,7 @@ namespace g3
                 }
 				if ( vax == b )
 					continue;
-                for ( int bi = 0; bi < edges_b_count; ++bi ) {
-                    int eid_b = edges_b[bi];
+                foreach (int eid_b in vertex_edges.ValueItr(b)) {
 					if ( edge_other_v(eid_b, b) == vax )
 						return MeshResult.Failed_InvalidNeighbourhood;
 				}
@@ -621,10 +637,10 @@ namespace g3
 					return MeshResult.Failed_CollapseTetrahedron;
 				}
 
-			} else if (bIsBoundaryEdge == true && edge_is_boundary(eac) ) {
+			} else if (bIsBoundaryEdge == true && IsBoundaryEdge(eac) ) {
                 // Cannot collapse edge if we are down to a single triangle
                 ebc = find_edge_from_tri(b, c, t0);
-                if ( edge_is_boundary(ebc) )
+                if ( IsBoundaryEdge(ebc) )
 					return MeshResult.Failed_CollapseTriangle;
 			}
 
@@ -637,7 +653,7 @@ namespace g3
 			//
 			// NOTE: potentially scanning all edges here...couldn't we
 			//  pick up eac/bc/ad/bd as we go? somehow?
-			if ( bIsBoundaryEdge == false && vertex_is_boundary(a) && vertex_is_boundary(b) )
+			if ( bIsBoundaryEdge == false && IsBoundaryVertex(a) && IsBoundaryVertex(b) )
 				return MeshResult.Failed_InvalidNeighbourhood;
 
 
@@ -646,24 +662,23 @@ namespace g3
 			// 3) for other edges, replace a with b, and add that edge to b
 			// 4) replace a with b in all triangles connected to a
 			int tad = InvalidID, tac = InvalidID;
-            for ( int ai = 0; ai < edges_a_count; ai++ ) {
-                int eid = edges_a[ai];
+            foreach ( int eid in vertex_edges.ValueItr(a)) { 
 				int o = edge_other_v(eid, a);
 				if (o == b) {
-					if (edges_b.Remove(eid) != true )
+					if ( vertex_edges.Remove(b,eid) != true )
 						debug_fail("remove case o == b");
 				} else if (o == c) {
-					if ( vertex_edges[c].Remove(eid) != true )
+					if ( vertex_edges.Remove(c, eid) != true )
 						debug_fail("remove case o == c");
 					tac = edge_other_t(eid, t0);
 				} else if (o == d) {
-					if ( vertex_edges[d].Remove(eid) != true )
+					if (vertex_edges.Remove(d, eid) != true )
 						debug_fail("remove case o == c, step 1");
 					tad = edge_other_t(eid, t1);
 				} else {
 					if ( replace_edge_vertex(eid, a, b) == -1 )
 						debug_fail("remove case else");
-					edges_b.Add(eid);
+                    vertex_edges.Insert(b, eid);
 				}
 
 				// [TODO] perhaps we can already have unique tri list because of the manifold-nbrhood check we need to do...
@@ -682,8 +697,8 @@ namespace g3
 
 			if (bIsBoundaryEdge == false) {
 
-				// remove all edges from vtx a, then remove vtx a
-				edges_a.Clear();
+                // remove all edges from vtx a, then remove vtx a
+                vertex_edges.Clear(a);
 				Debug.Assert( vertices_refcount.refCount(a) == 3 );		// in t0,t1, and initial ref
 				vertices_refcount.decrement( a, 3 );
 				Debug.Assert( vertices_refcount.isValid( a ) == false );
@@ -728,11 +743,11 @@ namespace g3
 
 			} else {
 
-				//  this is basically same code as above, just not referencing t1/d
+                //  this is basically same code as above, just not referencing t1/d
 
-				// remove all edges from vtx a, then remove vtx a
-				edges_a.Clear();
-				Debug.Assert( vertices_refcount.refCount( a ) == 2 );		// in t0 and initial ref
+                // remove all edges from vtx a, then remove vtx a
+                vertex_edges.Clear(a);
+                Debug.Assert( vertices_refcount.refCount( a ) == 2 );		// in t0 and initial ref
 				vertices_refcount.decrement( a, 2 );
 				Debug.Assert( vertices_refcount.isValid( a ) == false );
 
@@ -829,14 +844,43 @@ namespace g3
 			merge_info.eKept = eab;
 			merge_info.eRemoved = ecd;
 
-			// [TODO] this acts on each interior tri twice. could avoid using vtx-tri iterator?
+            // if a/c or b/d are connected by an existing edge, we can't merge
+            if (a != c && find_edge(a,c) != DMesh3.InvalidID )
+                return MeshResult.Failed_InvalidNeighbourhood;
+            if (b != d && find_edge(b, d) != DMesh3.InvalidID)
+                return MeshResult.Failed_InvalidNeighbourhood;
 
-			List<int> edges_a = vertex_edges[a];
-			if (a != c) {
+            // if vertices at either end already share a common neighbour vertex, and we 
+            // do the merge, that would create duplicate edges. This is something like the
+            // 'link condition' in edge collapses. 
+            // Note that we have to catch cases where both edges to the shared vertex are
+            // boundary edges, in that case we will also merge this edge later on
+            if ( a != c ) {
+                int ea = 0, ec = 0, other_v = (b == d) ? b : -1;
+                foreach ( int cnbr in VtxVerticesItr(c) ) {
+                    if (cnbr != other_v && (ea = find_edge(a, cnbr)) != DMesh3.InvalidID) {
+                        ec = find_edge(c, cnbr);
+                        if (IsBoundaryEdge(ea) == false || IsBoundaryEdge(ec) == false)
+                            return MeshResult.Failed_InvalidNeighbourhood;
+                    }
+                }
+            }
+            if ( b != d ) {
+                int eb = 0, ed = 0, other_v = (a == c) ? a : -1;
+                foreach ( int dnbr in VtxVerticesItr(d)) {
+                    if (dnbr != other_v && (eb = find_edge(b, dnbr)) != DMesh3.InvalidID) {
+                        ed = find_edge(d, dnbr);
+                        if (IsBoundaryEdge(eb) == false || IsBoundaryEdge(ed) == false)
+                            return MeshResult.Failed_InvalidNeighbourhood;
+                    }
+                }
+            }
+            
+
+            // [TODO] this acts on each interior tri twice. could avoid using vtx-tri iterator?
+            if (a != c) {
 				// replace c w/ a in edges and tris connected to c, and move edges to a
-				List<int> edges_c = vertex_edges[c];
-				for (int i = 0; i < edges_c.Count; ++i) {
-					int eid = edges_c[i];
+                foreach ( int eid in vertex_edges.ValueItr(c)) { 
 					if (eid == eDiscard)
 						continue;
 					replace_edge_vertex(eid, c, a);
@@ -847,27 +891,24 @@ namespace g3
 						if (replace_tri_vertex(edges[4 * eid + 3], c, a) >= 0)
 							rc++;
 					}
-					edges_a.Add(eid);
+                    vertex_edges.Insert(a, eid);
 					if (rc > 0) {
 						vertices_refcount.increment(a, rc);
 						vertices_refcount.decrement(c, rc);
 					}
 				}
-				vertex_edges[c] = null;
+                vertex_edges.Clear(c);
 				vertices_refcount.decrement(c);
 				merge_info.vRemoved[0] = c;
 			} else {
-				edges_a.Remove(ecd);
+                vertex_edges.Remove(a, ecd);
 				merge_info.vRemoved[0] = InvalidID;
 			}
 			merge_info.vKept[0] = a;
 
-			List<int> edges_b = vertex_edges[b];
 			if (d != b) {
 				// replace d w/ b in edges and tris connected to d, and move edges to b
-				List<int> edges_d = vertex_edges[d];
-				for (int i = 0; i < edges_d.Count; ++i) {
-					int eid = edges_d[i];
+                foreach (int eid in vertex_edges.ValueItr(d)) { 
 					if (eid == eDiscard)
 						continue;
 					replace_edge_vertex(eid, d, b);
@@ -878,18 +919,18 @@ namespace g3
 						if (replace_tri_vertex(edges[4 * eid + 3], d, b) >= 0)
 							rc++;
 					}
-					edges_b.Add(eid);
+                    vertex_edges.Insert(b, eid);
 					if (rc > 0) {
 						vertices_refcount.increment(b, rc);
 						vertices_refcount.decrement(d, rc);
 					}
 
 				}
-				vertex_edges[d] = null;
+                vertex_edges.Clear(d);
 				vertices_refcount.decrement(d);
 				merge_info.vRemoved[1] = d;
 			} else {
-				edges_b.Remove(ecd);
+                vertex_edges.Remove(b, ecd);
 				merge_info.vRemoved[1] = InvalidID;
 			}
 			merge_info.vKept[1] = b;
@@ -916,36 +957,38 @@ namespace g3
 				}
 				if (v1 == v2)
 					continue;
-				List<int> edges_v = vertex_edges[v1];
-				int Nedges = edges_v.Count;
+                List<int> edges_v = vertex_edges_list(v1);
+                int Nedges = edges_v.Count;
 				bool found = false;
 				// in this loop, we compare 'other' vert_1 and vert_2 of edges around v1.
 				// problem case is when vert_1 == vert_2  (ie two edges w/ same other vtx).
+                //restart_merge_loop:
 				for (int i = 0; i < Nedges && found == false; ++i) {
 					int edge_1 = edges_v[i];
-					if ( edge_is_boundary(edge_1) == false)
+					if ( IsBoundaryEdge(edge_1) == false)
 						continue;
 					int vert_1 = edge_other_v(edge_1, v1);
 					for (int j = i + 1; j < Nedges; ++j) {
 						int edge_2 = edges_v[j];
 						int vert_2 = edge_other_v(edge_2, v1);
-						if (vert_1 == vert_2 && edge_is_boundary(edge_2)) { // if ! boundary here, we are in deep trouble...
+						if (vert_1 == vert_2 && IsBoundaryEdge(edge_2)) { // if ! boundary here, we are in deep trouble...
 							// replace edge_2 w/ edge_1 in tri, update edge and vtx-edge-nbr lists
 							int tri_1 = edges[4 * edge_1 + 2];
 							int tri_2 = edges[4 * edge_2 + 2];
 							replace_triangle_edge(tri_2, edge_2, edge_1);
 							set_edge_triangles(edge_1, tri_1, tri_2);
-							vertex_edges[v1].Remove(edge_2);
-							vertex_edges[vert_1].Remove(edge_2);
+                            vertex_edges.Remove(v1, edge_2);
+                            vertex_edges.Remove(vert_1, edge_2);
 							edges_refcount.decrement(edge_2);
 							merge_info.eRemovedExtra[vi] = edge_2;
 							merge_info.eKeptExtra[vi] = edge_1;
 
-							//Nedges = edges_v.Count; // this code allows us to continue checking, ie in case we had
-							//i--;					  // multiple such edges. but I don't think it's possible.
-							found = true;			  // exit outer i loop
-							break;					  // exit inner j loop
-						}
+                            //edges_v = vertex_edges_list(v1);      // this code allows us to continue checking, ie in case we had
+                            //Nedges = edges_v.Count;               // multiple such edges. but I don't think it's possible.
+                            //goto restart_merge_loop;
+                            found = true;			  // exit outer i loop
+                            break;					  // exit inner j loop
+                        }
 					}
 				}
 			}
@@ -1060,8 +1103,8 @@ namespace g3
             edges.insert(tA, i + 2);
             edges.insert(tB, i + 3);
 
-            vertex_edges[vA].Add(eid);
-            vertex_edges[vB].Add(eid);
+            vertex_edges.Insert(vA, eid);
+            vertex_edges.Insert(vB, eid);
             return eid;
         }
 
@@ -1087,10 +1130,26 @@ namespace g3
 
 
 
+        void allocate_edges_list(int vid)
+        {
+            if ( vid < vertex_edges.Size )
+                vertex_edges.Clear(vid);
+            vertex_edges.AllocateAt(vid);
+        }
+        List<int> vertex_edges_list(int vid)
+        {
+            return new List<int>( vertex_edges.ValueItr(vid) );
+        }
+        List<int> vertex_vertices_list(int vid)
+        {
+            List<int> vnbrs = new List<int>();
+            foreach (int eid in vertex_edges.ValueItr(vid))
+                vnbrs.Add(edge_other_v(eid, vid));
+            return vnbrs;
+        }
 
 
-
-		void set_edge_vertices(int eID, int a, int b) {
+        void set_edge_vertices(int eID, int a, int b) {
 			int i = 4*eID;
 			edges[i] = Math.Min(a,b);
 			edges[i + 1] = Math.Max(a,b);

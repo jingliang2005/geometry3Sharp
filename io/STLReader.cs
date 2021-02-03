@@ -8,18 +8,63 @@ using System.Threading;
 
 namespace g3
 {
+    /// <summary>
+    /// Read ASCII/Binary STL file and produce set of meshes.
+    /// 
+    /// Since STL is just a list of disconnected triangles, by default we try to
+    /// merge vertices together. Use .RebuildStrategy to disable this and/or configure
+    /// which algorithm is used. If you are using via StandardMeshReader, you can add
+    /// .StrategyFlag to ReadOptions.CustomFlags to set this flag.
+    /// 
+    /// TODO: document welding strategies. There is no "best" one, they all fail
+    /// in some cases, because STL is a stupid and horrible format.
+    /// 
+    /// STL Binary supports a per-triangle short-int that is usually used to specify color.
+    /// However since we do not support per-triangle color in DMesh3, this color
+    /// cannot be directly used. Instead of hardcoding behavior, we return the list of shorts
+    /// if requested via IMeshBuilder Metadata. Set .WantPerTriAttribs=true or attach flag .PerTriAttribFlag.
+    /// After the read finishes you can get the face color list via:
+    ///    DVector<short> colors = Builder.Metadata[0][STLReader.PerTriAttribMetadataName] as DVector<short>;
+    /// (for DMesh3Builder, which is the only builder that supports Metadata)
+    /// </summary>
     public class STLReader : IMeshReader
     {
 
         public enum Strategy
         {
-            NoProcessing = 0,
-            IdenticalVertexWeld = 1
+            NoProcessing = 0,           // return triangle soup
+            IdenticalVertexWeld = 1,    // merge identical vertices. Logically sensible but doesn't always work on ASCII STL.
+            TolerantVertexWeld = 2,     // merge vertices within .WeldTolerance
+
+            AutoBestResult = 3          // try identical weld first, if there are holes then try tolerant weld, and return "best" result
+                                        // ("best" is not well-defined...)
         }
-        public Strategy RebuildStrategy = Strategy.IdenticalVertexWeld;
+
+        /// <summary>
+        /// Which algorithm is used to try to reconstruct mesh topology from STL triangle soup
+        /// </summary>
+        public Strategy RebuildStrategy = Strategy.AutoBestResult;
+
+        /// <summary>
+        /// Vertices within this distance are considered "the same" by welding strategies.
+        /// </summary>
+        public double WeldTolerance = MathUtil.ZeroTolerancef;
 
 
-        // connect to this to get warning messages
+        /// <summary>
+        /// Binary STL supports per-triangle integer attribute, which is often used
+        /// to store face colors. If this flag is true, we will attach these face
+        /// colors to the returned mesh via IMeshBuilder.AppendMetaData
+        /// </summary>
+        public bool WantPerTriAttribs = false;
+
+        /// <summary>
+        /// name argument passed to IMeshBuilder.AppendMetaData
+        /// </summary>
+        public static string PerTriAttribMetadataName = "tri_attrib";
+
+
+        /// <summary> connect to this event to get warning messages </summary>
 		public event ParsingMessagesHandler warningEvent;
 
 
@@ -28,11 +73,20 @@ namespace g3
 
 
 
+        /// <summary> ReadOptions.CustomFlags flag for configuring .RebuildStrategy </summary>
         public const string StrategyFlag = "-stl-weld-strategy";
+
+        /// <summary> ReadOptions.CustomFlags flag for configuring .WantPerTriAttribs </summary>
+        public const string PerTriAttribFlag = "-want-tri-attrib";
+
+
         void ParseArguments(CommandArgumentSet args)
         {
             if ( args.Integers.ContainsKey(StrategyFlag) ) {
                 RebuildStrategy = (Strategy)args.Integers[StrategyFlag];
+            }
+            if (args.Flags.ContainsKey(PerTriAttribFlag)) {
+                WantPerTriAttribs = true;
             }
         }
 
@@ -43,6 +97,7 @@ namespace g3
         {
             public string Name;
             public DVectorArray3f Vertices = new DVectorArray3f();
+            public DVector<short> TriAttribs = null;
         }
 
 
@@ -83,9 +138,13 @@ namespace g3
             stl_triangle tmp = new stl_triangle();
             Type tri_type = tmp.GetType();
 
+            DVector<short> tri_attribs = new DVector<short>();
+
             try {
                 for (int i = 0; i < totalTris; ++i) {
                     byte[] tri_bytes = reader.ReadBytes(50);
+                    if (tri_bytes.Length < 50)
+                        break;
 
                     Marshal.Copy(tri_bytes, 0, bufptr, tri_size);
                     stl_triangle tri = (stl_triangle)Marshal.PtrToStructure(bufptr, tri_type);
@@ -93,6 +152,7 @@ namespace g3
                     append_vertex(tri.ax, tri.ay, tri.az);
                     append_vertex(tri.bx, tri.by, tri.bz);
                     append_vertex(tri.cx, tri.cy, tri.cz);
+                    tri_attribs.Add(tri.attrib);
                 }
 
             } catch (Exception e) {
@@ -100,6 +160,9 @@ namespace g3
             }
 
             Marshal.FreeHGlobal(bufptr);
+
+            if (Objects.Count == 1)
+                Objects[0].TriAttribs = tri_attribs;
 
             foreach (STLSolid solid in Objects)
                 BuildMesh(solid, builder);
@@ -143,9 +206,9 @@ namespace g3
                     continue;
 
                 if (tokens[0].Equals("vertex", StringComparison.OrdinalIgnoreCase)) {
-                    float x = Single.Parse(tokens[1]);
-                    float y = Single.Parse(tokens[2]);
-                    float z = Single.Parse(tokens[3]);
+                    float x = (tokens.Length > 1) ? Single.Parse(tokens[1]) : 0;
+                    float y = (tokens.Length > 2) ? Single.Parse(tokens[2]) : 0;
+                    float z = (tokens.Length > 3) ? Single.Parse(tokens[3]) : 0;
                     append_vertex(x, y, z);
 
                 // [RMS] we don't really care about these lines...
@@ -199,10 +262,22 @@ namespace g3
 
         protected virtual void BuildMesh(STLSolid solid, IMeshBuilder builder)
         {
-            if (RebuildStrategy == Strategy.IdenticalVertexWeld)
-                BuildMesh_IdenticalWeld(solid, builder);
-            else
+            if (RebuildStrategy == Strategy.AutoBestResult) {
+                DMesh3 result = BuildMesh_Auto(solid);
+                builder.AppendNewMesh(result);
+
+            } else if (RebuildStrategy == Strategy.IdenticalVertexWeld) {
+                DMesh3 result = BuildMesh_IdenticalWeld(solid);
+                builder.AppendNewMesh(result);
+            } else if (RebuildStrategy == Strategy.TolerantVertexWeld) {
+                DMesh3 result = BuildMesh_TolerantWeld(solid, WeldTolerance);
+                builder.AppendNewMesh(result);
+            } else {
                 BuildMesh_NoMerge(solid, builder);
+            }
+
+            if (WantPerTriAttribs && solid.TriAttribs != null && builder.SupportsMetaData)
+                builder.AppendMetaData(PerTriAttribMetadataName, solid.TriAttribs);
         }
 
 
@@ -226,21 +301,83 @@ namespace g3
 
 
 
-        // [TODO] is there any way we could use a HashSet<Vector3f> here, instead of Dictionary?
-        protected virtual void BuildMesh_IdenticalWeld(STLSolid solid, IMeshBuilder builder)
+        protected virtual DMesh3 BuildMesh_Auto(STLSolid solid)
         {
-            /*int meshID = */builder.AppendNewMesh(false, false, false, false);
+            DMesh3 fastWeldMesh = BuildMesh_IdenticalWeld(solid);
+            int fastWeldMesh_bdryCount;
+            if (check_for_cracks(fastWeldMesh, out fastWeldMesh_bdryCount, WeldTolerance)) {
+                DMesh3 tolWeldMesh = BuildMesh_TolerantWeld(solid, WeldTolerance);
+                int tolWeldMesh_bdryCount = count_boundary_edges(tolWeldMesh);
+
+                if (tolWeldMesh_bdryCount < fastWeldMesh_bdryCount)
+                    return tolWeldMesh;
+                else
+                    return fastWeldMesh;
+
+            }
+
+            return fastWeldMesh;
+        }
+
+
+
+
+        protected int count_boundary_edges(DMesh3 mesh) {
+            int boundary_edge_count = 0;
+            foreach (int eid in mesh.BoundaryEdgeIndices()) {
+                boundary_edge_count++;
+            }
+            return boundary_edge_count;
+        }
+
+
+
+        protected bool check_for_cracks(DMesh3 mesh, out int boundary_edge_count, double crack_tol = MathUtil.ZeroTolerancef)
+        {
+            boundary_edge_count = 0;
+            MeshVertexSelection boundary_verts = new MeshVertexSelection(mesh);
+            foreach ( int eid in mesh.BoundaryEdgeIndices() ) {
+                Index2i ev = mesh.GetEdgeV(eid);
+                boundary_verts.Select(ev.a); boundary_verts.Select(ev.b);
+                boundary_edge_count++;
+            }
+            if (boundary_verts.Count == 0)
+                return false;
+            
+
+            AxisAlignedBox3d bounds = mesh.CachedBounds;
+            PointHashGrid3d<int> borderV = new PointHashGrid3d<int>(bounds.MaxDim / 128, -1);
+            foreach ( int vid in boundary_verts ) {
+                Vector3d v = mesh.GetVertex(vid);
+                var result = borderV.FindNearestInRadius(v, crack_tol, (existing_vid) => {
+                    return v.Distance(mesh.GetVertex(existing_vid));
+                });
+                if (result.Key != -1)
+                    return true;            // we found a crack vertex!
+                borderV.InsertPoint(vid, v);
+            }
+
+            // found no cracks
+            return false;
+        }
+
+
+
+
+        protected virtual DMesh3 BuildMesh_IdenticalWeld(STLSolid solid)
+        {
+            DMesh3Builder builder = new DMesh3Builder();
+            builder.AppendNewMesh(false, false, false, false);
 
             DVectorArray3f vertices = solid.Vertices;
             int N = vertices.Count;
             int[] mapV = new int[N];
 
             Dictionary<Vector3f, int> uniqueV = new Dictionary<Vector3f, int>();
-
-            for ( int vi = 0; vi < N; ++vi ) {
+            for (int vi = 0; vi < N; ++vi) {
                 Vector3f v = vertices[vi];
                 int existing_idx;
-                if ( uniqueV.TryGetValue(v, out existing_idx) ) {
+                if (uniqueV.TryGetValue(v, out existing_idx)) {
                     mapV[vi] = existing_idx;
                 } else {
                     int vid = builder.AppendVertex(v.x, v.y, v.z);
@@ -249,12 +386,70 @@ namespace g3
                 }
             }
 
+            append_mapped_triangles(solid, builder, mapV);
+            return builder.Meshes[0];
+        }
 
-            int nTris = N / 3;
-            for ( int ti = 0; ti < nTris; ++ti ) {
+
+
+
+        protected virtual DMesh3 BuildMesh_TolerantWeld(STLSolid solid, double weld_tolerance)
+        {
+            DMesh3Builder builder = new DMesh3Builder();
+            builder.AppendNewMesh(false, false, false, false);
+
+            DVectorArray3f vertices = solid.Vertices;
+            int N = vertices.Count;
+            int[] mapV = new int[N];
+
+
+            AxisAlignedBox3d bounds = AxisAlignedBox3d.Empty;
+            for (int i = 0; i < N; ++i)
+                bounds.Contain(vertices[i]);
+
+            // [RMS] because we are only searching within tiny radius, there is really no downside to
+            // using lots of bins here, except memory usage. If we don't, and the mesh has a ton of triangles
+            // very close together (happens all the time on big meshes!), then this step can start
+            // to take an *extremely* long time!
+            int num_bins = 256;
+            if (N > 100000)   num_bins = 512;
+            if (N > 1000000)  num_bins = 1024;
+            if (N > 2000000) num_bins = 2048;
+            if (N > 5000000) num_bins = 4096;
+
+            PointHashGrid3d<int> uniqueV = new PointHashGrid3d<int>(bounds.MaxDim / (float)num_bins, -1);
+            Vector3f[] pos = new Vector3f[N];
+            for (int vi = 0; vi < N; ++vi) {
+                Vector3f v = vertices[vi];
+
+                var pair = uniqueV.FindNearestInRadius(v, weld_tolerance, (vid) => {
+                    return v.Distance(pos[vid]);
+                });
+                if (pair.Key == -1) {
+                    int vid = builder.AppendVertex(v.x, v.y, v.z);
+                    uniqueV.InsertPoint(vid, v);
+                    mapV[vi] = vid;
+                    pos[vid] = v;
+                } else {
+                    mapV[vi] = pair.Key;
+                }
+            }
+
+            append_mapped_triangles(solid, builder, mapV);
+            return builder.Meshes[0];
+        }
+
+
+
+        void append_mapped_triangles(STLSolid solid, DMesh3Builder builder, int[] mapV)
+        {
+            int nTris = solid.Vertices.Count / 3;
+            for (int ti = 0; ti < nTris; ++ti) {
                 int a = mapV[3 * ti];
                 int b = mapV[3 * ti + 1];
                 int c = mapV[3 * ti + 2];
+                if (a == b || a == c || b == c)     // don't try to add degenerate triangles
+                    continue;
                 builder.AppendTriangle(a, b, c);
             }
         }

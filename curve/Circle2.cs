@@ -8,6 +8,12 @@ namespace g3
 		public double Radius;
 		public bool IsReversed;		// use ccw orientation instead of cw
 
+        public Circle2d(double radius) {
+            IsReversed = false;
+            Center = Vector2d.Zero;
+            Radius = radius;
+        }
+
 		public Circle2d(Vector2d center, double radius)
 		{
 			IsReversed = false;
@@ -39,7 +45,16 @@ namespace g3
                 { IsReversed = this.IsReversed };
         }
 
-		// angle in range [0,360] (but works for any value, obviously)
+        public bool IsTransformable { get { return true; } }
+        public void Transform(ITransform2 xform)
+        {
+            Center = xform.TransformP(Center);
+            Radius = xform.TransformScalar(Radius);
+        }
+
+
+
+        // angle in range [0,360] (but works for any value, obviously)
         public Vector2d SampleDeg(double degrees)
         {
             double theta = degrees * MathUtil.Deg2Rad;
@@ -114,7 +129,7 @@ namespace g3
 
 
 		public AxisAlignedBox2d Bounds {
-			get { return new AxisAlignedBox2d(Center, 0.5*Radius, 0.5*Radius); }
+			get { return new AxisAlignedBox2d(Center, Radius, Radius); }
 		}
 
         public double SignedDistance(Vector2d pt)
@@ -128,5 +143,21 @@ namespace g3
             return Math.Abs(d - Radius);
         }
 
+
+
+        public static double RadiusArea(double r) {
+            return Math.PI * r * r;
+        }
+        public static double RadiusCircumference(double r) {
+            return MathUtil.TwoPI * r;
+        }
+
+        /// <summary>
+        /// Radius of n-sided regular polygon that contains circle of radius r
+        /// </summary>
+        public static double BoundingPolygonRadius(double r, int n) {
+            double theta = (MathUtil.TwoPI / (double)n) / 2.0;
+            return r / Math.Cos(theta);
+        }
     }
 }

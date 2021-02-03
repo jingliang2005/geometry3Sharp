@@ -60,7 +60,7 @@ namespace g3
 			else if ( t <= -Extent )
 				return P0.DistanceSquared(p);
 			Vector2d proj = Center + t * Direction;
-			return (proj - p).LengthSquared;
+            return proj.DistanceSquared(p);
 		}
         public double DistanceSquared(Vector2d p, out double t)
         {
@@ -73,7 +73,7 @@ namespace g3
                 return P0.DistanceSquared(p);
             }
             Vector2d proj = Center + t * Direction;
-            return (proj - p).LengthSquared;
+            return proj.DistanceSquared(p);
         }
 
         public Vector2d NearestPoint(Vector2d p)
@@ -112,10 +112,10 @@ namespace g3
             // [TODO] subtract Center from test?
             Vector2d vec0 = Center + Extent * Direction;
             Vector2d vec1 = Center - Extent * Direction;
-            double x0 = test[0] - vec0[0];
-            double y0 = test[1] - vec0[1];
-            double x1 = vec1[0] - vec0[0];
-            double y1 = vec1[1] - vec0[1];
+            double x0 = test.x - vec0.x;
+            double y0 = test.y - vec0.y;
+            double x1 = vec1.x - vec0.x;
+            double y1 = vec1.y - vec0.y;
             double det = x0 * y1 - x1 * y0;
             return (det > tol ? +1 : (det < -tol ? -1 : 0));
         }
@@ -151,7 +151,109 @@ namespace g3
         public IParametricCurve2d Clone() {
             return new Segment2d(this.Center, this.Direction, this.Extent);
         }
+
+        public bool IsTransformable { get { return true; } }
+        public void Transform(ITransform2 xform)
+        {
+            Center = xform.TransformP(Center);
+            Direction = xform.TransformN(Direction);
+            Extent = xform.TransformScalar(Extent);
+        }
+
+
+
+        /// <summary>
+        /// distance from pt to segment (a,b), with no square roots
+        /// </summary>
+        public static double FastDistanceSquared(ref Vector2d a, ref Vector2d b, ref Vector2d pt)
+        {
+            double vx = b.x - a.x, vy = b.y - a.y;
+            double len2 = vx*vx + vy*vy;
+            double dx = pt.x - a.x, dy = pt.y - a.y;
+            if (len2 < 1e-13) {
+                return dx * dx + dy * dy;
+            }
+            double t = (dx*vx + dy*vy);
+            if (t <= 0) {
+                return dx * dx + dy * dy;
+            } else if (t >= len2) {
+                dx = pt.x - b.x; dy = pt.y - b.y;
+                return dx * dx + dy * dy;
+            }
+
+            dx = pt.x - (a.x + ((t * vx)/len2));
+            dy = pt.y - (a.y + ((t * vy)/len2));
+            return dx * dx + dy * dy;
+        }
+
+
+        /// <summary>
+        /// Returns:
+        ///   +1, on right of line
+        ///   -1, on left of line
+        ///    0, on the line
+        /// </summary>
+        public static int WhichSide(ref Vector2d a, ref Vector2d b, ref Vector2d test, double tol = 0)
+        {
+            double x0 = test.x - a.x;
+            double y0 = test.y - a.y;
+            double x1 = b.x - a.x;
+            double y1 = b.y - a.y;
+            double det = x0 * y1 - x1 * y0;
+            return (det > tol ? +1 : (det < -tol ? -1 : 0));
+        }
+
+
+
+
+        /// <summary>
+        /// Test if segments intersect. Returns true for parallel-line overlaps.
+        /// Returns same result as IntrSegment2Segment2.
+        /// </summary>
+        public bool Intersects(ref Segment2d seg2, double dotThresh = double.Epsilon, double intervalThresh = 0)
+        {
+            // see IntrLine2Line2 and IntrSegment2Segment2 for details on this code
+
+            Vector2d diff = seg2.Center - Center;
+            double D0DotPerpD1 = Direction.DotPerp(seg2.Direction);
+            if (Math.Abs(D0DotPerpD1) > dotThresh) {   // Lines intersect in a single point.
+                double invD0DotPerpD1 = ((double)1) / D0DotPerpD1;
+                double diffDotPerpD0 = diff.DotPerp(Direction);
+                double diffDotPerpD1 = diff.DotPerp(seg2.Direction);
+                double s = diffDotPerpD1 * invD0DotPerpD1;
+                double s2 = diffDotPerpD0 * invD0DotPerpD1;
+                return Math.Abs(s) <= (Extent + intervalThresh) 
+                        && Math.Abs(s2) <= (seg2.Extent + intervalThresh);
+            }
+
+            // Lines are parallel.
+            diff.Normalize();
+            double diffNDotPerpD1 = diff.DotPerp(seg2.Direction);
+            if (Math.Abs(diffNDotPerpD1) <= dotThresh) {
+                // Compute the location of segment1 endpoints relative to segment0.
+                diff = seg2.Center - Center;
+                double t1 = Direction.Dot(diff);
+                double tmin = t1 - seg2.Extent;
+                double tmax = t1 + seg2.Extent;
+                Interval1d extents = new Interval1d(-Extent, Extent);
+                if (extents.Overlaps(new Interval1d(tmin, tmax)))
+                    return true;
+                return false;
+            }
+
+            // lines are parallel but not collinear
+            return false;
+        }
+        public bool Intersects(Segment2d seg2, double dotThresh = double.Epsilon, double intervalThresh = 0) {
+            return Intersects(ref seg2, dotThresh, intervalThresh);
+        }
+
+
     }
+
+
+
+
 
 
 
@@ -233,6 +335,34 @@ namespace g3
             Direction = p1 - p0;
             Extent = 0.5f * Direction.Normalize();
         }
+
+
+
+
+        /// <summary>
+        /// distance from pt to segment (a,b), with no square roots
+        /// </summary>
+        public static float FastDistanceSquared(ref Vector2f a, ref Vector2f b, ref Vector2f pt)
+        {
+            float vx = b.x - a.x, vy = b.y - a.y;
+            float len2 = vx * vx + vy * vy;
+            float dx = pt.x - a.x, dy = pt.y - a.y;
+            if (len2 < 1e-7) {
+                return dx * dx + dy * dy;
+            }
+            float t = (dx * vx + dy * vy);
+            if (t <= 0) {
+                return dx * dx + dy * dy;
+            } else if (t >= len2) {
+                dx = pt.x - b.x; dy = pt.y - b.y;
+                return dx * dx + dy * dy;
+            }
+
+            dx = pt.x - (a.x + ((t * vx) / len2));
+            dy = pt.y - (a.y + ((t * vy) / len2));
+            return dx * dx + dy * dy;
+        }
+
     }
 
 

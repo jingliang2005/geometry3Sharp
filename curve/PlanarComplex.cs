@@ -43,8 +43,18 @@ namespace g3
                 get { return has_set_color; }
             }
 
+            protected void copy_to(Element new_element)
+            {
+                new_element.ID = this.ID;
+                new_element.color = this.color;
+                new_element.has_set_color = this.has_set_color;
+                if (source != null)
+                    new_element.source = this.source.Clone();
+            }
+
 			public abstract IEnumerable<Segment2d> SegmentItr();
 			public abstract AxisAlignedBox2d Bounds();
+            public abstract Element Clone();
 		}
 
 		public class SmoothCurveElement : Element 
@@ -57,6 +67,13 @@ namespace g3
 			public override AxisAlignedBox2d Bounds() {
 				return polyLine.GetBounds();
 			}
+
+            public override Element Clone() {
+                SmoothCurveElement curve = new SmoothCurveElement();
+                this.copy_to(curve);
+                curve.polyLine = (this.polyLine == this.source) ? curve.source as PolyLine2d : new PolyLine2d(this.polyLine);
+                return curve;
+            }
 		}
 
 		public class SmoothLoopElement : Element 
@@ -69,12 +86,20 @@ namespace g3
 			public override AxisAlignedBox2d Bounds() {
 				return polygon.GetBounds();
 			}
-		}
+
+            public override Element Clone()
+            {
+                SmoothLoopElement loop = new SmoothLoopElement();
+                this.copy_to(loop);
+                loop.polygon = (this.polygon == this.source) ? loop.source as Polygon2d : new Polygon2d(this.polygon);
+                return loop;
+            }
+        }
 
 
 
 
-		List<Element> vElements;
+        List<Element> vElements;
 
 
 		public PlanarComplex() {
@@ -106,15 +131,26 @@ namespace g3
 		}
 
 
-        public void Add(Polygon2d poly)
+        public Element Add(Polygon2d poly)
         {
             SmoothLoopElement e = new SmoothLoopElement();
             e.ID = id_generator++;
             e.source = new Polygon2DCurve() { Polygon = poly };
             e.polygon = new Polygon2d(poly);
             vElements.Add(e);
+            return e;
         }
 
+
+        public Element Add(PolyLine2d pline)
+        {
+            SmoothCurveElement e = new SmoothCurveElement();
+            e.ID = id_generator++;
+            e.source = new PolyLine2DCurve() { Polyline = pline };
+            e.polyLine = new PolyLine2d(pline);
+            vElements.Add(e);
+            return e;
+        }
 
 
         public void Remove(Element e)
@@ -375,11 +411,19 @@ namespace g3
 
 
 
+        public class GeneralSolid
+        {
+            public Element Outer;
+            public List<Element> Holes = new List<Element>();
+        }
+
         public class SolidRegionInfo
         {
             public List<GeneralPolygon2d> Polygons;
             public List<PlanarSolid2d> Solids;
 
+            // map from polygon solids back to element(s) they came from
+            public List<GeneralSolid> PolygonsSources;
 
             public AxisAlignedBox2d Bounds {
                 get {
@@ -415,10 +459,40 @@ namespace g3
 
 
 
+		public struct FindSolidsOptions
+		{
+			public double SimplifyDeviationTolerance;
+			public bool WantCurveSolids;
+			public bool TrustOrientations;
+			public bool AllowOverlappingHoles;
+
+			public static readonly FindSolidsOptions Default = new FindSolidsOptions() {
+				SimplifyDeviationTolerance = 0.1,
+				WantCurveSolids = true,
+				TrustOrientations = false,
+				AllowOverlappingHoles = false
+			};
+
+            public static readonly FindSolidsOptions SortPolygons = new FindSolidsOptions() {
+                SimplifyDeviationTolerance = 0.0,
+                WantCurveSolids = false,
+                TrustOrientations = true,
+                AllowOverlappingHoles = false
+            };
+        }
+
+
+		public SolidRegionInfo FindSolidRegions(double fSimplifyDeviationTol = 0.1, bool bWantCurveSolids = true)
+		{
+			FindSolidsOptions opt = FindSolidsOptions.Default;
+			opt.SimplifyDeviationTolerance = fSimplifyDeviationTol;
+			opt.WantCurveSolids = bWantCurveSolids;
+			return FindSolidRegions(opt);
+		}
 
         // Finds set of "solid" regions - eg boundary loops with interior holes.
         // Result has outer loops being clockwise, and holes counter-clockwise
-		public SolidRegionInfo FindSolidRegions(double fSimplifyDeviationTol = 0.1, bool bWantCurveSolids = true) 
+		public SolidRegionInfo FindSolidRegions(FindSolidsOptions options) 
 		{
 			List<SmoothLoopElement> validLoops = new List<SmoothLoopElement>(LoopsItr());
 			int N = validLoops.Count;
@@ -433,7 +507,7 @@ namespace g3
 
 			// copy polygons, simplify if desired
 			double fClusterTol = 0.0;		// don't do simple clustering, can lose corners
-			double fDeviationTol = fSimplifyDeviationTol;
+			double fDeviationTol = options.SimplifyDeviationTolerance;
 			Polygon2d[] polygons = new Polygon2d[maxid];
 			foreach ( var v in validLoops ) {
 				Polygon2d p = new Polygon2d(v.polygon);
@@ -452,6 +526,10 @@ namespace g3
 			Dictionary<int, List<int>> ContainSets = new Dictionary<int, List<int>>();
             Dictionary<int, List<int>> ContainedParents = new Dictionary<int, List<int>>();
 
+			bool bUseOrient = options.TrustOrientations;
+			bool bWantCurveSolids = options.WantCurveSolids;
+			bool bCheckHoles = ! options.AllowOverlappingHoles;
+
             // construct containment sets
 			for ( int i = 0; i < N; ++i ) {
 				SmoothLoopElement loopi = validLoops[i];
@@ -462,6 +540,11 @@ namespace g3
 						continue;
 					SmoothLoopElement loopj = validLoops[j];
 					Polygon2d polyj = polygons[loopj.ID];
+
+					// if we are preserving orientations, holes cannot contain holes and
+					// outers cannot contain outers!
+					if (bUseOrient && loopj.polygon.IsClockwise == loopi.polygon.IsClockwise)
+						continue;
 
 					// cannot be contained if bounds are not contained
 					if ( bounds[loopi.ID].Contains( bounds[loopj.ID] ) == false )
@@ -484,6 +567,8 @@ namespace g3
 			}
 
 			List<GeneralPolygon2d> polysolids = new List<GeneralPolygon2d>();
+            List<GeneralSolid> polySolidsInfo = new List<GeneralSolid>();
+
             List<PlanarSolid2d> solids = new List<PlanarSolid2d>();
 			HashSet<SmoothLoopElement> used = new HashSet<SmoothLoopElement>();
 
@@ -531,6 +616,7 @@ namespace g3
                     ParentsToProcess.Add(i);
 
                 polysolids.Add(g);
+                polySolidsInfo.Add(new GeneralSolid() { Outer = loopi });
                 if ( bWantCurveSolids )
                     solids.Add(s);
             }
@@ -566,7 +652,8 @@ namespace g3
                         }
 
                         try {
-                            polysolids[outer_idx].AddHole(hole_poly);
+                            polysolids[outer_idx].AddHole(hole_poly, bCheckHoles);
+                            polySolidsInfo[outer_idx].Holes.Add(childLoop);
                             if ( hole_loop != null )
                                 solids[outer_idx].AddHole(hole_loop);
                         } catch {
@@ -594,7 +681,6 @@ namespace g3
                 }
 
                 ParentsToProcess.Clear();
-
 
                 // ok now find next-level uncontained parents...
                 for (int i = 0; i < N; ++i) {
@@ -629,6 +715,7 @@ namespace g3
                         ParentsToProcess.Add(i);
 
                     polysolids.Add(g);
+                    polySolidsInfo.Add(new GeneralSolid() { Outer = loopi });
                     if (bWantCurveSolids)
                         solids.Add(s);
                 }
@@ -656,6 +743,7 @@ namespace g3
                     s.SetOuter(outer_loop, true);
 
                 polysolids.Add(g);
+                polySolidsInfo.Add(new GeneralSolid() { Outer = loopi });
                 if (bWantCurveSolids)
                     solids.Add(s);
             }
@@ -664,6 +752,7 @@ namespace g3
 
             return new SolidRegionInfo() {
                 Polygons = polysolids,
+                PolygonsSources = polySolidsInfo,
                 Solids = (bWantCurveSolids) ? solids : null
             };
 		}
@@ -783,6 +872,74 @@ namespace g3
 
 			return ci;
 		}
+
+
+
+
+
+
+        public PlanarComplex Clone()
+        {
+            PlanarComplex clone = new PlanarComplex();
+            clone.DistanceAccuracy = this.DistanceAccuracy;
+            clone.AngleAccuracyDeg = this.AngleAccuracyDeg;
+            clone.SpacingT = this.SpacingT;
+            clone.MinimizeSampling = this.MinimizeSampling;
+            clone.id_generator = this.id_generator;
+
+            clone.vElements = new List<Element>(vElements.Count);
+            foreach ( var element in vElements )
+                clone.vElements.Add(element.Clone());
+
+            return clone;
+        }
+
+
+
+
+        public void Append(PlanarComplex append)
+        {
+            foreach ( var element in append.vElements ) {
+                element.ID = this.id_generator++;
+                vElements.Add(element);
+            }
+
+            // clear elements in other so we don't make any mistakes...
+            append.vElements.Clear();
+        }
+
+
+
+        public void Transform(ITransform2 xform, bool bApplyToSources, bool bRecomputePolygons = false)
+        {
+            foreach ( var element in vElements ) {
+                if ( element is SmoothLoopElement ) {
+                    var loop = element as SmoothLoopElement;
+                    if (bApplyToSources && loop.source != loop.polygon)
+                        loop.source.Transform(xform);
+
+                    if ( bRecomputePolygons )
+                        UpdateSampling(loop);
+                    else
+                        loop.polygon.Transform(xform);
+
+                } else if (element is SmoothCurveElement) {
+                    var curve = element as SmoothCurveElement;
+                    if (bApplyToSources && curve.source != curve.polyLine)
+                        curve.source.Transform(xform);
+
+                    if (bRecomputePolygons)
+                        UpdateSampling(curve);
+                    else
+                        curve.polyLine.Transform(xform);
+                }
+            }
+        }
+
+
+
+
+
 
 
 

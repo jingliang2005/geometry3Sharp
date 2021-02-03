@@ -14,6 +14,7 @@ namespace g3
         FileAccessError = 1,
         UnknownFormatError = 2,
         FormatNotSupportedError = 3,
+        InvalidFilenameError = 4,
 
         // read errors
         FileParsingError = 100,
@@ -106,6 +107,10 @@ namespace g3
 
 		public bool bWriteMaterials;		// for OBJ, indicates that .mtl file should be written
 		public string MaterialFilePath;		// only used if bWriteMaterialFile = true
+
+        public string groupNamePrefix;        // prefix for group names in OBJ files (default is "mmGroup")
+        public Func<int, string> GroupNameF;  // if non-null, you can use this to generate your own group names
+
 
         public Action<int, int> ProgressFunc;	// progress monitoring callback
 
