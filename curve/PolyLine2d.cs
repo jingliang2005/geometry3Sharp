@@ -382,15 +382,23 @@ namespace g3
 
 
     /// <summary>
+    /// 提供最小IParametricCurve2D接口的PolyLine2d包装,IParametricCurve2D 参数曲线2D接口。
     /// Wrapper for a PolyLine2d that provides minimal IParametricCurve2D interface
     /// </summary>
     public class PolyLine2DCurve : IParametricCurve2d
     {
         public PolyLine2d Polyline;
 
+        /// <summary>
+        /// 直接返回：return false;。
+        /// </summary>
         public bool IsClosed { get { return false; } }
 
-        // can call SampleT in range [0,ParamLength]
+
+        /// <summary>
+        /// 可以在[0，Param Length]范围内调用Sample
+        /// can call SampleT in range [0,ParamLength]
+        /// </summary>
         public double ParamLength { get { return Polyline.VertexCount; } }
         public Vector2d SampleT(double t)
         {
@@ -414,7 +422,8 @@ namespace g3
 
         public Vector2d SampleArcLength(double a)
         {
-            throw new NotImplementedException("Polygon2dCurve.SampleArcLength");
+            //TODO:没有实现，直接抛出异常。
+            throw new NotImplementedException("没有实现Polygon2dCurve.SampleArcLength");
         }
 
         public void Reverse()

@@ -7,22 +7,41 @@ using System.Text;
 
 namespace g3
 {
+    /// <summary>
+    /// 多边形2d
+    /// </summary>
 	public class Polygon2d : IDuplicatable<Polygon2d>
     {
+        /// <summary>
+        /// 顶点集合。
+        /// </summary>
         protected List<Vector2d> vertices;
+
+        /// <summary>
+        /// 时间戳记.
+        /// </summary>
 		public int Timestamp;
 
+        /// <summary>
+        /// 创建没有顶点的空多边形。时间戳记=0。
+        /// </summary>
         public Polygon2d() {
             vertices = new List<Vector2d>();
 			Timestamp = 0;
         }
-
+        /// <summary>
+        /// 从多边形创建新多边形，时间戳记=0。
+        /// </summary>
+        /// <param name="copy"></param>
         public Polygon2d(Polygon2d copy)
         {
             vertices = new List<Vector2d>(copy.vertices);
 			Timestamp = 0;
         }
-
+        /// <summary>
+        /// 从顶点集合创建多边形，时间戳记=0。
+        /// </summary>
+        /// <param name="copy"></param>
         public Polygon2d(IList<Vector2d> copy)
         {
             vertices = new List<Vector2d>(copy);
@@ -55,7 +74,11 @@ namespace g3
                 vertices.Add(new Vector2d(values[2 * k], values[2 * k + 1]));
             Timestamp = 0;
         }
-
+        /// <summary>
+        /// 从委托方法创建多边形，时间戳记=0。
+        /// </summary>
+        /// <param name="SourceF"></param>
+        /// <param name="N"></param>
         public Polygon2d(Func<int,Vector2d> SourceF, int N) 
         {
             vertices = new List<Vector2d>();
@@ -63,7 +86,10 @@ namespace g3
                 vertices.Add(SourceF(k));
             Timestamp = 0;
         }
-
+        /// <summary>
+        /// 重复，返回一个新多边形，时间戳记相同。
+        /// </summary>
+        /// <returns></returns>
         public virtual Polygon2d Duplicate() {
 			Polygon2d p = new Polygon2d(this);
 			p.Timestamp = this.Timestamp;
@@ -76,38 +102,58 @@ namespace g3
 			get { return vertices[key]; }
 			set { vertices[key] = value; Timestamp++; }
 		}
-
+        /// <summary>
+        /// 开始顶点。
+        /// </summary>
 		public Vector2d Start {
 			get { return vertices[0]; }
 		}
-
+        /// <summary>
+        /// 返回只读顶点集合。
+        /// </summary>
         public ReadOnlyCollection<Vector2d> Vertices {
             get { return vertices.AsReadOnly(); }
         }
-
+        /// <summary>
+        /// 顶点数量。
+        /// </summary>
         public int VertexCount
         {
             get { return vertices.Count; }
         }
-
+        /// <summary>
+        /// 增加顶点，时间戳记累加1。
+        /// </summary>
+        /// <param name="v"></param>
         public void AppendVertex(Vector2d v)
         {
             vertices.Add(v);
 			Timestamp++; 
         }
+        /// <summary>
+        /// 增加顶点集合，时间戳记加1。
+        /// </summary>
+        /// <param name="v"></param>
         public void AppendVertices(IEnumerable<Vector2d> v)
         {
             vertices.AddRange(v);
             Timestamp++;
         }
-
+        /// <summary>
+        /// 移除一个指定索引的顶点，时间戳记加1。
+        /// </summary>
+        /// <param name="idx"></param>
         public void RemoveVertex(int idx)
         {
             vertices.RemoveAt(idx);
             Timestamp++;
         }
 
-
+        /// <summary>
+        /// 设置顶点，取得所有权：直接赋值（=），清空后循环增加（ADD)。
+        /// </summary>
+        /// <param name="newVertices"></param>
+        /// <param name="bTakeOwnership">取得所有权</param>
         public void SetVertices(List<Vector2d> newVertices, bool bTakeOwnership)
         {
             if ( bTakeOwnership) {
@@ -120,14 +166,20 @@ namespace g3
             }
         }
 
-
+        /// <summary>
+        /// 顶点顺序反转，时间戳记加1。
+        /// </summary>
         public void Reverse()
 		{
 			vertices.Reverse();
 			Timestamp++;
 		}
 
-
+        /// <summary>
+        /// 获取指定点的切线，返回下一点减上一点得到的新点，新点归一化处理。
+        /// </summary>
+        /// <param name="i"></param>
+        /// <returns></returns>
         public Vector2d GetTangent(int i)
         {
 			Vector2d next = vertices[(i+1)%vertices.Count];
@@ -136,6 +188,9 @@ namespace g3
         }
 
         /// <summary>
+        /// 获取指定点的归一化顶点，
+        /// 垂直于切线方向的顶点i处的法线，如果边的长度非常不同，则不是那么直观。
+        /// 点“向内”表示顺时针多边形，点向外“表示”逆时针
         /// Normal at vertex i, which is perp to tangent direction, which is not so 
         /// intuitive if edges have very different lengths. 
         /// Points "inward" for clockwise polygon, outward for counter-clockwise
@@ -514,8 +569,9 @@ namespace g3
 
 
         /// <summary>
+        /// 沿顶点法线方向将每个点偏移dist（即切线-perp）
         /// Offset each point by dist along vertex normal direction (ie tangent-perp)
-        /// CCW polygon offsets "outwards", CW "inwards".
+        /// CCW多边形偏移“向外”，CW“向内”。CCW polygon offsets "outwards", CW "inwards".
         /// </summary>
         public void VtxNormalOffset(double dist, bool bUseFaceAvg = false)
         {
@@ -535,6 +591,7 @@ namespace g3
 
 
         /// <summary>
+        /// 通过使边缘偏移和相交将多边形偏移固定距离。 CCW多边形偏移“向外”，CW“向内”。
         /// offset polygon by fixed distance, by offsetting and intersecting edges.
         /// CCW polygon offsets "outwards", CW "inwards".
         /// </summary>
@@ -575,8 +632,19 @@ namespace g3
         //            v[] = polyline array of vertex points
         //            j,k = indices for the subchain v[j] to v[k]
         //    Output: mk[] = array of markers matching vertex array v[]
+        /// <summary>
+        /// 多边形简化代码，改编自：http://softsurfer.com/Archive/algorithm_0205/algorithm_0205.htm simpleDP（）
+        /// ：这是Douglas-Peucker递归简化例程，它仅标记作为简化折线一部分的顶点，用于逼近折线子链。
+        /// v [j]至v [k]。 输入：tol =近似公差v [] =顶点的折线数组j，k =子链v [j]至v [k]的索引输出：mk [] =匹配顶点数组v []的标记数组
+        /// </summary>
+        /// <param name="tol"></param>
+        /// <param name="v"></param>
+        /// <param name="j"></param>
+        /// <param name="k"></param>
+        /// <param name="mk"></param>
         static void simplifyDP( double tol, Vector2d[] v, int j, int k, bool[] mk )
 		{
+            //TODO:多边形简化，这函数要详细了解。
 			if (k <= j+1) // there is nothing to simplify
 				return;
 
@@ -608,7 +676,12 @@ namespace g3
 		}
 
 
-
+        /// <summary>
+        /// 简化
+        /// </summary>
+        /// <param name="clusterTol"></param>
+        /// <param name="lineDeviationTol"></param>
+        /// <param name="bSimplifyStraightLines"></param>
 		public void Simplify( double clusterTol = 0.0001,
 		                      double lineDeviationTol = 0.01,
 							  bool bSimplifyStraightLines = true )
@@ -688,7 +761,12 @@ namespace g3
 
 
 
-
+        /// <summary>
+        /// 倒角。
+        /// </summary>
+        /// <param name="chamfer_dist"></param>
+        /// <param name="minConvexAngleDeg"></param>
+        /// <param name="minConcaveAngleDeg"></param>
         public void Chamfer(double chamfer_dist, double minConvexAngleDeg = 30, double minConcaveAngleDeg = 30)
         {
             if (IsClockwise)
@@ -749,17 +827,24 @@ namespace g3
 
 
 
-		/// <summary>
-		/// Return minimal bounding box of vertices, computed to epsilon tolerance
-		/// </summary>
-		public Box2d MinimalBoundingBox(double epsilon)
+        /// <summary>
+        /// 返回顶点的最小边界框，计算为ε公差
+        /// Return minimal bounding box of vertices, computed to epsilon tolerance
+        /// </summary>
+        public Box2d MinimalBoundingBox(double epsilon)
 		{
 			ContMinBox2 box2 = new ContMinBox2(vertices, epsilon, QueryNumberType.QT_DOUBLE, false);
 			return box2.MinBox;
 		}
 
 
-
+        /// <summary>
+        /// 矩形。
+        /// </summary>
+        /// <param name="center"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
         static public Polygon2d MakeRectangle(Vector2d center, double width, double height)
         {
             VectorArray2d vertices = new VectorArray2d(4);
@@ -770,7 +855,13 @@ namespace g3
             return new Polygon2d(vertices);
         }
 
-
+        /// <summary>
+        /// 圆。生成一个新圆。指定半径，线段数量，angleShiftRad（角度偏移RAD?)。
+        /// </summary>
+        /// <param name="fRadius"></param>
+        /// <param name="nSteps"></param>
+        /// <param name="angleShiftRad"></param>
+        /// <returns></returns>
         static public Polygon2d MakeCircle(double fRadius, int nSteps, double angleShiftRad = 0)
         {
             VectorArray2d vertices = new VectorArray2d(nSteps);
@@ -791,16 +882,29 @@ namespace g3
 
 
     /// <summary>
+    /// 提供最小IParametricCurve2D接口的Polygon2d包装,IParametricCurve2D 参数曲线2D接口。
     /// Wrapper for a Polygon2d that provides minimal IParametricCurve2D interface
     /// </summary>
     public class Polygon2DCurve : IParametricCurve2d
-    {
+    { 
         public Polygon2d Polygon;
 
+        /// <summary>
+        /// 直接返回：return true;。
+        /// </summary>
         public bool IsClosed { get { return true; } }
 
-        // can call SampleT in range [0,ParamLength]
+
+        /// <summary>
+        /// 可以在[0，Param Length]范围内调用Sample
+        /// can call SampleT in range [0,ParamLength]
+        /// </summary>
         public double ParamLength { get { return Polygon.VertexCount; } }
+        /// <summary>
+        /// 样品。
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
         public Vector2d SampleT(double t)
         {
             int i = (int)t;
@@ -811,29 +915,57 @@ namespace g3
             double alpha = t - (double)i;
             return (1.0 - alpha) * a + (alpha) * b;
         }
+        /// <summary>
+        /// 切线
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
         public Vector2d TangentT(double t)
         {
             throw new NotImplementedException("Polygon2dCurve.TangentT");
         }
-
+        /// <summary>
+        /// 弧长。直接返回：return true;。
+        /// </summary>
         public bool HasArcLength { get { return true; } }
+        /// <summary>
+        /// 圆弧长度。
+        /// </summary>
         public double ArcLength { get { return Polygon.ArcLength; } }
+        /// <summary>
+        /// 样品弧长。
+        /// </summary>
+        /// <param name="a"></param>
+        /// <returns></returns>
         public Vector2d SampleArcLength(double a)
         {
             throw new NotImplementedException("Polygon2dCurve.SampleArcLength");
         }
 
+        /// <summary>
+        /// 反转。
+        /// </summary>
         public void Reverse()
         {
             Polygon.Reverse();
         }
 
+        /// <summary>
+        /// 克隆。
+        /// </summary>
+        /// <returns></returns>
         public IParametricCurve2d Clone()
         {
             return new Polygon2DCurve() { Polygon = new Polygon2d(this.Polygon) };
         }
-
+        /// <summary>
+        /// 可变换。直接返回：return true;。
+        /// </summary>
         public bool IsTransformable { get { return true; } }
+        /// <summary>
+        /// 变换。
+        /// </summary>
+        /// <param name="xform"></param>
         public void Transform(ITransform2 xform) {
             Polygon.Transform(xform);
         }
