@@ -157,7 +157,7 @@ namespace g3
 			double[] evector = new double[4];
 			es.GetEigenvector(0, evector);
 
-			double inv = 1.0 / evector[3];  // TODO: Guard against zero divide?
+			double inv = 1.0 / evector[3];  // TODO: Guard against zero divide? 防范零分差？
 			Vector3d coefficients = Vector3d.Zero;
 			for (int row = 0; row < 3; ++row) {
 				coefficients[row] = inv * evector[row];
