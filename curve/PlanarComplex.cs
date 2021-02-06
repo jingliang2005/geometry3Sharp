@@ -4,31 +4,53 @@ using System.Diagnostics;
 
 namespace g3 
 {
-
+	/// <summary>
+	/// 线段和复合体，2d
+	/// </summary>
 	public struct ComplexSegment2d
 	{
 		public Segment2d seg;
 		public bool isClosed;
+		/// <summary>
+		/// 元件。
+		/// </summary>
 		public PlanarComplex.Element element;
 	}
+
+	/// <summary>
+	/// 顶点和复合体。
+	/// </summary>
 	public struct ComplexEndpoint2d
 	{
 		public Vector2d v;
 		public bool isStart;
+		/// <summary>
+		/// 平滑曲线元素。
+		/// </summary>
 		public PlanarComplex.SmoothCurveElement element;
 	}
 
-
+	/// <summary>
+	/// 平面复合体。
+	/// </summary>
 	public class PlanarComplex 
 	{
+		#region 这些决定了逐点采样率
 		// these determine pointwise sampling rates
 		public double DistanceAccuracy = 0.1;
 		public double AngleAccuracyDeg = 5.0;
-		public double SpacingT = 0.01;		// for curves where we don't know arc length
-		public bool MinimizeSampling = false;	// if true, we don't subsample straight lines
+		public double SpacingT = 0.01;      // for curves where we don't know arc length
+		public bool MinimizeSampling = false;   // if true, we don't subsample straight lines
 
+		#endregion
+		/// <summary>
+		/// id生成器
+		/// </summary>
 		int id_generator = 1;
 
+		/// <summary>
+		/// 元件类。
+		/// </summary>
 		public abstract class Element {
 			public IParametricCurve2d source;
 			public int ID = 0;
@@ -57,6 +79,9 @@ namespace g3
             public abstract Element Clone();
 		}
 
+		/// <summary>
+		/// 平滑曲线元素。
+		/// </summary>
 		public class SmoothCurveElement : Element 
 		{
 			public PolyLine2d polyLine;
@@ -76,6 +101,9 @@ namespace g3
             }
 		}
 
+		/// <summary>
+		/// 平滑环元素。
+		/// </summary>
 		public class SmoothLoopElement : Element 
 		{
 			public Polygon2d polygon;
@@ -98,7 +126,9 @@ namespace g3
 
 
 
-
+		/// <summary>
+		/// 元素集合。
+		/// </summary>
         List<Element> vElements;
 
 
@@ -158,7 +188,10 @@ namespace g3
             vElements.Remove(e);
         }
 
-
+		/// <summary>
+		/// 更新采样
+		/// </summary>
+		/// <param name="c"></param>
 		void UpdateSampling(SmoothCurveElement c) {
 			if ( MinimizeSampling && c.source is Segment2d ) {
 				c.polyLine = new PolyLine2d();
@@ -169,19 +202,29 @@ namespace g3
               	  CurveSampler2.AutoSample(c.source, DistanceAccuracy, SpacingT) );
 			}
 		}
+		/// <summary>
+		/// 更新采样
+		/// </summary>
+		/// <param name="l"></param>
 		void UpdateSampling(SmoothLoopElement l) {
 			l.polygon = new Polygon2d(
 				CurveSampler2.AutoSample(l.source, DistanceAccuracy, SpacingT) );
 		}
 
-
+		/// <summary>
+		/// 反转点顺序。
+		/// </summary>
+		/// <param name="c"></param>
 		public void Reverse(SmoothCurveElement c) {
 			c.source.Reverse();
 			UpdateSampling(c);
 		}
 
 
-
+		/// <summary>
+		/// 全部线段。
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerable<ComplexSegment2d> AllSegmentsItr() {
 			foreach ( Element e in vElements ) {
 				ComplexSegment2d s = new ComplexSegment2d();
@@ -198,7 +241,10 @@ namespace g3
 			}
 		}
 
-
+		/// <summary>
+		/// 返回元素的IEnumerable<Element>表示。
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerable<Element> ElementsItr() {
 			foreach ( Element e in vElements ) {
                 yield return e;
@@ -225,14 +271,15 @@ namespace g3
             }
             return false;
         }
-            
 
 
-        /// <summary>
-        /// iterate through "leaf" curves, ie all the IParametricCurve2D's 
-        /// embedded in loops that do not contain any child curves
-        /// </summary>
-        public IEnumerable<IParametricCurve2d> LoopLeafComponentsItr()
+
+		/// <summary>
+		/// 遍历“叶”曲线，即所有IParametricCurve2D嵌入到不包含任何子曲线的循环中
+		/// iterate through "leaf" curves, ie all the IParametricCurve2D's 
+		/// embedded in loops that do not contain any child curves
+		/// </summary>
+		public IEnumerable<IParametricCurve2d> LoopLeafComponentsItr()
         {
             foreach ( Element e in vElements ) {
                 if ( e is SmoothLoopElement ) {
@@ -247,6 +294,10 @@ namespace g3
         }
 
 		// iterate through endpoints of open curves
+		/// <summary>
+		/// 遍历开放曲线的端点
+		/// </summary>
+		/// <returns></returns>
 		public IEnumerable<ComplexEndpoint2d> EndpointsItr() {
 			foreach ( Element e in vElements ) {
 				if ( e is SmoothCurveElement ) {
@@ -262,7 +313,10 @@ namespace g3
 		}
 
 
-
+		/// <summary>
+		/// 轴对齐框2d
+		/// </summary>
+		/// <returns></returns>
 		public AxisAlignedBox2d Bounds() {
 			AxisAlignedBox2d box = AxisAlignedBox2d.Empty;
 			foreach ( Element e in vElements ) {
@@ -273,7 +327,9 @@ namespace g3
 
 
 
-
+		/// <summary>
+		/// 拆分所有循环
+		/// </summary>
 		public void SplitAllLoops() {
 			List<Element> vRemove = new List<Element>();
 			List<IParametricCurve2d> vAdd = new List<IParametricCurve2d>();
@@ -302,7 +358,13 @@ namespace g3
 
 
 
-
+		/// <summary>
+		/// 联接元素
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
+		/// <param name="loop_tolerance"></param>
+		/// <returns></returns>
 		public bool JoinElements(ComplexEndpoint2d a, ComplexEndpoint2d b, double loop_tolerance = MathUtil.ZeroTolerance) {
 			if (a.element == b.element)
 				throw new Exception("PlanarComplex.ChainElements: same curve!!");
@@ -358,8 +420,12 @@ namespace g3
 
 
 
-
-        public void ConvertToLoop(SmoothCurveElement curve, double tolerance = MathUtil.ZeroTolerance)
+		/// <summary>
+		/// 转换为环。
+		/// </summary>
+		/// <param name="curve"></param>
+		/// <param name="tolerance"></param>
+		public void ConvertToLoop(SmoothCurveElement curve, double tolerance = MathUtil.ZeroTolerance)
         {
 			double dDelta = ( curve.polyLine.Start - curve.polyLine.End ).Length;
 			if ( dDelta < tolerance ) {
@@ -387,7 +453,11 @@ namespace g3
         }
 
 
-
+		/// <summary>
+		/// 附加
+		/// </summary>
+		/// <param name="cTo"></param>
+		/// <param name="cAppend"></param>
 		void append(SmoothCurveElement cTo, SmoothCurveElement cAppend) {
 			ParametricCurveSequence2 use = null;
 			if ( cTo.source is ParametricCurveSequence2 ) {
@@ -410,21 +480,38 @@ namespace g3
 		}
 
 
-
+		/// <summary>
+		/// 通用实体类。封闭一个元素和内孔（元素集合）。
+		/// </summary>
         public class GeneralSolid
         {
             public Element Outer;
             public List<Element> Holes = new List<Element>();
         }
 
-        public class SolidRegionInfo
+		/// <summary>
+		/// 实体区域信息类。
+		/// </summary>
+		public class SolidRegionInfo
         {
+			/// <summary>
+			/// 多边形集合。
+			/// </summary>
             public List<GeneralPolygon2d> Polygons;
-            public List<PlanarSolid2d> Solids;
+			/// <summary>
+			/// 平面实体2d集合。
+			/// </summary>
+			public List<PlanarSolid2d> Solids;
 
-            // map from polygon solids back to element(s) they came from
-            public List<GeneralSolid> PolygonsSources;
+			// map from polygon solids back to element(s) they came from
+			/// <summary>
+			/// 从多边形实体映射回它们来自的元素
+			/// </summary>
+			public List<GeneralSolid> PolygonsSources;
 
+			/// <summary>
+			/// 边界。
+			/// </summary>
             public AxisAlignedBox2d Bounds {
                 get {
                     AxisAlignedBox2d bounds = AxisAlignedBox2d.Empty;
@@ -434,7 +521,9 @@ namespace g3
                 }
             }
 
-
+			/// <summary>
+			/// 面积。
+			/// </summary>
             public double Area {
                 get {
                     double area = 0;
@@ -444,8 +533,10 @@ namespace g3
                 }
             }
 
-
-            public double HolesArea {
+			/// <summary>
+			/// 孔面积。
+			/// </summary>
+			public double HolesArea {
                 get {
                     double area = 0;
                     foreach (GeneralPolygon2d p in Polygons) {
@@ -458,14 +549,31 @@ namespace g3
         }
 
 
-
+		/// <summary>
+		/// 查找实体选项结构体。
+		/// </summary>
 		public struct FindSolidsOptions
 		{
+			/// <summary>
+			/// 简化偏差。
+			/// </summary>
 			public double SimplifyDeviationTolerance;
+			/// <summary>
+			/// 想要曲线实体
+			/// </summary>
 			public bool WantCurveSolids;
+			/// <summary>
+			/// 信任方向。
+			/// </summary>
 			public bool TrustOrientations;
+			/// <summary>
+			/// 允许重叠孔
+			/// </summary>
 			public bool AllowOverlappingHoles;
 
+			/// <summary>
+			/// 默认，将选项设置为默认。
+			/// </summary>
 			public static readonly FindSolidsOptions Default = new FindSolidsOptions() {
 				SimplifyDeviationTolerance = 0.1,
 				WantCurveSolids = true,
@@ -473,7 +581,10 @@ namespace g3
 				AllowOverlappingHoles = false
 			};
 
-            public static readonly FindSolidsOptions SortPolygons = new FindSolidsOptions() {
+			/// <summary>
+			/// 排序多边形。
+			/// </summary>
+			public static readonly FindSolidsOptions SortPolygons = new FindSolidsOptions() {
                 SimplifyDeviationTolerance = 0.0,
                 WantCurveSolids = false,
                 TrustOrientations = true,
@@ -481,7 +592,12 @@ namespace g3
             };
         }
 
-
+		/// <summary>
+		/// 查找实体区域。
+		/// </summary>
+		/// <param name="fSimplifyDeviationTol">简化偏差量</param>
+		/// <param name="bWantCurveSolids">想要曲线实体</param>
+		/// <returns></returns>
 		public SolidRegionInfo FindSolidRegions(double fSimplifyDeviationTol = 0.1, bool bWantCurveSolids = true)
 		{
 			FindSolidsOptions opt = FindSolidsOptions.Default;
@@ -490,14 +606,19 @@ namespace g3
 			return FindSolidRegions(opt);
 		}
 
-        // Finds set of "solid" regions - eg boundary loops with interior holes.
-        // Result has outer loops being clockwise, and holes counter-clockwise
+		// Finds set of "solid" regions - eg boundary loops with interior holes.
+		// Result has outer loops being clockwise, and holes counter-clockwise
+		/// <summary>
+		/// 查找实体区域。查找一组“实心”区域-例如带有内部孔的边界环。 结果是外部循环为顺时针方向，而孔为逆时针方向
+		/// </summary>
+		/// <param name="options"></param>
+		/// <returns></returns>
 		public SolidRegionInfo FindSolidRegions(FindSolidsOptions options) 
 		{
 			List<SmoothLoopElement> validLoops = new List<SmoothLoopElement>(LoopsItr());
 			int N = validLoops.Count;
 
-			// precompute bounding boxes
+			// 预计算边界框 precompute bounding boxes
 			int maxid = 0;
 			foreach ( var v in validLoops )
 				maxid = Math.Max(maxid, v.ID+1);
@@ -505,7 +626,7 @@ namespace g3
 			foreach ( var v in validLoops )
 				bounds[v.ID] = v.Bounds();
 
-			// copy polygons, simplify if desired
+			// 复制多边形，根据需要进行简化 copy polygons, simplify if desired
 			double fClusterTol = 0.0;		// don't do simple clustering, can lose corners
 			double fDeviationTol = options.SimplifyDeviationTolerance;
 			Polygon2d[] polygons = new Polygon2d[maxid];
@@ -516,12 +637,13 @@ namespace g3
 				polygons[v.ID] = p;
 			}
 
+			// bbox包含进行排序以加快测试速度（确实吗？）
 			// sort by bbox containment to speed up testing (does it??)
 			validLoops.Sort((x, y) => {
 				return bounds[x.ID].Contains( bounds[y.ID] ) ? -1 : 1; 
 			});
 
-            // containment sets
+			// 收容套 containment sets
 			bool[] bIsContained = new bool[N];
 			Dictionary<int, List<int>> ContainSets = new Dictionary<int, List<int>>();
             Dictionary<int, List<int>> ContainedParents = new Dictionary<int, List<int>>();
@@ -721,9 +843,9 @@ namespace g3
                 }
             }
 
-
-            // any remaining loops must be top-level
-            for (int i = 0; i < N; ++i) {
+			// 任何剩余的循环必须是顶级的
+			// any remaining loops must be top-level
+			for (int i = 0; i < N; ++i) {
                 SmoothLoopElement loopi = validLoops[i];
                 if (used.Contains(loopi))
                     continue;
@@ -760,7 +882,9 @@ namespace g3
 
 
 
-
+		/// <summary>
+		/// 封闭环信息。
+		/// </summary>
 		public class ClosedLoopsInfo
 		{
 			public List<Polygon2d> Polygons;
@@ -777,6 +901,11 @@ namespace g3
 			}
 		}
 		// returns set of closed loops (not necessarily solids)
+		/// <summary>
+		/// 返回一组闭环（不一定是实体）
+		/// </summary>
+		/// <param name="fSimplifyDeviationTol"></param>
+		/// <returns></returns>
 		public ClosedLoopsInfo FindClosedLoops(double fSimplifyDeviationTol = 0.1)
 		{
 			List<SmoothLoopElement> loopElems = new List<SmoothLoopElement>(LoopsItr());
@@ -819,7 +948,9 @@ namespace g3
 
 
 
-
+		/// <summary>
+		/// 打开曲线信息类。(没有闭合的曲线）
+		/// </summary>
 		public class OpenCurvesInfo
 		{
 			public List<PolyLine2d> Polylines;
@@ -836,6 +967,11 @@ namespace g3
 			}
 		}
 		// returns set of open curves (ie non-solids)
+		/// <summary>
+		/// 返回一组开放曲线（即非实体）
+		/// </summary>
+		/// <param name="fSimplifyDeviationTol"></param>
+		/// <returns></returns>
 		public OpenCurvesInfo FindOpenCurves(double fSimplifyDeviationTol = 0.1)
 		{
 			List<SmoothCurveElement> curveElems = new List<SmoothCurveElement>(CurvesItr());
@@ -877,7 +1013,10 @@ namespace g3
 
 
 
-
+		/// <summary>
+		/// 拷贝。
+		/// </summary>
+		/// <returns></returns>
         public PlanarComplex Clone()
         {
             PlanarComplex clone = new PlanarComplex();
@@ -896,7 +1035,10 @@ namespace g3
 
 
 
-
+		/// <summary>
+		/// 附加。
+		/// </summary>
+		/// <param name="append"></param>
         public void Append(PlanarComplex append)
         {
             foreach ( var element in append.vElements ) {
@@ -909,8 +1051,13 @@ namespace g3
         }
 
 
-
-        public void Transform(ITransform2 xform, bool bApplyToSources, bool bRecomputePolygons = false)
+		/// <summary>
+		/// 偏移。变换。
+		/// </summary>
+		/// <param name="xform"></param>
+		/// <param name="bApplyToSources">是否应用此变换到来源</param>
+		/// <param name="bRecomputePolygons">重新计算多边形：</param>
+		public void Transform(ITransform2 xform, bool bApplyToSources, bool bRecomputePolygons = false)
         {
             foreach ( var element in vElements ) {
                 if ( element is SmoothLoopElement ) {
@@ -943,7 +1090,10 @@ namespace g3
 
 
 
-
+		/// <summary>
+		/// 列印统计资料
+		/// </summary>
+		/// <param name="label"></param>
 		public void PrintStats(string label = "") {
 			System.Console.WriteLine("PlanarComplex Stats {0}", label);
 			List<SmoothLoopElement> Loops = new List<SmoothLoopElement>(LoopsItr());
@@ -967,7 +1117,12 @@ namespace g3
             System.Console.WriteLine("    segments {0,4}  arcs     {1,4}  circles      {2,4}", nSegments, nArcs, nCircles);
             System.Console.WriteLine("    nurbs    {0,4}  ellipses {1,4}  ellipse-arcs {2,4}", nNURBS, nEllipses, nEllipseArcs);
 		}
-        public int CountType(Type t)
+       /// <summary>
+	   /// 类型数量 。返回全部元素的数量。
+	   /// </summary>
+	   /// <param name="t"></param>
+	   /// <returns></returns>
+		public int CountType(Type t)
         {
             int count = 0;
 			foreach (Element loop in vElements) {
@@ -978,7 +1133,13 @@ namespace g3
             }
             return count;
         }
-        public int CountType(IMultiCurve2d curve, Type t)
+       /// <summary>
+	   /// 
+	   /// </summary>
+	   /// <param name="curve"></param>
+	   /// <param name="t"></param>
+	   /// <returns></returns>
+		public int CountType(IMultiCurve2d curve, Type t)
         {
             int count = 0;
             foreach ( IParametricCurve2d c in curve.Curves ) {

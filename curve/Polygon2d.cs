@@ -633,25 +633,27 @@ namespace g3
         //            j,k = indices for the subchain v[j] to v[k]
         //    Output: mk[] = array of markers matching vertex array v[]
         /// <summary>
+        /// Douglas-Peucker:道格拉斯-普克算法.
         /// 多边形简化代码，改编自：http://softsurfer.com/Archive/algorithm_0205/algorithm_0205.htm simpleDP（）
         /// ：这是Douglas-Peucker递归简化例程，它仅标记作为简化折线一部分的顶点，用于逼近折线子链。
         /// v [j]至v [k]。 输入：tol =近似公差v [] =顶点的折线数组j，k =子链v [j]至v [k]的索引输出：mk [] =匹配顶点数组v []的标记数组
         /// </summary>
-        /// <param name="tol"></param>
-        /// <param name="v"></param>
-        /// <param name="j"></param>
-        /// <param name="k"></param>
+        /// <param name="tol">公差</param>
+        /// <param name="v">顶点数组</param>
+        /// <param name="j">现在点数量</param>
+        /// <param name="k">目标点数量</param>
         /// <param name="mk"></param>
         static void simplifyDP( double tol, Vector2d[] v, int j, int k, bool[] mk )
 		{
             //TODO:多边形简化，这函数要详细了解。
-			if (k <= j+1) // there is nothing to simplify
-				return;
+			if (k <= j+1) // 没有什么可以简化的 there is nothing to simplify 
+                return;
 
-			// check for adequate approximation by segment S from v[j] to v[k]
-			int maxi = j;          // index of vertex farthest from S
-			double maxd2 = 0;         // distance squared of farthest vertex
-			double tol2 = tol * tol;  // tolerance squared
+            // 检查从v [j]到v [k]的段S是否有足够的近似值
+            // check for adequate approximation by segment S from v[j] to v[k]
+            int maxi = j;          // index of vertex farthest from S 离S最远的顶点的索引
+            double maxd2 = 0;         // distance squared of farthest vertex 最远顶点的距离平方
+            double tol2 = tol * tol;  // tolerance squared
 			Segment2d S = new Segment2d(v[j], v[k]);    // segment from v[j] to v[k]
 
 			// test each vertex v[i] for max distance from S
@@ -678,10 +680,14 @@ namespace g3
 
         /// <summary>
         /// 简化
+        /// 阶段1.在先前顶点簇的公差范围内减少顶点
+        /// 阶段2.Douglas-Peucker道格拉斯·皮克折线的简化
+        /// 
+        /// 
         /// </summary>
-        /// <param name="clusterTol"></param>
-        /// <param name="lineDeviationTol"></param>
-        /// <param name="bSimplifyStraightLines"></param>
+        /// <param name="clusterTol">簇公差</param>
+        /// <param name="lineDeviationTol">线公差</param>
+        /// <param name="bSimplifyStraightLines">是否简化直线</param>
 		public void Simplify( double clusterTol = 0.0001,
 		                      double lineDeviationTol = 0.01,
 							  bool bSimplifyStraightLines = true )
@@ -694,12 +700,13 @@ namespace g3
 			Vector2d[] vt = new Vector2d[n+1];  // vertex buffer
 			bool[] mk = new bool[n+1];
 			for ( i = 0; i < n+1; ++i )		// marker buffer
-				mk[i] = false;		 
+				mk[i] = false;
 
-			// STAGE 1.  Vertex Reduction within tolerance of prior vertex cluster
-			double clusterTol2 = clusterTol*clusterTol;
-			vt[0] = vertices[0];              // start at the beginning
-			for (i = 1, k = 1, pv = 0; i < n; i++) {
+            // STAGE 1.  Vertex Reduction within tolerance of prior vertex cluster
+            // 阶段1.在先前顶点簇的公差范围内减少顶点
+            double clusterTol2 = clusterTol*clusterTol;
+			vt[0] = vertices[0];              // start at the beginning 从头开始
+            for (i = 1, k = 1, pv = 0; i < n; i++) {
 				if ( (vertices[i] - vertices[pv]).LengthSquared < clusterTol2 )
 					continue;
 				vt[k++] = vertices[i];
@@ -716,8 +723,10 @@ namespace g3
             }
 
             // push on start vertex again, because simplifyDP is for polylines, not polygons
+            // 再次按下起始顶点，因为simpleDP用于折线，而不是多边形
             vt[k++] = vertices[0];
 
+            // 阶段2.Douglas-Peucker道格拉斯·皮克折线的简化
             // STAGE 2.  Douglas-Peucker polyline simplification
             int nv = 0;
 			if (skip_dp == false && lineDeviationTol > 0) {
@@ -733,7 +742,7 @@ namespace g3
                 nv = k - 1;
 			}
 
-            // polygon requires at least 3 vertices
+            // 多边形至少需要3个顶点 polygon requires at least 3 vertices 
             if ( nv == 2 ) {
                 for (i = 1; i < k-1; ++i ) {
                     if (mk[1] == false)
@@ -748,8 +757,9 @@ namespace g3
                 nv += 2;
             }
 
-			// copy marked vertices back to this polygon
-			vertices = new List<Vector2d>();
+            // 将标记的顶点复制回此多边形
+            // copy marked vertices back to this polygon
+            vertices = new List<Vector2d>();
 			for (i = 0; i < k-1; ++i) {   // last vtx is copy of first, and definitely marked
 				if (mk[i])
 					vertices.Add( vt[i] );

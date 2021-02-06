@@ -182,7 +182,10 @@ namespace g3
 			if (v.y > Max.y) Max.y = v.y;
 		}
 
-
+        /// <summary>
+        /// °üº¬
+        /// </summary>
+        /// <param name="box"></param>
         public void Contain(AxisAlignedBox2d box) {
 			if (box.Min.x < Min.x) Min.x = box.Min.x;
 			if (box.Max.x > Max.x) Max.x = box.Max.x;

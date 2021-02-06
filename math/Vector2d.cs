@@ -5,6 +5,9 @@ using System.Text;
 
 namespace g3
 {
+    /// <summary>
+    /// 顶点结构，具有X/Y二个字段。
+    /// </summary>
     public struct Vector2d : IComparable<Vector2d>, IEquatable<Vector2d>
     {
         public double x;
