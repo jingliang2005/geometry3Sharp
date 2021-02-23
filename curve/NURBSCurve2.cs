@@ -6,6 +6,9 @@ using System.Linq;
 namespace g3
 {
     // ported from WildMagic5 NURBSCurve2
+    /// <summary>
+    /// 从WildMagic5 NURBSCurve2移植
+    /// </summary>
     public class NURBSCurve2 : BaseCurve2, IParametricCurve2d
     {
         // Construction and destruction. Internal copies of the

@@ -2,9 +2,19 @@
 using System.Collections.Generic;
 
 namespace g3 {
-	
+
+	/// <summary>
+	/// 曲线采样器2.
+	/// </summary>
 	public static class CurveSampler2 
 	{
+		/// <summary>
+		/// 自动采样.
+		/// </summary>
+		/// <param name="curve"></param>
+		/// <param name="fSpacingLength"></param>
+		/// <param name="fSpacingT"></param>
+		/// <returns></returns>
 		public static VectorArray2d AutoSample(IParametricCurve2d curve, double fSpacingLength, double fSpacingT)
 		{
 			if ( curve is ParametricCurveSequence2 )
@@ -63,9 +73,14 @@ namespace g3 {
 			return vec;
 		}
 
-
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="curve"></param>
+		/// <param name="fSpacing"></param>
+		/// <returns></returns>
 		public static VectorArray2d SampleArcLen(IParametricCurve2d curve, double fSpacing) 
-		{
+		{ 
 			if ( curve.HasArcLength == false )
 				throw new InvalidOperationException("CurveSampler2.SampleArcLen: curve does not support arc length sampling!");
 
@@ -141,7 +156,13 @@ namespace g3 {
 		}
 
 
-
+		/// <summary>
+		/// 自动采样,
+		/// </summary>
+		/// <param name="curves"></param>
+		/// <param name="fSpacingLength"></param>
+		/// <param name="fSpacingT"></param>
+		/// <returns></returns>
 		public static VectorArray2d AutoSample(ParametricCurveSequence2 curves, double fSpacingLength, double fSpacingT)
 		{
 			int N = curves.Count;
@@ -159,6 +180,7 @@ namespace g3 {
 			int nDuplicates = (bClosed) ? N : N-1;		// handle closed here...
 			nTotal -= nDuplicates;
 
+			// final;最终的
 			VectorArray2d final = new VectorArray2d(nTotal);
 
 			int k = 0;
@@ -166,6 +188,7 @@ namespace g3 {
 				VectorArray2d vv = vecs[vi];
 				// skip final vertex unless we are on last curve (because it is
 				// the same as first vertex of next curve)
+				// 跳过最终顶点，除非我们在最后一条曲线上（因为它与下一条曲线的第一个顶点相同）
 				int nStop = (bClosed || vi < N-1) ? vv.Count-1 : vv.Count;
 				final.Set(k, nStop, vv);
 				k += nStop;

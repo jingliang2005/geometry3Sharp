@@ -43,6 +43,7 @@ namespace g3
 		public bool MinimizeSampling = false;   // if true, we don't subsample straight lines
 
 		#endregion
+
 		/// <summary>
 		/// id生成器
 		/// </summary>

@@ -4,6 +4,9 @@ using System.Collections.ObjectModel;
 
 namespace g3 
 {
+	/// <summary>
+	/// 参数曲线序列2,(:IParametricCurve2d, IMultiCurve2d)
+	/// </summary>
 	public class ParametricCurveSequence2 : IParametricCurve2d, IMultiCurve2d
 	{
 
@@ -34,7 +37,7 @@ namespace g3
 
 
 		public void Append(IParametricCurve2d c) {
-			// sanity checking??
+			// sanity checking?? 健全性检查？？
 			curves.Add(c);
 		}
 
