@@ -849,15 +849,15 @@ namespace g3
 
 
         /// <summary>
-        /// 矩形。
+        /// 创建矩形。通过中心点。高度，宽度三个参数创建矩形。
         /// </summary>
-        /// <param name="center"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
+        /// <param name="center">中点，Vector2d类型，矢量2D类型。</param>
+        /// <param name="width">宽度</param>
+        /// <param name="height">高度</param>
         /// <returns></returns>
         static public Polygon2d MakeRectangle(Vector2d center, double width, double height)
         {
-            VectorArray2d vertices = new VectorArray2d(4);
+            VectorArray2d vertices = new VectorArray2d(4);//顶点
             vertices.Set(0, center.x - width / 2, center.y - height / 2);
             vertices.Set(1, center.x + width / 2, center.y - height / 2);
             vertices.Set(2, center.x + width / 2, center.y + height / 2);

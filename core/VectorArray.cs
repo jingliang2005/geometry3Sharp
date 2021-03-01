@@ -217,6 +217,10 @@ namespace g3
             return array.GetEnumerator();
         }
     }
+
+    /// <summary>
+    /// 矢量数组2D类，
+    /// </summary>
     public class VectorArray2d : VectorArray2<double>
     {
         public VectorArray2d(int nCount) : base(nCount) { }
