@@ -524,7 +524,11 @@ namespace g3
             }
         }
 
-
+        /// <summary>
+        /// 平移。
+        /// </summary>
+        /// <param name="translate">矢量2D,平稳矢量。</param>
+        /// <returns></returns>
 		public Polygon2d Translate(Vector2d translate) {
 			int N = vertices.Count;
 			for (int i = 0; i < N; ++i)
@@ -843,7 +847,8 @@ namespace g3
         /// </summary>
         public Box2d MinimalBoundingBox(double epsilon)
 		{
-			ContMinBox2 box2 = new ContMinBox2(vertices, epsilon, QueryNumberType.QT_DOUBLE, false);
+			ContMinBox2 box2 = new ContMinBox2(vertices, epsilon, 
+                QueryNumberType.QT_DOUBLE, false);
 			return box2.MinBox;
 		}
 

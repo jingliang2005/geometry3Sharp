@@ -13,6 +13,7 @@ namespace g3
 
 
     /// <summary>
+    /// 使最小边界框适合一组2D点。 结果在MinBox中。
     /// Fit minimal bounding-box to a set of 2D points. Result is in MinBox.
     /// </summary>
     public class ContMinBox2
@@ -23,7 +24,8 @@ namespace g3
         protected enum RCFlags { F_NONE, F_LEFT, F_RIGHT, F_BOTTOM, F_TOP };
 
 
-        public Box2d MinBox {
+        public Box2d MinBox
+        {
             get { return mMinBox; }
         }
 
@@ -32,16 +34,20 @@ namespace g3
             // Get the convex hull of the points.
             IList<Vector2d> hullPoints;
             int numPoints;
-            if (isConvexPolygon) {
+            if (isConvexPolygon)
+            {
                 hullPoints = points;
                 numPoints = hullPoints.Count;
-            } else {
+            }
+            else
+            {
                 ConvexHull2 hull = new ConvexHull2(points, epsilon, queryType);
                 int hullDim = hull.Dimension;
                 int hullNumSimplices = hull.NumSimplices;
                 int[] hullIndices = hull.HullIndices;
 
-                if (hullDim == 0) {
+                if (hullDim == 0)
+                {
                     mMinBox.Center = points[0];
                     mMinBox.AxisX = Vector2d.AxisX;
                     mMinBox.AxisY = Vector2d.AxisY;
@@ -50,7 +56,8 @@ namespace g3
                     return;
                 }
 
-                if (hullDim == 1) {
+                if (hullDim == 1)
+                {
                     throw new NotImplementedException("ContMinBox2: Have not implemented 1d case");
                     //ConvexHull1 hull1 = hull.GetConvexHull1();
                     //hullIndices = hull1->GetIndices();
@@ -68,7 +75,8 @@ namespace g3
 
                 numPoints = hullNumSimplices;
                 Vector2d[] pointsArray = new Vector2d[numPoints];
-                for (int i = 0; i < numPoints; ++i) {
+                for (int i = 0; i < numPoints; ++i)
+                {
                     pointsArray[i] = points[hullIndices[i]];
                 }
                 hullPoints = pointsArray;
@@ -83,7 +91,8 @@ namespace g3
             int numPointsM1 = numPoints - 1;
             Vector2d[] edges = new Vector2d[numPoints];
             bool[] visited = new bool[numPoints];
-            for (int i = 0; i < numPointsM1; ++i) {
+            for (int i = 0; i < numPointsM1; ++i)
+            {
                 edges[i] = hullPoints[i + 1] - hullPoints[i];
                 edges[i].Normalize();
                 visited[i] = false;
@@ -102,21 +111,26 @@ namespace g3
             double xmin = hullPoints[0].x, xmax = xmin;
             double ymin = hullPoints[0].y, ymax = ymin;
             int LIndex = 0, RIndex = 0, BIndex = 0, TIndex = 0;
-            for (int i = 1; i < numPoints; ++i) {
-                if (hullPoints[i].x <= xmin) {
+            for (int i = 1; i < numPoints; ++i)
+            {
+                if (hullPoints[i].x <= xmin)
+                {
                     xmin = hullPoints[i].x;
                     LIndex = i;
                 }
-                if (hullPoints[i].x >= xmax) {
+                if (hullPoints[i].x >= xmax)
+                {
                     xmax = hullPoints[i].x;
                     RIndex = i;
                 }
 
-                if (hullPoints[i].y <= ymin) {
+                if (hullPoints[i].y <= ymin)
+                {
                     ymin = hullPoints[i].y;
                     BIndex = i;
                 }
-                if (hullPoints[i].y >= ymax) {
+                if (hullPoints[i].y >= ymax)
+                {
                     ymax = hullPoints[i].y;
                     TIndex = i;
                 }
@@ -124,29 +138,37 @@ namespace g3
 
             // Apply wrap-around tests to ensure the constraints mentioned above are
             // satisfied.
-            if (LIndex == numPointsM1) {
-                if (hullPoints[0].x <= xmin) {
+            if (LIndex == numPointsM1)
+            {
+                if (hullPoints[0].x <= xmin)
+                {
                     xmin = hullPoints[0].x;
                     LIndex = 0;
                 }
             }
 
-            if (RIndex == numPointsM1) {
-                if (hullPoints[0].x >= xmax) {
+            if (RIndex == numPointsM1)
+            {
+                if (hullPoints[0].x >= xmax)
+                {
                     xmax = hullPoints[0].x;
                     RIndex = 0;
                 }
             }
 
-            if (BIndex == numPointsM1) {
-                if (hullPoints[0].y <= ymin) {
+            if (BIndex == numPointsM1)
+            {
+                if (hullPoints[0].y <= ymin)
+                {
                     ymin = hullPoints[0].y;
                     BIndex = 0;
                 }
             }
 
-            if (TIndex == numPointsM1) {
-                if (hullPoints[0].y >= ymax) {
+            if (TIndex == numPointsM1)
+            {
+                if (hullPoints[0].y >= ymax)
+                {
                     ymax = hullPoints[0].y;
                     TIndex = 0;
                 }
@@ -167,41 +189,50 @@ namespace g3
             Vector2d V = Vector2d.AxisY;
 
             bool done = false;
-            while (!done) {
+            while (!done)
+            {
                 // Determine the edge that forms the smallest angle with the current
                 // box edges.
                 RCFlags flag = RCFlags.F_NONE;
                 double maxDot = (double)0;
 
                 double dot = U.Dot(edges[BIndex]);
-                if (dot > maxDot) {
+                if (dot > maxDot)
+                {
                     maxDot = dot;
                     flag = RCFlags.F_BOTTOM;
                 }
 
                 dot = V.Dot(edges[RIndex]);
-                if (dot > maxDot) {
+                if (dot > maxDot)
+                {
                     maxDot = dot;
                     flag = RCFlags.F_RIGHT;
                 }
 
                 dot = -U.Dot(edges[TIndex]);
-                if (dot > maxDot) {
+                if (dot > maxDot)
+                {
                     maxDot = dot;
                     flag = RCFlags.F_TOP;
                 }
 
                 dot = -V.Dot(edges[LIndex]);
-                if (dot > maxDot) {
+                if (dot > maxDot)
+                {
                     maxDot = dot;
                     flag = RCFlags.F_LEFT;
                 }
 
-                switch (flag) {
+                switch (flag)
+                {
                     case RCFlags.F_BOTTOM:
-                        if (visited[BIndex]) {
+                        if (visited[BIndex])
+                        {
                             done = true;
-                        } else {
+                        }
+                        else
+                        {
                             // Compute box axes with E[B] as an edge.
                             U = edges[BIndex];
                             V = -U.Perp;
@@ -211,15 +242,19 @@ namespace g3
 
                             // Mark edge visited and rotate the calipers.
                             visited[BIndex] = true;
-                            if (++BIndex == numPoints) {
+                            if (++BIndex == numPoints)
+                            {
                                 BIndex = 0;
                             }
                         }
                         break;
                     case RCFlags.F_RIGHT:
-                        if (visited[RIndex]) {
+                        if (visited[RIndex])
+                        {
                             done = true;
-                        } else {
+                        }
+                        else
+                        {
                             // Compute box axes with E[R] as an edge.
                             V = edges[RIndex];
                             U = V.Perp;
@@ -229,15 +264,19 @@ namespace g3
 
                             // Mark edge visited and rotate the calipers.
                             visited[RIndex] = true;
-                            if (++RIndex == numPoints) {
+                            if (++RIndex == numPoints)
+                            {
                                 RIndex = 0;
                             }
                         }
                         break;
                     case RCFlags.F_TOP:
-                        if (visited[TIndex]) {
+                        if (visited[TIndex])
+                        {
                             done = true;
-                        } else {
+                        }
+                        else
+                        {
                             // Compute box axes with E[T] as an edge.
                             U = -edges[TIndex];
                             V = -U.Perp;
@@ -247,15 +286,19 @@ namespace g3
 
                             // Mark edge visited and rotate the calipers.
                             visited[TIndex] = true;
-                            if (++TIndex == numPoints) {
+                            if (++TIndex == numPoints)
+                            {
                                 TIndex = 0;
                             }
                         }
                         break;
                     case RCFlags.F_LEFT:
-                        if (visited[LIndex]) {
+                        if (visited[LIndex])
+                        {
                             done = true;
-                        } else {
+                        }
+                        else
+                        {
                             // Compute box axes with E[L] as an edge.
                             V = -edges[LIndex];
                             U = V.Perp;
@@ -265,7 +308,8 @@ namespace g3
 
                             // Mark edge visited and rotate the calipers.
                             visited[LIndex] = true;
-                            if (++LIndex == numPoints) {
+                            if (++LIndex == numPoints)
+                            {
                                 LIndex = 0;
                             }
                         }
@@ -281,26 +325,37 @@ namespace g3
 
 
 
-
-    protected void UpdateBox(Vector2d LPoint, Vector2d RPoint, 
-                             Vector2d BPoint, Vector2d TPoint, 
-                             ref Vector2d U, ref Vector2d V, ref double minAreaDiv4)
-    {
-        Vector2d RLDiff = RPoint - LPoint;
-        Vector2d TBDiff = TPoint - BPoint;
-        double extent0 = ((double)0.5) * (U.Dot(RLDiff));
-        double extent1 = ((double)0.5) * (V.Dot(TBDiff));
-        double areaDiv4 = extent0 * extent1;
-        if (areaDiv4 < minAreaDiv4) {
-            minAreaDiv4 = areaDiv4;
-            mMinBox.AxisX = U;
-            mMinBox.AxisY = V;
-            mMinBox.Extent[0] = extent0;
-            mMinBox.Extent[1] = extent1;
-            Vector2d LBDiff = LPoint - BPoint;
-            mMinBox.Center = LPoint + U * extent0 + V * (extent1 - V.Dot(LBDiff));
+        /// <summary>
+        /// 更新框。
+        /// </summary>
+        /// <param name="LPoint"></param>
+        /// <param name="RPoint"></param>
+        /// <param name="BPoint"></param>
+        /// <param name="TPoint"></param>
+        /// <param name="U"></param>
+        /// <param name="V"></param>
+        /// <param name="minAreaDiv4"></param>
+        protected void UpdateBox(Vector2d LPoint, Vector2d RPoint,
+                                 Vector2d BPoint, Vector2d TPoint,
+                                 ref Vector2d U, ref Vector2d V, 
+                                 ref double minAreaDiv4)
+        {
+            Vector2d RLDiff = RPoint - LPoint;
+            Vector2d TBDiff = TPoint - BPoint;
+            double extent0 = ((double)0.5) * (U.Dot(RLDiff));
+            double extent1 = ((double)0.5) * (V.Dot(TBDiff));
+            double areaDiv4 = extent0 * extent1;
+            if (areaDiv4 < minAreaDiv4)
+            {
+                minAreaDiv4 = areaDiv4;
+                mMinBox.AxisX = U;
+                mMinBox.AxisY = V;
+                mMinBox.Extent[0] = extent0;
+                mMinBox.Extent[1] = extent1;
+                Vector2d LBDiff = LPoint - BPoint;
+                mMinBox.Center = LPoint + U * extent0 + V * (extent1 - V.Dot(LBDiff));
+            }
         }
-    }
 
-}
+    }
 }

@@ -168,12 +168,18 @@ namespace g3
 
 
 
-
-    //
-    // Same as VectorArray3, but for 2D vectors/etc
-    //
+     
+    /// <summary>
+    /// 与VectorArray3相同，但用于2D矢量。 vectors / etc
+    /// Same as VectorArray3, but for 2D vectors/etc
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class VectorArray2<T> : IEnumerable<T>
     {
+
+        /// <summary>
+        /// 数组。
+        /// </summary>
         public T[] array;
 
         public VectorArray2(int nCount = 0)
@@ -186,17 +192,28 @@ namespace g3
             array = data;
         }
 
+        /// <summary>
+        /// 数量。数组长度/2。
+        /// </summary>
         public int Count
         {
             get { return array.Length / 2; }
         }
 
+        /// <summary>
+        /// 获取枚举器。
+        /// </summary>
+        /// <returns></returns>
         public IEnumerator<T> GetEnumerator()
         {
             for (int i = 0; i < array.Length; ++i)
                 yield return array[i];
         }
 
+        /// <summary>
+        /// 重置大小，创建新数组。
+        /// </summary>
+        /// <param name="Count"></param>
         public void Resize(int Count)
         {
             array = new T[2 * Count];
