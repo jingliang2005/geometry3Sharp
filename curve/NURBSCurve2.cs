@@ -7,6 +7,7 @@ namespace g3
 {
     // ported from WildMagic5 NURBSCurve2
     /// <summary>
+    /// NURBS（Non Uniform Rational B-spline）曲线通常称为非均匀有理B样条曲线，
     /// 从WildMagic5 NURBSCurve2移植
     /// </summary>
     public class NURBSCurve2 : BaseCurve2, IParametricCurve2d

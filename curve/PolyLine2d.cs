@@ -6,6 +6,9 @@ using System.Linq;
 
 namespace g3
 {
+    /// <summary>
+    /// 折线2d
+    /// </summary>
 	public class PolyLine2d : IEnumerable<Vector2d>
 	{
 		protected List<Vector2d> vertices;

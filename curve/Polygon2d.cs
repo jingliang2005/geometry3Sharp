@@ -940,7 +940,7 @@ namespace g3
             throw new NotImplementedException("Polygon2dCurve.TangentT");
         }
         /// <summary>
-        /// 弧长。直接返回：return true;。
+        /// 有弧长。直接返回：return true;。
         /// </summary>
         public bool HasArcLength { get { return true; } }
         /// <summary>

@@ -5,12 +5,24 @@ using System.Text;
 
 namespace g3
 {
+    /// <summary>
+    /// 曲线重采样器
+    /// </summary>
     public class CurveResampler
     {
-
+        /// <summary>
+        /// 长度
+        /// </summary>
         double[] lengths;
 
         // will return null if no edges need to be split!
+        /// <summary>
+        /// 拆分重采样
+        /// 如果不需要分割任何边缘，将返回null！
+        /// </summary>
+        /// <param name="curve">曲线</param>
+        /// <param name="fMaxEdgeLen">最大边长</param>
+        /// <returns></returns>
         public List<Vector3d> SplitResample(ISampledCurve3d curve, double fMaxEdgeLen)
         {
             double fMaxSqr = fMaxEdgeLen * fMaxEdgeLen;
@@ -54,7 +66,14 @@ namespace g3
 
 
 
-        // will return null if no edges need to be split!
+        /// <summary>
+        /// 拆分折叠重采样
+        /// 如果不需要分割任何边缘，将返回null！
+        /// </summary>
+        /// <param name="curve"></param>
+        /// <param name="fMaxEdgeLen"></param>
+        /// <param name="fMinEdgeLen"></param>
+        /// <returns></returns>
         public List<Vector3d> SplitCollapseResample(ISampledCurve3d curve, double fMaxEdgeLen, double fMinEdgeLen)
         {
             double fMaxSqr = fMaxEdgeLen * fMaxEdgeLen;

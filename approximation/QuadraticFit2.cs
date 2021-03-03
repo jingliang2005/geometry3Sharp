@@ -4,6 +4,10 @@ using System.Collections.Generic;
 namespace g3
 {
 	// ported from WildMagic5 Wm5ApprQuadraticFit2
+	/// <summary>
+	/// 二次拟合2D
+	/// 从WildMagic5 Wm5ApprQuadraticFit2移植
+	/// </summary>
 	public static class QuadraticFit2
 	{
 		// The quadratic fit is

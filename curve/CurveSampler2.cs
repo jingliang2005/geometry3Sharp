@@ -11,11 +11,13 @@ namespace g3 {
 		/// <summary>
 		/// 自动采样.
 		/// </summary>
-		/// <param name="curve"></param>
-		/// <param name="fSpacingLength"></param>
-		/// <param name="fSpacingT"></param>
+		/// <param name="curve">曲线</param>
+		/// <param name="fSpacingLength">间距长度</param>
+		/// <param name="fSpacingT">间距T</param>
 		/// <returns></returns>
-		public static VectorArray2d AutoSample(IParametricCurve2d curve, double fSpacingLength, double fSpacingT)
+		public static VectorArray2d AutoSample(IParametricCurve2d curve,
+			double fSpacingLength, 
+			double fSpacingT)
 		{
 			if ( curve is ParametricCurveSequence2 )
 				return AutoSample(curve as ParametricCurveSequence2, fSpacingLength, fSpacingT);

@@ -6,7 +6,9 @@ using System.Text;
 
 namespace g3
 {
-
+	/// <summary>
+	/// 参数曲线3d接口。
+	/// </summary>
 	public interface IParametricCurve3d
 	{
 		bool IsClosed {get;}
@@ -27,8 +29,10 @@ namespace g3
 
 
 
-
-    public interface ISampledCurve3d
+	/// <summary>
+	/// 采样曲线3d接口。
+	/// </summary>
+	public interface ISampledCurve3d
     {
         int VertexCount { get; }
         int SegmentCount { get; }
