@@ -228,7 +228,9 @@ namespace g3
         }
 
 
-
+        /// <summary>
+        /// 周长
+        /// </summary>
         public double Perimeter
         {
             get {

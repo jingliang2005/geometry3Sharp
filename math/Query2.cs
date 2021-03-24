@@ -4,8 +4,10 @@ using System.Collections.Generic;
 namespace g3
 {
     // Port of Wm5 Query/Query2 from WildMagic5 library by David Eberly / geometrictools.com
-
-
+    // 几何工具官方网站: https://www.geometrictools.com/
+    /// <summary>
+    /// 查询数字类型
+    /// </summary>
     public enum QueryNumberType
     {
         QT_DOUBLE = 0,
@@ -13,6 +15,7 @@ namespace g3
 
 
         // none of these are implemented, but keeping in code for now
+        // 这些都没有实现，但暂时保留在代码中
         QT_INTEGER = 2,
         QT_RATIONAL = 3,
         QT_FILTERED = 4

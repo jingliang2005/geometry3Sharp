@@ -5,6 +5,9 @@ using System.Text;
 
 namespace g3
 {
+    /// <summary>
+    ///  ∏¡ø2d
+    /// </summary>
     public struct Vector2d : IComparable<Vector2d>, IEquatable<Vector2d>
     {
         public double x;
@@ -148,6 +151,11 @@ namespace g3
 			double dx = v2.x-x, dy = v2.y-y;
 			return dx*dx + dy*dy;
 		}
+        /// <summary>
+        /// æ‡¿Î
+        /// </summary>
+        /// <param name="v2"></param>
+        /// <returns></returns>
         public double Distance(Vector2d v2) {
             double dx = v2.x-x, dy = v2.y-y;
 			return Math.Sqrt(dx*dx + dy*dy);
