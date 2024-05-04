@@ -1,0 +1,3229 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="g3.BiArcFit2" Collapsed="true">
+    <Position X="53" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAADAAAMgwCBAAAEAAAAAAASAABAoAgAIBBhAgA=</HashCode>
+      <FileName>approximation\BiArcFit2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.GaussPointsFit3" Collapsed="true">
+    <Position X="53" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAQAEAAAAAIAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>approximation\GaussPointsFit3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.OrthogonalPlaneFit3" Collapsed="true">
+    <Position X="61.75" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAQAAAAAAAAIAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>approximation\OrthogonalPlaneFit3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.QuadraticFit2" Collapsed="true">
+    <Position X="68.75" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAACABAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>approximation\QuadraticFit2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ColorHSV" Collapsed="true">
+    <Position X="53" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAgQZAAQAAAAAA=</HashCode>
+      <FileName>color\ColorHSV.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ColorMap" Collapsed="true">
+    <Position X="54.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAACgAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>color\ColorMap.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ColorMixer" Collapsed="true">
+    <Position X="56.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAEAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>color\ColorMixer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Arrangement2d" Collapsed="true">
+    <Position X="51.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAEAAAAAIBAAAIgAAAAAAAABAAAgAAAAABAQAQAA=</HashCode>
+      <FileName>comp_geom\Arrangement2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ConvexHull2" Collapsed="true">
+    <Position X="61.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgYAAAAAAAIAAgFAAAIAAAAAEAAAwAAgQAAAAAAAoAg=</HashCode>
+      <FileName>comp_geom\ConvexHull2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.GraphCells2d" Collapsed="true">
+    <Position X="60" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAAAAAAgAAAAAAAAAhAgAAAAAAAAAAAA=</HashCode>
+      <FileName>comp_geom\GraphCells2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.GraphSplitter2d" Collapsed="true">
+    <Position X="61.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAABAAAAAAAQAAAAAAAAAQAAAkEAAAAAAAAAIA=</HashCode>
+      <FileName>comp_geom\GraphSplitter2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SphericalFibonacciPointSet" Collapsed="true">
+    <Position X="56.5" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAAAAAAAAAgAAICABAAAQAAAAAAABAAAAAABAAAAA=</HashCode>
+      <FileName>comp_geom\SphericalFibonacciPointSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Arc2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACgIAAAAAAAAAACgAAAgAAQgAASABEDkAAACUAAIExA=</HashCode>
+      <FileName>curve\Arc2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.SampledArcLengthParam" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="51.25" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAMABgAAAAAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>curve\ArcLengthParam.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.SampledArcLengthParam2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="53" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAMABgAAAAAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>curve\ArcLengthParam.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.BaseCurve2" Collapsed="true">
+    <Position X="15.75" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAMAAAAGCRAAAARACAACAIgAMAAAACAAAAAAAEAIA=</HashCode>
+      <FileName>curve\BaseCurve2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.BezierCurve2" Collapsed="true">
+    <Position X="14.5" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAACABCAAAAAgAAAgACQ4gAQABMEAAAACQAQggRA=</HashCode>
+      <FileName>curve\BezierCurve2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="g3.BSplineBasis" Collapsed="true">
+    <Position X="67" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>YEAAAAAECAABAYAgABASCAcABAAAAIAIAAAAQD0EEBA=</HashCode>
+      <FileName>curve\BSplineBasis.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Circle2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAIAAAAQAAAIAAgAgAgAAwgAAQCBEBgAAADYQAYExA=</HashCode>
+      <FileName>curve\Circle2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.CurveGenerator" Collapsed="true">
+    <Position X="7.5" Y="18.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAAIAAAEIAAAA=</HashCode>
+      <FileName>curve\CurveGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.LineGenerator" Collapsed="true">
+    <Position X="7.5" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAKAAAAAAAAAAAAAAAAAAAAAAAAEAAEAAAAA=</HashCode>
+      <FileName>curve\CurveGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.CurveResampler" Collapsed="true">
+    <Position X="63.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAACQAAAAAAAAAAAAAACAAAAAAAAAAAA=</HashCode>
+      <FileName>curve\CurveResampler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.CurveSampler2" Collapsed="true">
+    <Position X="65.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAAAABAAAAAAEAAAAQAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>curve\CurveSampler2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.CurveUtils" Collapsed="true">
+    <Position X="67" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAAAAAACAAAAkAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>curve\CurveUtils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IWrappedCurve3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="72.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAgAAABBAAAAAAEAAAAAAAAAEAAAAACAAAA=</HashCode>
+      <FileName>curve\CurveUtils.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.CurveUtils2" Collapsed="true">
+    <Position X="68.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAABAEAAAAAAAAAAAIAAACAAQJAAAAAQAAAgCAAgEAA=</HashCode>
+      <FileName>curve\CurveUtils2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DCurve3" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="74" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIACgEAGiAAAIBBCAQCgAEhEAAQBAACEAACAACEAAA=</HashCode>
+      <FileName>curve\DCurve3.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DGraph" Collapsed="true">
+    <Position X="3" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACBEtACIQ4AEABARiFECIgEXI+AgEQYREBBQCACAAAA=</HashCode>
+      <FileName>curve\DGraph.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DGraphN" Collapsed="true">
+    <Position X="3" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAEAAA=</HashCode>
+      <FileName>curve\DGraph.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DGraph2" Collapsed="true">
+    <Position X="5.25" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAMJEAEAgAAAIAAAAAAAQCECgRAAGAEBAAAIBFgAg=</HashCode>
+      <FileName>curve\DGraph2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DGraph2Resampler" Collapsed="true">
+    <Position X="65.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAgAAAAAQAAAAAAAgIAAAAAAAAAAA=</HashCode>
+      <FileName>curve\DGraph2Resampler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DGraph2Util" Collapsed="true">
+    <Position X="67" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QIAgAgAAEAAAAAAABCAAAAAEJAAAEAAAAAAABAAAAIA=</HashCode>
+      <FileName>curve\DGraph2Util.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DGraph3" Collapsed="true">
+    <Position X="0.75" Y="14.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAMJEAEAgAAAIAAAAAAAQAECARAACAEBAAAABFgAg=</HashCode>
+      <FileName>curve\DGraph3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DGraph3Util" Collapsed="true">
+    <Position X="68.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAACAAAAAABAAAAAACAAAAAAAAAIA=</HashCode>
+      <FileName>curve\DGraph3Util.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Ellipse2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="68.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ECAIAAAAAAAAAAAgEIAgAgQhAAQCBkAAAIACYQAYIRA=</HashCode>
+      <FileName>curve\Ellipse2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.EllipseArc2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="70.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ECAIAAAAAAAAAAAgAAAgAAQhAAQABEAEAAACUAAIARA=</HashCode>
+      <FileName>curve\EllipseArc2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.GeneralPolygon2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="54.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAABCwoAAAAIBAMAAAUAEAKAICQAggAGAQAQAqA=</HashCode>
+      <FileName>curve\GeneralPolygon2d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.Hexagon2d" Collapsed="true">
+    <Position X="65.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAACBAAgAAAAAEAAIEAACAAAAEAAAAAAAAAIAhA=</HashCode>
+      <FileName>curve\Hexagon2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.LaplacianCurveDeformer" Collapsed="true">
+    <Position X="74" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIGEAcAIAMAAYQgAFAAICEAoQASAAAAAgACAgBYAAwA=</HashCode>
+      <FileName>curve\LaplacianCurveDeformer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.NURBSCurve2" Collapsed="true">
+    <Position X="16.75" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAACAIAABgEjAmACU4hgQABEEAAAACQAAAkRg=</HashCode>
+      <FileName>curve\NURBSCurve2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="g3.ParametricCurveSequence2" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="65.25" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAgAAAgAAAgAAQgAASABUAAgIACAAAAARA=</HashCode>
+      <FileName>curve\ParametricCurveSequence2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.PlanarComplex" Collapsed="true">
+    <Position X="67" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>0IIIAAAABAAAAAAABAiABAwAAEAQgScIAAECAABAAhA=</HashCode>
+      <FileName>curve\PlanarComplex.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PlanarSolid2d" Collapsed="true">
+    <Position X="70.5" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIBAwgAAAAIAIAAAAAAAACABAAAgAAAAAAAAAA=</HashCode>
+      <FileName>curve\PlanarSolid2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Polygon2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="53" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACgACCSiAgAEACFMCQAchEAIQIAACGIgGBQKUAqA=</HashCode>
+      <FileName>curve\Polygon2d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.Polygon2DCurve" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="56.5" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAAAgAAAgAAQgAAQABEAAAAACAAAAATA=</HashCode>
+      <FileName>curve\Polygon2d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.PolygonFont2d" Collapsed="true">
+    <Position X="58.25" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAIBACEACAAAAAAAAAAAAAQIBAQAAAAA=</HashCode>
+      <FileName>curve\PolygonFont2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PolyLine2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="60" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAIEAgAACCiAgBAACAECAAVgAAIQICAEEAACBAAEAiA=</HashCode>
+      <FileName>curve\PolyLine2d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.PolyLine2DCurve" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="61.75" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAAAgAAAiAAQgAAQABEAAAAACAAAAARA=</HashCode>
+      <FileName>curve\PolyLine2d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DPolyLine2f" Collapsed="true">
+    <Position X="51.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAEABAAAAAAACAAAAAEQEAAAACAAEAAAAABAAQA=</HashCode>
+      <FileName>curve\PolyLine2f.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PolyLine3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63.5" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAgAAACiAABAACAACAAEAAAAQAAAEEAAAAAAEAAA=</HashCode>
+      <FileName>curve\PolyLine3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.PolySimplification2" Collapsed="true">
+    <Position X="65.25" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAQBAAAAAAAAAAAAAQgAAAAAABAEQAAAAAAICA=</HashCode>
+      <FileName>curve\PolySimplification2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SculptCurveDeformation" Collapsed="true">
+    <Position X="13.25" Y="4.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAIgEAACRIAAACAAAAAAAAAAAAAAAAAgAAAAAAAAAE=</HashCode>
+      <FileName>curve\SculptCurveDeformers.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.StandardSculptCurveDeformation" Collapsed="true">
+    <Position X="12.75" Y="5.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAABAABAAAABAAAAAAAAAEAAAAAAAACAAAAAA=</HashCode>
+      <FileName>curve\SculptCurveDeformers.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SculptCurveSmooth" Collapsed="true">
+    <Position X="11.5" Y="7.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>curve\SculptCurveDeformers.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SculptCurveMove" Collapsed="true">
+    <Position X="14.5" Y="7.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>curve\SculptCurveDeformers.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.InPlaceIterativeCurveSmooth" Collapsed="true">
+    <Position X="72.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAIAAASAAAAAECAAAAAAAAAAAABAAgAAEAAIAAAE=</HashCode>
+      <FileName>curve\SimpleCurveDeformers.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ArcLengthSoftTranslation" Collapsed="true">
+    <Position X="49.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAgAQAAUIAAACAACQAAAACAAAAAIoAgAAEIAAARAE=</HashCode>
+      <FileName>curve\SimpleCurveDeformers.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Distance" Collapsed="true">
+    <Position X="74" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>distance\Distance.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistLine2Line2" Collapsed="true">
+    <Position X="47.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEQAIAEACAAAAABAAAAAAAAAACAAgABAAAAAYAARAAA=</HashCode>
+      <FileName>distance\DistLine2Line2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistLine2Segment2" Collapsed="true">
+    <Position X="49.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEEAIAEACAAAAQBAAAEAAAAEAAEAAAAAAAFAAAABAAA=</HashCode>
+      <FileName>distance\DistLine2Segment2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistLine3Ray3" Collapsed="true">
+    <Position X="51.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEEAIAEICAAACABAAEAAAAAAGAEAAAAAAABAAAABAAA=</HashCode>
+      <FileName>distance\DistLine3Ray3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistLine3Segment3" Collapsed="true">
+    <Position X="53" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEEAIAEACAAAAQBAAEEAAAAEAAEAAAAAAAFAAAABAAA=</HashCode>
+      <FileName>distance\DistLine3Segment3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistLine3Triangle3" Collapsed="true">
+    <Position X="54.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEEAKAAACAAAAABBAAAAAQAAAgEAACAAAAAAAAABAAA=</HashCode>
+      <FileName>distance\DistLine3Triangle3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistPoint2Box2" Collapsed="true">
+    <Position X="56.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAIACACAAAgABAAEAAAgAAAAIAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>distance\DistPoint2Box2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistPoint2Circle2" Collapsed="true">
+    <Position X="58.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAIACACAAAgABAAAAACAAAAAgAAAAAAAAgAABAAAA=</HashCode>
+      <FileName>distance\DistPoint2Circle2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistPoint3Circle3" Collapsed="true">
+    <Position X="60" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAIACACAAAgABAAAAACAAAAAgAAAAAAAAgAABAAAA=</HashCode>
+      <FileName>distance\DistPoint3Circle3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistPoint3Cylinder3" Collapsed="true">
+    <Position X="61.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEACIACACAAAgABAAgAAAEAAAAAABAAAAAQAAAAAAAE=</HashCode>
+      <FileName>distance\DistPoint3Cylinder3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistPoint3Triangle3" Collapsed="true">
+    <Position X="63.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAKACACAAAggBBAAAAAQAAAAAAACAAAAAAAAAAAAA=</HashCode>
+      <FileName>distance\DistPoint3Triangle3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistRay3Ray3" Collapsed="true">
+    <Position X="65.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAIQEACAYAAABAAAAABAAAAAAAAAAIAAAABgAAAgA=</HashCode>
+      <FileName>distance\DistRay3Ray3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistRay3Segment3" Collapsed="true">
+    <Position X="67" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AECAIAEICAAACQBAAAEAAAAEGAAAAABAAAEAAAAAAAA=</HashCode>
+      <FileName>distance\DistRay3Segment3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistSegment2Segment2" Collapsed="true">
+    <Position X="68.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AGAAIAEACAAkAABBAAAAAAEABAAIAAAAAAAAAAAgAAA=</HashCode>
+      <FileName>distance\DistSegment2Segment2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistSegment3Triangle3" Collapsed="true">
+    <Position X="70.5" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAKAAACAAAAQBBAAEAAQAAAAAAACAAAAEAAAAAAIA=</HashCode>
+      <FileName>distance\DistSegment3Triangle3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DistTriangle3Triangle3" Collapsed="true">
+    <Position X="72.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAIAAACAAAAABBAAAAAQICAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>distance\DistTriangle3Triangle3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.CachingDenseGridTrilinearImplicit" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="70.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAhAQEABAAAAAACAAAAAEAEAAAAAAAAAgAAAAAgA=</HashCode>
+      <FileName>implicit\CachingGridImplicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.CachingMeshSDF" Collapsed="true">
+    <Position X="72.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAhACIQIAARCECACQBMIACEEEAQADASAAAQABCAg=</HashCode>
+      <FileName>implicit\CachingMeshSDF.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.CachingMeshSDFImplicit" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="74" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAhAQAABgAAAAAAAAAAAAAEAAAAAAAAAgAAAAAgA=</HashCode>
+      <FileName>implicit\CachingMeshSDF.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DenseGridTrilinearImplicit" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="58.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAhAAAABAAAAAAAAAAAAAAEAAAAAAAAAgAAAAAgA=</HashCode>
+      <FileName>implicit\GridImplicits3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitPoint2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="58.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>DAEAAAAACABIAAAAAAAAAAAAAAAAAAAAAAJkgAAIAgA=</HashCode>
+      <FileName>implicit\Implicit2d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitSphere3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="67" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAgAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitHalfSpace3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="46" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAgAAgAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitAxisAlignedBox3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="67" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitBox3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="70.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAEAAAgAIAAIAAAAAAAAgAAAAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitLine3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="49.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAgAAAAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitOffset3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="56.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgIAAAggA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitShell3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="60" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAhIAAAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitUnion3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="68.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgIAEAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitIntersection3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgIAEAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitDifference3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="72.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgIAEAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitNaryUnion3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="54.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAgAAAAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitNaryIntersection3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="53" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAgAAAAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitNaryDifference3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="51.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAgIAAAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitSmoothUnion3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="65.25" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAgIAEAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitSmoothIntersection3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAgIAEAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitSmoothDifference3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="61.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAgIAEAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitBlend3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="68.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAQJAAAEAAAAAgIAEAApg=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DistanceFieldToSkeletalField" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="46" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAEAAgAAAAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.SkeletalBlend3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="46" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgIAEAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.SkeletalRicciBlend3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAgIAEAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.SkeletalRicciNaryBlend3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="49.5" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAEAAAAQAAAAAAAAAAgAQAAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ImplicitFieldSampler3d" Collapsed="true">
+    <Position X="74" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAFhQAAAAAAAAAAAAAAABAEECAAAEAAAAAAABAAAA=</HashCode>
+      <FileName>implicit\ImplicitFieldSampler3d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ImplicitNAryOp2d" Collapsed="true">
+    <Position X="4.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAEAAAAAAAAAAAAAAAAAAAQAAgAAAAAgA=</HashCode>
+      <FileName>implicit\ImplicitOperators.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="g3.ImplicitBlend2d" Collapsed="true">
+    <Position X="3.25" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>implicit\ImplicitOperators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ImplicitUnion2d" Collapsed="true">
+    <Position X="5.5" Y="8.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>implicit\ImplicitOperators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ImplicitIntersection2d" Collapsed="true">
+    <Position X="7.75" Y="8.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>implicit\ImplicitOperators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ImplicitDifference2d" Collapsed="true">
+    <Position X="0.75" Y="8.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>implicit\ImplicitOperators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MarchingQuads" Collapsed="true">
+    <Position X="54.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAEQiQAAgYAgAgIRgAJAAAIAgAgIAgQAFCSQEAAgI=</HashCode>
+      <FileName>implicit\MarchingQuads.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gs.LinearFalloff" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="49.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAABAAIAAAACAAAAAAAAA=</HashCode>
+      <FileName>implicit\FalloffFunctions.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="gs.WyvillFalloff" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="53" Y="15.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAABAAIAAAACAAAAAAAAA=</HashCode>
+      <FileName>implicit\FalloffFunctions.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.Intersector1" Collapsed="true">
+    <Position X="47.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABBAAAIAAAAAAAACAISAAA=</HashCode>
+      <FileName>intersection\Intersector1.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrLine2Line2" Collapsed="true">
+    <Position X="49.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAggAAIAAAAAAUAAEAIAABgAQEA4AAAAQA=</HashCode>
+      <FileName>intersection\IntrLine2Line2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrLine2Segment2" Collapsed="true">
+    <Position X="51.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEUAAAQAAAAAgQAIAAEAAAQAAAAYAAAAAQEAgAABAQA=</HashCode>
+      <FileName>intersection\IntrLine2Segment2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrLine2Triangle2" Collapsed="true">
+    <Position X="53" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEEAAAIAAAACgAABAAAAAQQAAAAIAEAAAQEAgAABAAA=</HashCode>
+      <FileName>intersection\IntrLine2Triangle2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrLine3AxisAlignedBox3" Collapsed="true">
+    <Position X="54.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEEAAAAAAAAAgAAAAAAQAgQAAAIIAAAAAwEAqAABAAA=</HashCode>
+      <FileName>intersection\IntrLine3AxisAlignedBox3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrLine3Box3" Collapsed="true">
+    <Position X="56.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEEAAAAAAAAAgAAAAAAQAgQAAAIIAAAAAwEAqAABAAA=</HashCode>
+      <FileName>intersection\IntrLine3Box3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrRay3AxisAlignedBox3" Collapsed="true">
+    <Position X="58.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAABAIAAAAyAAAAAAAAgQAAAIIAAAAAQEAiAAAAIA=</HashCode>
+      <FileName>intersection\IntrRay3AxisAlignedBox3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrRay3Box3" Collapsed="true">
+    <Position X="60" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAIAAAAyAAAAAAAAgQAAAIIAAAAAQEAiAAAAIA=</HashCode>
+      <FileName>intersection\IntrRay3Box3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrRay3Triangle3" Collapsed="true">
+    <Position X="61.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAACAAIAAAACAABAAAAAQQACAAIAAAAAQEAgAAAAIA=</HashCode>
+      <FileName>intersection\IntrRay3Triangle3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrSegment2Segment2" Collapsed="true">
+    <Position X="63.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AGQAAAQAAAAEgAAIAAAAAAQwAAAIAAAAAQEAgAAgIQA=</HashCode>
+      <FileName>intersection\IntrSegment2Segment2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrSegment2Triangle2" Collapsed="true">
+    <Position X="65.25" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAIAAAAAgQABAAEAAQQAAAAIAAAAAQEAgAAAAAA=</HashCode>
+      <FileName>intersection\IntrSegment2Triangle2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrSegment3Box3" Collapsed="true">
+    <Position X="67" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAgQAAAAETAgQAAAoIAAAIAQEAqAAAAAA=</HashCode>
+      <FileName>intersection\IntrSegment3Box3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrTriangle2Triangle2" Collapsed="true">
+    <Position X="68.75" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAgAABAAAAAQQAAAAIAAAgCQEAiAAAAAA=</HashCode>
+      <FileName>intersection\IntrTriangle2Triangle2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IntrTriangle3Triangle3" Collapsed="true">
+    <Position X="70.5" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QEIECAAAAAAAgAABAAAAAQQAAAAIAAAAAQAAiAAAAJA=</HashCode>
+      <FileName>intersection\IntrTriangle3Triangle3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.BinaryG3Writer" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="60" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>io\BinaryG3ReaderWriter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.BinaryG3Reader" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="58.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>io\BinaryG3ReaderWriter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.gSerialization" Collapsed="true">
+    <Position X="63.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAACAAAAAAAAACAAAAAAAQAAAAA=</HashCode>
+      <FileName>io\gSerialization.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SimpleStore" Collapsed="true">
+    <Position X="72.25" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAgAAAAAACAgAAgAIAAAAAAAAAAQAAAAA=</HashCode>
+      <FileName>io\gSerialization.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.GenericMaterial" Collapsed="true">
+    <Position X="4.5" Y="16.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAEAAAAAAAAAEABAAAQAAAAAAggA=</HashCode>
+      <FileName>io\MaterialTypes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.OBJMaterial" Collapsed="true">
+    <Position X="4.5" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAIAgEAgACEAAQAoAAAQAACAACQABgEAAAAAAAAgAA=</HashCode>
+      <FileName>io\MaterialTypes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ReadOptions" Collapsed="true">
+    <Position X="74" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAQAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>io\MeshIO.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshIOUtil" Collapsed="true">
+    <Position X="67" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>io\MeshIOUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.OBJReader" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="53" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QEhCgAhEQgGCCQgUAgigCAAgAEIhAAgIAAAABAACAwA=</HashCode>
+      <FileName>io\OBJReader.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.OBJWriter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="54.75" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BgAAQAQAEAAAAAAAAAAAAAAAgAAAAAAAAEABAAEIAAA=</HashCode>
+      <FileName>io\OBJWriter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.OFFReader" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="58.25" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAABAAAAAAAAQAAAAAAAgAAAAAAgAAAAAAAAAAAA=</HashCode>
+      <FileName>io\OFFReader.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.OFFWriter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="60" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>io\OFFWriter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.StandardMeshReader" Collapsed="true">
+    <Position X="58.25" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAQQgAAAAwAgAAAAIAAgIAAAAAAAAAA=</HashCode>
+      <FileName>io\StandardMeshReader.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.OBJFormatReader" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="51.25" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAIAAAAAAAA=</HashCode>
+      <FileName>io\StandardMeshReader.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.STLFormatReader" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="61.75" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAIAAAAAAAA=</HashCode>
+      <FileName>io\StandardMeshReader.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.OFFFormatReader" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="56.5" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAIAAAAAAAA=</HashCode>
+      <FileName>io\StandardMeshReader.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.BinaryG3FormatReader" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="56.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAIAAAAAAAA=</HashCode>
+      <FileName>io\StandardMeshReader.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.StandardMeshWriter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="60" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAEAECAEAAAAAAAAAAAACAAAAQAAAAAACgECCAA=</HashCode>
+      <FileName>io\StandardMeshWriter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.STLReader" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63.5" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>KAAAAABAAACBCAAQAAAKAAAgACAAAC0gBAEAAAAAAgI=</HashCode>
+      <FileName>io\STLReader.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.STLWriter" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="65.25" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>io\STLWriter.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.SVGWriter" Collapsed="true">
+    <Position X="67" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgIRAAAARqAAAAhIgBAEABAECIIAQEgRAAQEqUAEgA=</HashCode>
+      <FileName>io\SVGWriter.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.BoundsUtil" Collapsed="true">
+    <Position X="65.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>math\BoundsUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.FastTriWinding" Collapsed="true">
+    <Position X="49.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAABAAAAAAAAAAAAAAAABAAAAAgAAAAA=</HashCode>
+      <FileName>math\FastWindingMath.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.FastPointWinding" Collapsed="true">
+    <Position X="46" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAIAAAAAAAAABAAAAAAAAAAAAAAAABAAAAAgAAAAA=</HashCode>
+      <FileName>math\FastWindingMath.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.IndexUtil" Collapsed="true">
+    <Position X="70.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAABACCAAECgAJACAAABAAIAAAA4QAABQAohQ=</HashCode>
+      <FileName>math\IndexUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.gIndices" Collapsed="true">
+    <Position X="58.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAAAAAAAAAQAAAAAAAAIAQAAAAAGAAAAAAEBA=</HashCode>
+      <FileName>math\IndexUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Integrate1d" Collapsed="true">
+    <Position X="74" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAIAAAAAAAAgEAAAAAAEAACAAAAAAAAAAAA=</HashCode>
+      <FileName>math\Integrate1d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MathUtil" Collapsed="true">
+    <Position X="56.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AggIQCAFAnKFKjgQWyAAAIDAAgwYAAwBgBgEASGCAEg=</HashCode>
+      <FileName>math\MathUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Matrix2d" Collapsed="true">
+    <Position X="58.25" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQQAAAAIABAAAaAdIAAAAAwAAAiAAAEAQACgAQIA=</HashCode>
+      <FileName>math\Matrix2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Matrix2f" Collapsed="true">
+    <Position X="60" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQQAAAAIABAAAYAcIAAAAAwAAACAAAEAQACgAQIA=</HashCode>
+      <FileName>math\Matrix2f.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MatrixUtil" Collapsed="true">
+    <Position X="61.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAAAAAAAACAAAAAAAAAACAAAAAABECAAgAAAAA=</HashCode>
+      <FileName>math\MatrixUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PrimalQuery2d" Collapsed="true">
+    <Position X="67" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAyAAAAAAAAAAAAAAAAAAAQAAAAAAQAAA=</HashCode>
+      <FileName>math\PrimalQuery2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Query2d" Collapsed="true">
+    <Position X="11.5" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AGAAABEAAAAAQAAAAAAAAAAACAAAAAAgAAAAAAgQAAA=</HashCode>
+      <FileName>math\Query2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="g3.QueryBase" Collapsed="true">
+    <Position X="11.5" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>math\Query2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Query2Int64" Collapsed="true">
+    <Position X="11.5" Y="17.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AGAAAAAAAAAAQAAAAAAAAAAACAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>math\Query2Integer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.QueryTuple2d" Collapsed="true">
+    <Position X="70.5" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AGAAABAAAAAAQAAAAAAQAAAACAAAAAAgAAAAAAAQAAA=</HashCode>
+      <FileName>math\QueryTuple2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ScalarMap" Collapsed="true">
+    <Position X="54.75" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAAACgAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>math\ScalarMap.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Segment2dBox" Collapsed="true">
+    <Position X="56.5" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>math\Segment2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.TransformSequence" Collapsed="true">
+    <Position X="46" Y="15.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACIAAAACAAAAACAAAIAAAIQRAAAAACAQAAgAA=</HashCode>
+      <FileName>math\TransformSequence.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.TransformSequence2" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="15.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAAAACAAAAAAACAAIAAAAAAAAAQQAAABAIEAAAAAA=</HashCode>
+      <FileName>math\TransformSequence2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DMesh3" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="74" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>nvjwvbnpX7lMi5VTunpLp501fu2/i++5VrTUIhrfmrg=</HashCode>
+      <FileName>mesh\DMesh3.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DMesh3Builder" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="46" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AMAAgAEIAAAABABAAIRAAAAIAgIAgAAAAQAAAAAEAAA=</HashCode>
+      <FileName>mesh\DMesh3Builder.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.ModifyVerticesMeshChange" Collapsed="true">
+    <Position X="46" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAADEAAAAAABAAAAIAQAECABAAAAAABAAQACA=</HashCode>
+      <FileName>mesh\DMesh3Changes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SetVerticesMeshChange" Collapsed="true">
+    <Position X="63.5" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAADEAAAAAAAAAAAAAQAECABAAAAAABAAQAAA=</HashCode>
+      <FileName>mesh\DMesh3Changes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.RemoveTrianglesMeshChange" Collapsed="true">
+    <Position X="49.5" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEBCAAAAhAAgAEQIAQAAAABAEAIAAgAAQAAA=</HashCode>
+      <FileName>mesh\DMesh3Changes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.AddTrianglesMeshChange" Collapsed="true">
+    <Position X="46" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEBAAAAAhAAgAAEIAQAAAABAAAIAAgAAQAgA=</HashCode>
+      <FileName>mesh\DMesh3Changes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DSubmesh3" Collapsed="true">
+    <Position X="54.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gEAKAAAAQAEAACEAEAgAgABIFBAFAAAAIIQYAEBAAAQ=</HashCode>
+      <FileName>mesh\DSubmesh3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DSubmesh3Set" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="56.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAQAAAIAAAABAAAAAAAAAAAAAAAAAkAYAAAAAAAIA=</HashCode>
+      <FileName>mesh\DSubmesh3Set.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.EdgeLoop" Collapsed="true">
+    <Position X="63.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIgIEAAAgAAAIACQAAAKEQCAAACAABEUAGEAAAIAA=</HashCode>
+      <FileName>mesh\EdgeLoop.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.EdgeLoopRemesher" Collapsed="true">
+    <Position X="13.25" Y="13.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>IBAAFFAAAAAAIAAACAAACREAAAAEKAAIAAAIAAAAAFA=</HashCode>
+      <FileName>mesh\EdgeLoopRemesher.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.EdgeSpan" Collapsed="true">
+    <Position X="65.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAhIEAAAoAABIAAQAEACEQAAAAAAABEUAAEAAAAAA=</HashCode>
+      <FileName>mesh\EdgeSpan.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.FaceGroupOptimizer" Collapsed="true">
+    <Position X="72.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAhAAAAgIAAAAAAAEgCAAAgAABADBACAIQAAAAAAAIA=</HashCode>
+      <FileName>mesh\FaceGroupOptimizer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.FaceGroupUtil" Collapsed="true">
+    <Position X="74" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAhSAAAAAAAAACAAAAAAAAAAAAAAABAAAAAEAAAAAAA=</HashCode>
+      <FileName>mesh\FaceGroupUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshTriInfoCache" Collapsed="true">
+    <Position X="65.25" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAIAAAAAAAAAAAACAAAAQAAAAAAAAAAA=</HashCode>
+      <FileName>mesh\MeshCaches.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshConstraints" Collapsed="true">
+    <Position X="70.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QgAAgBAAAAAAAACAAAAAAAAAEAEwAAAAUAgAAAAAEIE=</HashCode>
+      <FileName>mesh\MeshConstraints.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshConstraintUtil" Collapsed="true">
+    <Position X="72.25" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAQABAAAAAAAkQAAAAAAABAAAAQBAUAA=</HashCode>
+      <FileName>mesh\MeshConstraintUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshDecomposition" Collapsed="true">
+    <Position X="74" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAAAACAAABAAAAAICCAABBAAgAAAAAAAAAQA=</HashCode>
+      <FileName>mesh\MeshDecomposition.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshEditor" Collapsed="true">
+    <Position X="49.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAQAIACgQAAABAEAAAAQAsCAAQAQSACAQKhgCAQggg=</HashCode>
+      <FileName>mesh\MeshEditor.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshIndexUtil" Collapsed="true">
+    <Position X="61.75" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAA=</HashCode>
+      <FileName>mesh\MeshIndexUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshIterators" Collapsed="true">
+    <Position X="72.25" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAYAAAAQAAAAAQAQAAAhAACAAAAACAAAACAAAAA=</HashCode>
+      <FileName>mesh\MeshIterators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshMeasurements" Collapsed="true">
+    <Position X="49.5" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>KAAAgAAAAAAAAIBQABEAAAAAAAAAQAAAAIAAAAAAQgA=</HashCode>
+      <FileName>mesh\MeshMeasurements.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshNormals" Collapsed="true">
+    <Position X="51.25" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAEAAAAAAECAAAAAAAAAAAAAABAQACAAAAoAA=</HashCode>
+      <FileName>mesh\MeshNormals.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshEdgeMidpoints" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="46" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAEAAAAAAAAACAACAAEAAAABgwAQAQAAAAAAAAA=</HashCode>
+      <FileName>mesh\MeshPointSets.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.MeshBoundaryEdgeMidpoints" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63.5" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAEAAAAAAAAACAACAAEAAAAFgwAQAQAAAAAAAAA=</HashCode>
+      <FileName>mesh\MeshPointSets.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.MeshRefinerBase" Collapsed="true">
+    <Position X="11" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAiCEABIAAAAAAAAAQgECBABAAQQAQAACAAQA=</HashCode>
+      <FileName>mesh\MeshRefinerBase.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshTransforms" Collapsed="true">
+    <Position X="63.5" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAoAAAABAAAAAAIABCIAEAAAAAIAAAAEAAAAAAA=</HashCode>
+      <FileName>mesh\MeshTransforms.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshUtil" Collapsed="true">
+    <Position X="67" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACgACAAACAAYAAAAAoEAAACAAAAAEIAAAAAAA=</HashCode>
+      <FileName>mesh\MeshUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DenseUVMesh" Collapsed="true">
+    <Position X="61.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAIAAAAAAAAAAAAAAAIAAAAAAAAIAAAAAAAAA=</HashCode>
+      <FileName>mesh\MeshUVSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshWeights" Collapsed="true">
+    <Position X="72.25" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAQAABIAAAAAAA=</HashCode>
+      <FileName>mesh\MeshWeights.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.NTMesh3" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="49.5" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>GLTwPZnMV7gMiZRROnBLhx0ZPum7g+6xVLBUYBjfgCA=</HashCode>
+      <FileName>mesh\NTMesh3.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.Reducer" Collapsed="true">
+    <Position X="8.75" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gBAA1BWECDoAQxDgIQAAAEOEAIgUCAggGJAIARtQIAk=</HashCode>
+      <FileName>mesh\Reducer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.RegionRemesher" Collapsed="true">
+    <Position X="11" Y="13.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAACAgAgAAAAgAAACIAABAIAAAAAAAAAAQAAAAAAAA=</HashCode>
+      <FileName>mesh\RegionRemesher.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Remesher" Collapsed="true">
+    <Position X="12.25" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>aFAAlBGmKCLACxAkNAAEAEEQAIkUCAk4AICoBRhUJFs=</HashCode>
+      <FileName>mesh\Remesher.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SimpleMesh" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="67" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CBAAAQkQEhCIQYBBCLIGQAFBAjCxgxAwXIIEhBAEgAA=</HashCode>
+      <FileName>mesh\SimpleMesh.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.SimpleMeshBuilder" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="68.75" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AMAAgAEIAAAAAABAAIRAAAAAAgIAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>mesh\SimpleMesh.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.SimpleQuadMesh" Collapsed="true">
+    <Position X="70.5" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>iBQIACEAEgAIQYCACIAEQAFRADQRhxAwEIoAoBEEgBA=</HashCode>
+      <FileName>mesh\SimpleQuadMesh.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Radial3DArrowGenerator" Collapsed="true">
+    <Position X="10.5" Y="3.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAAAAAAAAAAAEARAAAAAAAAAAAAAAABAAAAEAAAAA=</HashCode>
+      <FileName>mesh_generators\ArrowGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.TrivialBox3Generator" Collapsed="true">
+    <Position X="7.5" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>mesh_generators\BoxGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.GridBox3Generator" Collapsed="true">
+    <Position X="17.75" Y="1.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACAAAAAAAQAAAAAAAAAAAIAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>mesh_generators\BoxGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.OpenCylinderGenerator" Collapsed="true">
+    <Position X="29.25" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACABAABCAAEAAABAAAAAAAAAAAAAAAAAECAAAA=</HashCode>
+      <FileName>mesh_generators\CylinderGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.CappedCylinderGenerator" Collapsed="true">
+    <Position X="34.75" Y="1.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACABAABCAAEAAABAAAAAAAAAAAAAAAAAECAAAA=</HashCode>
+      <FileName>mesh_generators\CylinderGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ConeGenerator" Collapsed="true">
+    <Position X="2.5" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACABAAACAAEAAABAAAAAAAAAAAAAAAAAECAAAA=</HashCode>
+      <FileName>mesh_generators\CylinderGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.VerticalGeneralizedCylinderGenerator" Collapsed="true">
+    <Position X="10.25" Y="1.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAACCQABAAAAAAAAAAAAAAAAAAAAAAAEAAAECAAAA=</HashCode>
+      <FileName>mesh_generators\CylinderGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.TrivialDiscGenerator" Collapsed="true">
+    <Position X="20.75" Y="1.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAACAAEAAAAAAAAAAAAAAAAAAAAAECAAAA=</HashCode>
+      <FileName>mesh_generators\DiscGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PuncturedDiscGenerator" Collapsed="true">
+    <Position X="32" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAEAAAAIAAAABAAAAAAAAAAAECAAAA=</HashCode>
+      <FileName>mesh_generators\DiscGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.TubeGenerator" Collapsed="true">
+    <Position X="37.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACCQABAAAAAAAAAAAAAAAAAAAAAIEAEAAEAAACE=</HashCode>
+      <FileName>mesh_generators\GenCylGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MarchingCubes" Collapsed="true">
+    <Position X="53" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CgAAgCBAICAAQgAEAQACCAAQAAAQAABAAUoAAUAAApE=</HashCode>
+      <FileName>mesh_generators\MarchingCubes.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshGenerator" Collapsed="true">
+    <Position X="23" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QEAAgAAAAEMAARACACAAAQEAAECQAQAAAABAAEAAAiA=</HashCode>
+      <FileName>mesh_generators\MeshGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.TrivialRectGenerator" Collapsed="true">
+    <Position X="23.25" Y="1.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIABAAAAAAAAAAAAEAAAAAIQABAAAAAAEAAAAA=</HashCode>
+      <FileName>mesh_generators\PlaneGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.GriddedRectGenerator" Collapsed="true">
+    <Position X="23.25" Y="3.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>mesh_generators\PlaneGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.RoundRectGenerator" Collapsed="true">
+    <Position X="40" Y="1.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAIgAAABQAAAAAAAAAAAFAAAAAAQAAAgAAIAEIAAgA=</HashCode>
+      <FileName>mesh_generators\PlaneGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PointSplatsGenerator" Collapsed="true">
+    <Position X="4.75" Y="1.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAACAAAAgAAAAAAAAAAAAAAAgAAAAAAAAEAAAgA=</HashCode>
+      <FileName>mesh_generators\PointsMeshGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Curve3Axis3RevolveGenerator" Collapsed="true">
+    <Position X="14" Y="1.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACCQQBAAAQAAAAAAAAAAAAAAAAAAgAAAAECAAAA=</HashCode>
+      <FileName>mesh_generators\RevolveGenerator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Curve3Curve3RevolveGenerator" Collapsed="true">
+    <Position X="26" Y="1.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACCQABAAAQAAAAAAAAAAAAAAAAAAgAAAAECAAAA=</HashCode>
+      <FileName>mesh_generators\RevolveGenerator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Sphere3Generator_NormalizedCube" Collapsed="true">
+    <Position X="17.25" Y="3.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>mesh_generators\SphereGenerators.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.TriangulatedPolygonGenerator" Collapsed="true">
+    <Position X="42.5" Y="1.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAAAAAAAAAAAAQAAAAQAAAAAEAAEAAACA=</HashCode>
+      <FileName>mesh_generators\TriangulatedPolygonGenerator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.VoxelSurfaceGenerator" Collapsed="true">
+    <Position X="51.25" Y="15.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAgAAAAAAAIgAAAAAQACAgAAIIAAAAAAAAAEAACAA=</HashCode>
+      <FileName>mesh_generators\VoxelSurfaceGenerator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.LaplacianMeshDeformer" Collapsed="true">
+    <Position X="46" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIGEAcAIAMAAYQiAFAAICEAoAAQAAAAAAQCAgBYQAwA=</HashCode>
+      <FileName>mesh_ops\LaplacianMeshDeformer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.LaplacianMeshSmoother" Collapsed="true">
+    <Position X="47.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIGEAcAIAMAAYQiAFAAICEAoAQQAAAAAAQCAgBYQAwA=</HashCode>
+      <FileName>mesh_ops\LaplacianMeshSmoother.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshExtrudeFaces" Collapsed="true">
+    <Position X="51.25" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ICAAAEIAAACAAAABAIAAAAAAAAgAAAAAAUAAAAAAAAA=</HashCode>
+      <FileName>mesh_ops\MeshExtrudeFaces.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshExtrudeLoop" Collapsed="true">
+    <Position X="53" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIIAACAAAAgAAAAAAAAAAAEAAAAAQAAAACAAAA=</HashCode>
+      <FileName>mesh_ops\MeshExtrudeLoop.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshExtrudeMesh" Collapsed="true">
+    <Position X="54.75" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAACCAAABAIAAAAAAAAIABAIEAAUACIAAABSA=</HashCode>
+      <FileName>mesh_ops\MeshExtrudeMesh.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshICP" Collapsed="true">
+    <Position X="60" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAUAAAEIgAAA4ACAgEAAAIIABAIoQgAAEAKAAACAAA=</HashCode>
+      <FileName>mesh_ops\MeshICP.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshInsertPolygon" Collapsed="true">
+    <Position X="63.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAEAEAAAAAAAAAAAAgAAAIAAAAAYAAAAAAACA=</HashCode>
+      <FileName>mesh_ops\MeshInsertPolygon.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshInsertUVPolyCurve" Collapsed="true">
+    <Position X="65.25" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAIAAQhCIgAEAAAAAAAEAAAAAAABAgSUAIAAAgLA=</HashCode>
+      <FileName>mesh_ops\MeshInsertUVPolyCurve.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshIsoCurves" Collapsed="true">
+    <Position X="68.75" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CEBgAABKQAAAAIAAAAACAAAAhAAAQAgAEQAgAAQAAIA=</HashCode>
+      <FileName>mesh_ops\MeshIsoCurves.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshIterativeSmooth" Collapsed="true">
+    <Position X="70.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAgCAAAAAAAAAAAgAAIAAABAAEQAAAAIAAAA=</HashCode>
+      <FileName>mesh_ops\MeshIterativeSmooth.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshLocalParam" Collapsed="true">
+    <Position X="74" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAgAACgCAABAQoAIIACAAAVAgAUASACAAAAABAAQA=</HashCode>
+      <FileName>mesh_ops\MeshLocalParam.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshLoopClosure" Collapsed="true">
+    <Position X="46" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAACAAAgAAAQABAAABAACAAAAgQQAAACAgAA=</HashCode>
+      <FileName>mesh_ops\MeshLoopClosure.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshLoopSmooth" Collapsed="true">
+    <Position X="47.75" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAIAgCAAAAAAAAAAAgAAAAAABAAAQAAAAIAAAA=</HashCode>
+      <FileName>mesh_ops\MeshLoopSmooth.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshOps" Collapsed="true">
+    <Position X="53" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>mesh_ops\MeshOps.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshPlaneCut" Collapsed="true">
+    <Position X="54.75" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAUAAACBAASAAIAAKAAAAAAEAAAgAEAgAQAAEAAAAAA=</HashCode>
+      <FileName>mesh_ops\MeshPlaneCut.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PlanarHoleFiller" Collapsed="true">
+    <Position X="68.75" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIACAAAAAAoAAgwgAAAAACAAACBAAAQYACAACQgA=</HashCode>
+      <FileName>mesh_ops\PlanarHoleFiller.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.RegionOperator" Collapsed="true">
+    <Position X="46" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAQAAgAgAAAAAAAgCIAABAIAAAAAAAAAAQAAAAAAAA=</HashCode>
+      <FileName>mesh_ops\RegionOperator.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SimpleHoleFiller" Collapsed="true">
+    <Position X="65.25" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAACAAAAAAAIAAAAAAAAACAAAAQAAAACAAAA=</HashCode>
+      <FileName>mesh_ops\SimpleHoleFiller.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshBoundaryLoopsException" Collapsed="true">
+    <Position X="67" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAACAAAAAAAgAAgAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>mesh_selection\MeshBoundaryLoops.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshBoundaryLoops" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="65.25" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QEAAIAAAQAAFABAACAQAEAQAKBAkAAAEAQQAGAAAQAA=</HashCode>
+      <FileName>mesh_selection\MeshBoundaryLoops.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.MeshConnectedComponents" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="68.75" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAQAAANggCYAAAAQABAAAAAAEAQAAAAAAAAA=</HashCode>
+      <FileName>mesh_selection\MeshConnectedComponents.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.MeshEdgeSelection" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAIAAEBAEAAgCAAQAAAAABACEAQAgQABCBAI=</HashCode>
+      <FileName>mesh_selection\MeshEdgeSelection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.MeshFaceSelection" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="56.5" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAEAAAIBiEBAEEAiSgQQAQFAQBAKUIUEAQADCAIo=</HashCode>
+      <FileName>mesh_selection\MeshFaceSelection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.MeshFacesFromLoop" Collapsed="true">
+    <Position X="58.25" Y="9.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAIEAAAEAAEAAgACAAAAAAAQBCQABAAAA=</HashCode>
+      <FileName>mesh_selection\MeshFacesFromLoop.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshRegionBoundaryLoops" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="58.25" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QGAAAAAAQKgBABAACAQAAQQAIAAkABAEAQQAGAAAQAA=</HashCode>
+      <FileName>mesh_selection\MeshRegionBoundaryLoops.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.MeshVertexSelection" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="70.5" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAIAAAQAAIAAEBAEAAAAAAQQQAAAAACEIUAAQABOAAI=</HashCode>
+      <FileName>mesh_selection\MeshVertexSelection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.IntersectionUtil" Collapsed="true">
+    <Position X="46" Y="7.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAAAAAAAAAAgAAAAQAAAAAAAAAAIAAAAIA=</HashCode>
+      <FileName>queries\IntersectionUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshQueries" Collapsed="true">
+    <Position X="56.5" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>DACACQCAAAAgAgAAAABgABAAACABAIAIAAAAIAAEIAA=</HashCode>
+      <FileName>queries\MeshQueries.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.MeshValidation" Collapsed="true">
+    <Position X="68.75" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAEAAAAAIAAQAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>queries\MeshValidation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.RayIntersection" Collapsed="true">
+    <Position X="72.25" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAABg=</HashCode>
+      <FileName>queries\RayIntersection.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Circle3d" Collapsed="true">
+    <Position X="49.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAAAAAAAAAgAAAAAAggAAQKBEAAAAIDYQAIAQA=</HashCode>
+      <FileName>shapes3\Circle3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Cylinder3d" Collapsed="true">
+    <Position X="70.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAIAAAABAAAAQAAAAAAAAgAAAAAAAAAAAIBAAAAAAA=</HashCode>
+      <FileName>shapes3\Cylinder3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.CholeskyDecomposition" Collapsed="true">
+    <Position X="46" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAABAAAAAAAAAAAAAAAAAIgAAAAAAAAAAAIAQAAAA=</HashCode>
+      <FileName>solvers\CholeskyDecomposition.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DenseMatrix" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="60" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAEAhEQACEBBAABAAABAKgAEAAAAABoAQAA=</HashCode>
+      <FileName>solvers\DenseMatrix.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DenseVector" Collapsed="true">
+    <Position X="63.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAhAAACAAAAABACAAAAAAEAAAAABAAQAA=</HashCode>
+      <FileName>solvers\DenseVector.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.FastQuaternionSVD" Collapsed="true">
+    <Position X="47.75" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAEAAAAAAAAAAICIAIAAEAAIhAAAAAAICFiCCACSAAA=</HashCode>
+      <FileName>solvers\FastQuaternionSVD.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SymmetricMatrix3d" Collapsed="true">
+    <Position X="70.5" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAIAAAwAAAAAAAAAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>solvers\FastQuaternionSVD.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PackedSparseMatrix" Collapsed="true">
+    <Position X="63.5" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BACAAAEAAAAAAECQyAARAAggACAAChAQAAAkEAg4AAE=</HashCode>
+      <FileName>solvers\PackedSparseMatrix.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SingularValueDecomposition" Collapsed="true">
+    <Position X="74" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>xAgAgAAQiAAAAEEAMAsAgAAIABBAkQEAABIAAAACAAA=</HashCode>
+      <FileName>solvers\SingularValueDecomposition.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SymmetricSparseMatrix" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="72.25" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAjEACCAABAAAAAQEAAAAEAAAgABgAQAA=</HashCode>
+      <FileName>solvers\SparseMatrix.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DiagonalMatrix" Collapsed="true">
+    <Position X="70.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAhEAACAABAAAAAAAAAAAAAAAABAhAAAA=</HashCode>
+      <FileName>solvers\SparseMatrix.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SparseSymmetricCG" Collapsed="true">
+    <Position X="51.25" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACEAAgABAAIoBAAAAAAEAAAgAAFAQQE=</HashCode>
+      <FileName>solvers\SparseSymmetricCG.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SparseSymmetricCGMultipleRHS" Collapsed="true">
+    <Position X="53" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACEAAgABAAIoBAAAAAAEAAAoAAFIQQE=</HashCode>
+      <FileName>solvers\SparseSymmetricCG.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SymmetricEigenSolver" Collapsed="true">
+    <Position X="68.75" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QIAAQAAQwQAAAEGAEAhAAAAIAAQAkQAgAAACAAACAQA=</HashCode>
+      <FileName>solvers\SymmetricEigenSolver.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.TransformedIntersectionTarget" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="74" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAACAAAAAgAAAQAAACAACAAAAAAAAACAAAAAAAA=</HashCode>
+      <FileName>spatial\BasicIntersectionTargets.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DMeshIntersectionTarget" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="49.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAQAABCAAAAAAAAAAAQAAAAAAAgA=</HashCode>
+      <FileName>spatial\BasicIntersectionTargets.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.PlaneIntersectionTarget" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="72.25" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAgAAAAAAAAAQAAACAACAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\BasicIntersectionTargets.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.MeshProjectionTarget" Collapsed="true">
+    <Position X="0.75" Y="16.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAADAAAAAAAAAAAAQAAACAAAAA=</HashCode>
+      <FileName>spatial\BasicProjectionTargets.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="g3.TransformedMeshProjectionTarget" Collapsed="true">
+    <Position X="0.5" Y="17.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAAAEAAQAAAAAQAAAA=</HashCode>
+      <FileName>spatial\BasicProjectionTargets.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PlaneProjectionTarget" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="74" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAIAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>spatial\BasicProjectionTargets.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.CircleProjectionTarget" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="51.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\BasicProjectionTargets.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.CylinderProjectionTarget" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="72.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAQAAAAAAAA=</HashCode>
+      <FileName>spatial\BasicProjectionTargets.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.SequentialProjectionTarget" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="61.75" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAAAEAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\BasicProjectionTargets.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.BiGrid3&lt;BlockType&gt;" Collapsed="true">
+    <Position X="54.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQABAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAACACIAQ=</HashCode>
+      <FileName>spatial\BiGrid3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Bitmap2" Collapsed="true">
+    <Position X="61.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAUCABABACgAAAAIgAACAAAAAAAAAAAEAQEA=</HashCode>
+      <FileName>spatial\Bitmap2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Bitmap3" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAUCABABACgAAAAIgABDAAAAAAECAAgAAQEA=</HashCode>
+      <FileName>spatial\Bitmap3.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DCurve3BoxTree" Collapsed="true">
+    <Position X="46" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAiAAAAAiAAABAAAAAAABAIACAAAAABAgAAABAAAAAA=</HashCode>
+      <FileName>spatial\DCurveBoxTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DCurveProjectionTarget" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAgAAAAAAAAAA=</HashCode>
+      <FileName>spatial\DCurveProjection.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DenseGrid2f" Collapsed="true">
+    <Position X="51.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EEAAEEAAAECEAAAACIBAAAAAAAAAAAIAAQEEAAAAQgg=</HashCode>
+      <FileName>spatial\DenseGrid2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DenseGrid2i" Collapsed="true">
+    <Position X="53" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAABEAAQECEAAAACIBAACAgAAACAAIACQAAAAAAQAA=</HashCode>
+      <FileName>spatial\DenseGrid2.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DenseGrid3f" Collapsed="true">
+    <Position X="54.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAAAEEAAAECEABAACIBAAAACAAAAAAEAEQEEAACAQgA=</HashCode>
+      <FileName>spatial\DenseGrid3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DenseGrid3i" Collapsed="true">
+    <Position X="56.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAEAAQECEAAAACIBAACAgAAACAAAQGQAAAACAQAA=</HashCode>
+      <FileName>spatial\DenseGrid3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DMeshAABBTree3" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>KATESEgCUAFJMkEQCrwADGERCIRBiowICQiEYIg5ToA=</HashCode>
+      <FileName>spatial\DMeshAABBTree.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DSparseGrid3&lt;ElemType&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="53" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAEQAACABBAAAEAAAYBAAAAAAAAAAACAgAAAAI=</HashCode>
+      <FileName>spatial\DSparseGrid3.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.MeshSignedDistanceGrid" Collapsed="true">
+    <Position X="61.75" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEFBBhgCAIKAABCECAiQlEIQCEEEAQADASAAgQgBCAg=</HashCode>
+      <FileName>spatial\MeshSignedDistanceGrid.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.NormalHistogram" Collapsed="true">
+    <Position X="47.75" Y="11.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAQAAgAAAAAAAAAQAAAAAAAAAAAAAIAAAIAA=</HashCode>
+      <FileName>spatial\NormalHistogram.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PointAABBTree3" Collapsed="true">
+    <Position X="46" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ICQAQDigUAEAoEEACIQACAESKATAiIABCAIEAAiIVgA=</HashCode>
+      <FileName>spatial\PointAABBTree3.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PointHashGrid2d&lt;T&gt;" Collapsed="true">
+    <Position X="47.75" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAhgAAAEIAAAAAiIAAAIAAICAABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\PointHashGrid2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.PointHashGrid3d&lt;T&gt;" Collapsed="true">
+    <Position X="49.5" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAhgAAAEIAAAAAiIAAAIAAICAABAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\PointHashGrid3d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.GeneralPolygon2dBoxTree" Collapsed="true">
+    <Position X="56.5" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgQAAAACAAAAAAAAAAAAAAAAAABAABAAAAAAAAAACA=</HashCode>
+      <FileName>spatial\Polygon2dBoxTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.Polygon2dBoxTree" Collapsed="true">
+    <Position X="54.75" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAiAAAAACAAAAAAAAAAABAIACAAAAABAAAAABAAAACA=</HashCode>
+      <FileName>spatial\Polygon2dBoxTree.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SegmentHashGrid2d&lt;T&gt;" Collapsed="true">
+    <Position X="58.25" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQkEBgEEAAIAAAAAgABAAAAAAAQAAAAAAQAAAAQAAEA=</HashCode>
+      <FileName>spatial\SegmentHashGrid.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SegmentSet2d" Collapsed="true">
+    <Position X="60" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAQAAAAAAAAACAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>spatial\SegmentSet2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.SpatialFunctions" Collapsed="true">
+    <Position X="54.75" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\SpatialFunctions.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.TriangleBinsGrid2d" Collapsed="true">
+    <Position X="49.5" Y="15.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gBgAAAgAAAAAAAEAAAEAAAAAAAQAIAAACAAKAAAQAgQ=</HashCode>
+      <FileName>spatial\TriangleBinsGrid2d.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gs.EditMeshSpatial" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="67" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAgAAAACEAAEAQAAACEIAAgQAAQBIA=</HashCode>
+      <FileName>spatial\EditMeshSpatial.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="gs.MeshScalarSamplingGrid" Collapsed="true">
+    <Position X="60" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEBAIhASAAABAgACCAIAAAIAAEUCAAAAAQAAAQABAAA=</HashCode>
+      <FileName>spatial\MeshScalarSamplingGrid.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gs.MeshWindingNumberGrid" Collapsed="true">
+    <Position X="74" Y="10.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEBAIhASAAAAAABCCAIAAAIAAEUCAIAAAQAAAQABAAA=</HashCode>
+      <FileName>spatial\MeshWindingNumberGrid.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="gs.PointSetHashtable" Collapsed="true">
+    <Position X="51.25" Y="12.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAgAAAAAAAAAAAAEAAgAAAAAAAIAgBAAA=</HashCode>
+      <FileName>spatial\PointSetHashtable.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.BufferUtil" Collapsed="true">
+    <Position X="68.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gAAAAACADAYAAAAUEAEAAAAQGBAABgBAABgEAAAIRAA=</HashCode>
+      <FileName>core\BufferUtil.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.CommandArgumentSet" Collapsed="true">
+    <Position X="58.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIgBAAAAACARAAAAAAgAgAIAAABAAAAAAAAAAAgAAA=</HashCode>
+      <FileName>core\CommandArgumentSet.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DeepCopy" Collapsed="true">
+    <Position X="49.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>core\DeepCopy.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DijkstraGraphDistance" Collapsed="true">
+    <Position X="72.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAIAQBBgIAABAAAAZICAJAEBGAAAQQAAAQAQFAQAQM=</HashCode>
+      <FileName>core\DijkstraGraphDistance.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DVector&lt;T&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="58.25" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAaEAAEAABBAAxACSIEIAABCABAAAAMEAQGCAABAAEA=</HashCode>
+      <FileName>core\DVector.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.DVectorArray3&lt;T&gt;" Collapsed="true">
+    <Position X="4.25" Y="4.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABBAAAAAAAAQAAAAAQQAEAAAAAAFAAAA=</HashCode>
+      <FileName>core\DVectorArray.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="g3.DVectorArray3d" Collapsed="true">
+    <Position X="3" Y="5.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAACAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>core\DVectorArray.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DVectorArray3f" Collapsed="true">
+    <Position X="7.75" Y="5.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAAAAIAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>core\DVectorArray.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DVectorArray3i" Collapsed="true">
+    <Position X="0.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAACAAAAAAEAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>core\DVectorArray.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DIndexArray3i" Collapsed="true">
+    <Position X="5.5" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABAAACAIAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>core\DVectorArray.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DVectorArray2&lt;T&gt;" Collapsed="true">
+    <Position X="3" Y="10.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAABBAAAAAAAAQAAAAAQQAEAAAAAAEAAAA=</HashCode>
+      <FileName>core\DVectorArray.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="g3.DVectorArray2d" Collapsed="true">
+    <Position X="0.75" Y="11.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>core\DVectorArray.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DVectorArray2f" Collapsed="true">
+    <Position X="3.25" Y="11.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAAAAIAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>core\DVectorArray.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DIndexArray2i" Collapsed="true">
+    <Position X="5.75" Y="11.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>core\DVectorArray.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DynamicPriorityQueueNode" Collapsed="true">
+    <Position X="61.75" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAA=</HashCode>
+      <FileName>core\DynamicPriorityQueue.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.DynamicPriorityQueue&lt;T&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="60" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AARAAAAAgAYAARAAABAARAQAAACABAAEAAACACBRIIA=</HashCode>
+      <FileName>core\DynamicPriorityQueue.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.FileSystemUtils" Collapsed="true">
+    <Position X="51.25" Y="5.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAgAAAAAAAACQAAAAAAAAAAAAAgAAAAAAQAAA=</HashCode>
+      <FileName>core\FileSystemUtils.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="g3.ConstantItr&lt;T&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="60" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAEAAAAABAAACA=</HashCode>
+      <FileName>core\g3Iterators.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.RemapItr&lt;T, T2&gt;" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="13.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAABAAAAAAAAAAAEAAAgAAAAAAA=</HashCode>
+      <FileName>core\g3Iterators.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="g3.MappedList" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="51.25" Y="8.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BEIAAEAAAAAAABAQCAAAJAQAAAAAAAAECAAAAABQIAA=</HashCode>
+      <FileName>core\g3Iterators.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Struct Name="g3.Colorb" Collapsed="true">
+    <Position X="65.25" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAAAAAAAAAAAAoAQABAAAAAAA=</HashCode>
+      <FileName>color\Colorb.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Colorf" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="67" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AFoOAAXEESAARhQU6hkCQFAghAQIA4BqiYUBKTAQAjE=</HashCode>
+      <FileName>color\Colorf.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.CurveSample" Collapsed="true">
+    <Position X="72.25" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>curve\ArcLengthParam.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.CurveSample2d" Collapsed="true">
+    <Position X="74" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAgAAAAA=</HashCode>
+      <FileName>curve\ArcLengthParam.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.ComplexSegment2d" Collapsed="true">
+    <Position X="70.5" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAQAAAAIQAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>curve\PlanarComplex.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.ComplexEndpoint2d" Collapsed="true">
+    <Position X="68.75" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAIAAAAAACAABAAAAAAAAA=</HashCode>
+      <FileName>curve\PlanarComplex.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.IOReadResult" Collapsed="true">
+    <Position X="65.25" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAABAAAAACA=</HashCode>
+      <FileName>io\MeshIO.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.IOWriteResult" Collapsed="true">
+    <Position X="67" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAABAAAAACA=</HashCode>
+      <FileName>io\MeshIO.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.WriteOptions" Collapsed="true">
+    <Position X="65.25" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAQEAIACAEAADBAAEAAAABAAAEAAAAEAAAAAAAAAAQA=</HashCode>
+      <FileName>io\MeshIO.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.WriteMesh" Collapsed="true">
+    <Position X="63.5" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAcAAAAAAAAA=</HashCode>
+      <FileName>io\MeshIO.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Triangle" Collapsed="true">
+    <Position X="56.5" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gEAAAAAEAAABgAAAAAAAAQAAAAAAAAkAAAAAEAAQAQA=</HashCode>
+      <FileName>io\OBJReader.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.AxisAlignedBox2d" Collapsed="true">
+    <Position X="47.75" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQIAAAAABBAiIgREEEIEAEAACQQIgABEAAAMAQAYAIQ=</HashCode>
+      <FileName>math\AxisAlignedBox2d.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.AxisAlignedBox2f" Collapsed="true">
+    <Position X="49.5" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AwIAIAAJBBACIhQEEUIEAEAACQQIgABEAAAMAQAYQMQ=</HashCode>
+      <FileName>math\AxisAlignedBox2f.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.AxisAlignedBox2i" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="51.25" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQgAAAAIDBACIAQEkEoEAEAACQAIgIBEAACMAQAYAqA=</HashCode>
+      <FileName>math\AxisAlignedBox2i.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.AxisAlignedBox3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="53" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAABIDBAAoAQEkkIECEAACQAIgIJkAAKMAAAYAqA=</HashCode>
+      <FileName>math\AxisAlignedBox3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.AxisAlignedBox3f" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="54.75" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQgAAAAIDBAAoAQEkEIEAEAACQAIgIBkAAIMAAAYAqA=</HashCode>
+      <FileName>math\AxisAlignedBox3f.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.AxisAlignedBox3i" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="56.5" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BRgAAAAIDBAAIAQEkEoEAEAACQAIgIBkAAKMAAAYAqA=</HashCode>
+      <FileName>math\AxisAlignedBox3i.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Box2d" Collapsed="true">
+    <Position X="58.25" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EQAAAAAACAAAIQAAAEIAQAAAAAAAASEAAABEA0AYAEA=</HashCode>
+      <FileName>math\Box2.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Box2f" Collapsed="true">
+    <Position X="60" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EQAAAAAAAAAAIQAAAEIAAAAAAAAAACEAAABEAUAYAEA=</HashCode>
+      <FileName>math\Box2.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Box3d" Collapsed="true">
+    <Position X="61.75" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>MQAAABAACAAAIQQAAEIAQEAACAAAASEBAAJECUAYAEA=</HashCode>
+      <FileName>math\Box3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Box3f" Collapsed="true">
+    <Position X="63.5" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EQAAAAAAAAAAIQAAAEIAQEAAAAAAACEBAAJECEAYAEA=</HashCode>
+      <FileName>math\Box3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Frame3f" Collapsed="true">
+    <Position X="47.75" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAACgIgCEAGYCEAAKAACUEEAEEAAAEAGAEAIgAZAE=</HashCode>
+      <FileName>math\Frame3f.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Index3i" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="56.5" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAABAQE+A0AAABAAQAAAICgAQAgAAAAAqA=</HashCode>
+      <FileName>math\IndexTypes.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Index2i" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="54.75" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAABAQE+A0AAABAAQAAAIAgAQAgAAAAAqA=</HashCode>
+      <FileName>math\IndexTypes.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Index4i" Collapsed="true">
+    <Position X="58.25" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAABAQE6A0QAABAAQAAAICkAQAgAAAQAqA=</HashCode>
+      <FileName>math\IndexTypes.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Interval1d" Collapsed="true">
+    <Position X="60" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABEBAAAAJAAEaEMgAARAAQAAgAAgAQQgAAAYAgA=</HashCode>
+      <FileName>math\Interval1d.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Interval1i" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="61.75" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAALBAEakMAAABAAQAAgAAkAQAgAAAYAgA=</HashCode>
+      <FileName>math\Interval1i.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Line2d" Collapsed="true">
+    <Position X="68.75" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAACIAAIAAAACAACAAEAAAAAAAACAAAAAoAAAA=</HashCode>
+      <FileName>math\Line2.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Line2f" Collapsed="true">
+    <Position X="70.5" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAACAAAAAAAACAACAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>math\Line2.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Line3d" Collapsed="true">
+    <Position X="72.25" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACCAACAAAQAAAACAASAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>math\Line3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Line3f" Collapsed="true">
+    <Position X="74" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAACAAAAAAAACAASAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>math\Line3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Matrix3d" Collapsed="true">
+    <Position X="49.5" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAgCAAAAAEaAdBAAAAgQMAAiAAAECAAAgAAAA=</HashCode>
+      <FileName>math\Matrix3d.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Matrix3f" Collapsed="true">
+    <Position X="51.25" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAACAAAAAEaAdBAAAAgQMAAiAAAECAAAgAAAA=</HashCode>
+      <FileName>math\Matrix3f.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Plane3d" Collapsed="true">
+    <Position X="58.25" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAACAAAAAAAAAAAAIAAgACAAAAAAAAAA=</HashCode>
+      <FileName>math\Plane3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Plane3f" Collapsed="true">
+    <Position X="60" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAACAAAAAAAAAAAAIAAgACAAAAAAAAAA=</HashCode>
+      <FileName>math\Plane3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Quaterniond" Collapsed="true">
+    <Position X="63.5" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAgAEBNAASAIAAEEeAMAIEBACQAAACEABEhgISAAAQA=</HashCode>
+      <FileName>math\Quaterniond.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Quaternionf" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="65.25" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEANAASAIAAUEuAMAIEBACQAAEKEAAEhgISAAAyA=</HashCode>
+      <FileName>math\Quaternionf.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Ray3d" Collapsed="true">
+    <Position X="67" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAASAAAAAACACAASAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>math\Ray3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Ray3f" Collapsed="true">
+    <Position X="68.75" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAACAAAAAAAACAACAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>math\Ray3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Segment2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="74" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ECgACAAACAAAAAAgAGAgCARgAASABEBACQACAEAIAZA=</HashCode>
+      <FileName>math\Segment2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Segment2f" Collapsed="true">
+    <Position X="46" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAgACAAACAAAAAAAACAgCABAAACAAABAAQAAAEAIAAA=</HashCode>
+      <FileName>math\Segment2.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Segment3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAgICAAACAAAAAAgACBgCABkAASABEBAAAACAEAIARA=</HashCode>
+      <FileName>math\Segment3.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Segment3f" Collapsed="true">
+    <Position X="49.5" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>EAgACAAACAAAAAAAACAgCABEAACAAABAAAAAAEAIAAA=</HashCode>
+      <FileName>math\Segment3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Triangle2d" Collapsed="true">
+    <Position X="58.25" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAABAAACAAABAAAAAAAAgAQAIAAAAAAAAA=</HashCode>
+      <FileName>math\Triangle2.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Triangle2f" Collapsed="true">
+    <Position X="60" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAAAAAACAAABAAAAAAAAgAQAAAAAAAAAAA=</HashCode>
+      <FileName>math\Triangle2.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Triangle3d" Collapsed="true">
+    <Position X="61.75" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAABAAACgAABAAAAAAIAgQQAIAAAQAAAAA=</HashCode>
+      <FileName>math\Triangle3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Triangle3f" Collapsed="true">
+    <Position X="63.5" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAACAAAAAAAAAAACAAABAAAAAAAAgQQAAAAAAAAAAA=</HashCode>
+      <FileName>math\Triangle3.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Vector2d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="65.25" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIIIAEACGAABAwM+AUCAARACQAAQKFAgFDgAAIAAqE=</HashCode>
+      <FileName>math\Vector2d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Vector2f" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="72.25" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIIAAEACGAABAwM+AUCAABACQAAAKFAgFDgAAIAAqA=</HashCode>
+      <FileName>math\Vector2f.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Vector2i" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="74" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAQE6A0AAAAAAQAAAKEAAABgAAAAAqA=</HashCode>
+      <FileName>math\Vector2i.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Vector2l" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="46" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAQE6A0AAAAAAQAAAKEAAABgAAAAAqA=</HashCode>
+      <FileName>math\Vector2i.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Vector3d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="47.75" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAQAEACnAABIwM+AUCAEBACQCAoKFAgEDgASJAAqA=</HashCode>
+      <FileName>math\Vector3d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Vector3f" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="53" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAEAGnAABIwM+AUCgEBACQCAAKFAgEDgAQJAAqA=</HashCode>
+      <FileName>math\Vector3f.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Vector3i" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="56.5" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAJAQE6A0CAkAAAQAEgKEAAABgAQAAAqA=</HashCode>
+      <FileName>math\Vector3i.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Vector4d" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="58.25" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEACGAAAAQM+AUAAABACQAAAIBAgEhgAQIAAqA=</HashCode>
+      <FileName>math\Vector4d.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Vector4f" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="60" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEACGAAAAQM+AUAAABACQAAAIBAgEhgAQIAAqA=</HashCode>
+      <FileName>math\Vector4f.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.Vector3dTuple2" Collapsed="true">
+    <Position X="49.5" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAAAAAAAAAAgAQAAAAAAAAAAA=</HashCode>
+      <FileName>math\VectorTuple.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Vector3dTuple3" Collapsed="true">
+    <Position X="51.25" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAABAAAAAAAAgAQAAAAAAAAAAA=</HashCode>
+      <FileName>math\VectorTuple.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Vector3fTuple3" Collapsed="true">
+    <Position X="54.75" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAABAAAAAAAAgAQAAAAAAAAAAA=</HashCode>
+      <FileName>math\VectorTuple.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Vector2dTuple2" Collapsed="true">
+    <Position X="67" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAAAAAAAAAAAgAQAAAAAAAAAAA=</HashCode>
+      <FileName>math\VectorTuple.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Vector2dTuple3" Collapsed="true">
+    <Position X="68.75" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAAABAAAAAAAAgAQAAAAAAAAAAA=</HashCode>
+      <FileName>math\VectorTuple.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.Vector2dTuple4" Collapsed="true">
+    <Position X="70.5" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAAAAAAACAAABAAAAAAAAgAQAAAAAAAAAAA=</HashCode>
+      <FileName>math\VectorTuple.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.NewVertexInfo" Collapsed="true">
+    <Position X="56.5" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAACAAACAEBACAAAAAgA=</HashCode>
+      <FileName>mesh\IMesh.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.EdgeConstraint" Collapsed="true">
+    <Position X="46" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAQAAAJAAAAJCAAAAEAAAAAAAAAIAAQACA=</HashCode>
+      <FileName>mesh\MeshConstraints.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.VertexConstraint" Collapsed="true">
+    <Position X="61.75" Y="20.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAEAQBAACA=</HashCode>
+      <FileName>mesh\MeshConstraints.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.QuadricError" Collapsed="true">
+    <Position X="61.75" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIgAAAAAAAAAAEAACAAAgAAAQAAAACAFAAAgAAAAAE=</HashCode>
+      <FileName>mesh\Reducer.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.SetGroupBehavior" Collapsed="true">
+    <Position X="51.25" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABIAAAACMAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>mesh_ops\MeshOps.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.LinearIntersection" Collapsed="true">
+    <Position X="46" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAEAAAgAAAAAA=</HashCode>
+      <FileName>queries\IntersectionUtil.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.matrix_entry" Collapsed="true">
+    <Position X="47.75" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAACCAAAABAAAAAAA=</HashCode>
+      <FileName>solvers\PackedSparseMatrix.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.GridLevelIndex" Collapsed="true">
+    <Position X="51.25" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAABAAAAAAAAA=</HashCode>
+      <FileName>spatial\GridIndexing.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.ScaleGridIndexer3" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="72.25" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAEAAAAAAAAABAAEAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\GridIndexing.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.ShiftGridIndexer3" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="54.75" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAEAAAAAAAAABAAEAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>spatial\GridIndexing.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.FrameGridIndexer3" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="49.5" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAEAAAAAAAAABAAEAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\GridIndexing.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.MultigridIndexer3" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="54.75" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACEAAAAAAAAAAAAAAiAAAAAAAIAAAAAACAAAIA=</HashCode>
+      <FileName>spatial\GridIndexing.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.GridLevelIndex2" Collapsed="true">
+    <Position X="53" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAABAAAAAAAAA=</HashCode>
+      <FileName>spatial\GridIndexing2.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.ScaleGridIndexer2" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="70.5" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAAAAAAAAAABAAEAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\GridIndexing2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.ShiftGridIndexer2" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="53" Y="19.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAAAAAAAAAABAAEAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>spatial\GridIndexing2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.MultigridIndexer2" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="53" Y="18.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAACEAAAAAAAAAAAAAAiAAAAAAAIAAAAAACAAAIA=</HashCode>
+      <FileName>spatial\GridIndexing2.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Struct Name="g3.ArrayAlias&lt;T&gt;" Collapsed="true">
+    <Position X="46" Y="16.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAgAAAAAACAAAAAAAAAAAAAAAAAEAAAAAAAA=</HashCode>
+      <FileName>core\BufferUtil.cs</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="g3.IntSequence" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="63.5" Y="17.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEIAAEAIAAAACBAQCgEABAQAAAAAAAAECAAAAABQIAA=</HashCode>
+      <FileName>core\g3Iterators.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Struct>
+  <Interface Name="g3.IArcLengthParam" Collapsed="true">
+    <Position X="46" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>curve\ArcLengthParam.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IArcLengthParam2d" Collapsed="true">
+    <Position X="47.75" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>curve\ArcLengthParam.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IParametricCurve3d" Collapsed="true">
+    <Position X="51.25" Y="22.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAgAAAgAAAgAAQABEAAAAACAAAAARA=</HashCode>
+      <FileName>curve\ICurve.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.ISampledCurve3d" Collapsed="true">
+    <Position X="53" Y="22.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAAAAABBAAAAAAEAAAAAAAAAEAAAAACAAAA=</HashCode>
+      <FileName>curve\ICurve.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IParametricCurve2d" Collapsed="true">
+    <Position X="49.5" Y="22.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAAAAAAAAAAgAAAgAAQgAAQABEAAAAACAAAAARA=</HashCode>
+      <FileName>curve\ICurve.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IMultiCurve2d" Collapsed="true">
+    <Position X="74" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAA=</HashCode>
+      <FileName>curve\ICurve.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.ImplicitField2d" Collapsed="true">
+    <Position X="18.5" Y="4.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAgA=</HashCode>
+      <FileName>implicit\Implicit2d.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.ImplicitOperator2d" Collapsed="true">
+    <Position X="18.5" Y="5.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>implicit\Implicit2d.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.ImplicitFunction3d" Collapsed="true">
+    <Position X="14.75" Y="17.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.BoundedImplicitFunction3d" Collapsed="true">
+    <Position X="14.5" Y="18.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>implicit\Implicit3d.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="gs.IFalloffFunction" Collapsed="true">
+    <Position X="53" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAABAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>implicit\FalloffFunctions.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IMeshReader" Collapsed="true">
+    <Position X="70.5" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>io\MeshIO.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IMeshWriter" Collapsed="true">
+    <Position X="72.25" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>io\MeshIO.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.MeshFormatReader" Collapsed="true">
+    <Position X="58.25" Y="22.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAIAAAAAAAA=</HashCode>
+      <FileName>io\StandardMeshReader.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.Query2" Collapsed="true">
+    <Position X="60" Y="22.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAQAAA=</HashCode>
+      <FileName>math\Query2.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.ITransform2" Collapsed="true">
+    <Position X="56.5" Y="22.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAABAIAAAAAAA=</HashCode>
+      <FileName>math\TransformSequence2.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IPointSet" Collapsed="true">
+    <Position X="8.5" Y="14.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAEAAAAAAAAACAACAAEAAAABgwAQAAAAAAAAAAA=</HashCode>
+      <FileName>mesh\IMesh.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IMesh" Collapsed="true">
+    <Position X="8.5" Y="15.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAAQAAAAAIAAAAADAAAAAAACCgAAAARAAAAAAAAAA=</HashCode>
+      <FileName>mesh\IMesh.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IDeformableMesh" Collapsed="true">
+    <Position X="8.5" Y="17.25" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAA=</HashCode>
+      <FileName>mesh\IMesh.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IMeshBuilder" Collapsed="true">
+    <Position X="67" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIAAgAEIAAAAAABAAAQAAAAAAgAAAAAAAAAAAAAEAAA=</HashCode>
+      <FileName>mesh\IMesh.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IMeshComponentManager" Collapsed="true">
+    <Position X="68.75" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>mesh\MeshDecomposition.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IMatrix" Collapsed="true">
+    <Position X="65.25" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAhEAACAAAAAAAAAAAAAAAAAAAAAgAAAA=</HashCode>
+      <FileName>solvers\IMatrix.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IBinaryVoxelGrid" Collapsed="true">
+    <Position X="49.5" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAABAAAAAAAAAAACAAAAAAAAAAAAAQAA=</HashCode>
+      <FileName>spatial\Bitmap3.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IGrid3" Collapsed="true">
+    <Position X="56.5" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\DSparseGrid3.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IFixedGrid3" Collapsed="true">
+    <Position X="54.75" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\DSparseGrid3.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IGridElement3" Collapsed="true">
+    <Position X="58.25" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAA=</HashCode>
+      <FileName>spatial\DSparseGrid3.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IGridWorldIndexer3" Collapsed="true">
+    <Position X="61.75" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAEAAAAAAAAABAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\GridIndexing.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IMultigridIndexer3" Collapsed="true">
+    <Position X="47.75" Y="22.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAiAAAAAAAIAAAAAAAAAAIA=</HashCode>
+      <FileName>spatial\GridIndexing.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IGridWorldIndexer2" Collapsed="true">
+    <Position X="60" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAgAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\GridIndexing2.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IMultigridIndexer2" Collapsed="true">
+    <Position X="46" Y="22.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAiAAAAAAAIAAAAAAAAAAIA=</HashCode>
+      <FileName>spatial\GridIndexing2.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.ISpatial" Collapsed="true">
+    <Position X="54.75" Y="22.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACEAAAAAAAAAAAAAAQAAABIA=</HashCode>
+      <FileName>spatial\SpatialInterfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IProjectionTarget" Collapsed="true">
+    <Position X="15.75" Y="8.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\SpatialInterfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IOrientedProjectionTarget" Collapsed="true">
+    <Position X="15.5" Y="9.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\SpatialInterfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IIntersectionTarget" Collapsed="true">
+    <Position X="63.5" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAQAAACAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>spatial\SpatialInterfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="g3.IDuplicatable&lt;T&gt;" Collapsed="true">
+    <Position X="51.25" Y="22" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>core\g3Interfaces.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Enum Name="g3.IOCode" Collapsed="true">
+    <Position X="51.25" Y="23.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAACAAAAAAAAAADCAAAAAQEAAhACQAAAA=</HashCode>
+      <FileName>io\MeshIO.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="g3.QueryNumberType" Collapsed="true">
+    <Position X="58.25" Y="23.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAEAAAAEAAAAAAAAAAAACAAAAAAAABAAQAAAAAA=</HashCode>
+      <FileName>math\Query2.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="g3.MeshResult" Collapsed="true">
+    <Position X="56.5" Y="23.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAgRAQAAEAAIACAgQAhAQECAAAAADABAAgCCAA=</HashCode>
+      <FileName>mesh\DMesh3.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="g3.MeshComponents" Collapsed="true">
+    <Position X="53" Y="23.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAiAAAAAAAAAAAAAAAABAAAAAAQAAIAAAAEAAAA=</HashCode>
+      <FileName>mesh\DMesh3.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="g3.MeshHints" Collapsed="true">
+    <Position X="54.75" Y="23.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>mesh\DMesh3.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="g3.EdgeRefineFlags" Collapsed="true">
+    <Position X="46" Y="23.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AQAEAAAgAAAAAAAAAAAAAAAAAAAAAAAAAEQCAAAAAAA=</HashCode>
+      <FileName>mesh\MeshConstraints.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="g3.IntersectionResult" Collapsed="true">
+    <Position X="47.75" Y="23.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAEAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>queries\IntersectionUtil.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="g3.IntersectionType" Collapsed="true">
+    <Position X="49.5" Y="23.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAMAAAAAAAAAAAAAAAIAAAABADA=</HashCode>
+      <FileName>queries\IntersectionUtil.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="g3.ValidationStatus" Collapsed="true">
+    <Position X="60" Y="23.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAICAAAAAAAAQCAAAIQAAAAACABAAAAABAAAAAAA=</HashCode>
+      <FileName>queries\MeshValidation.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Delegate Name="g3.ParsingMessagesHandler" Collapsed="true">
+    <Position X="46" Y="24.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>io\StandardMeshReader.cs</FileName>
+    </TypeIdentifier>
+  </Delegate>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>

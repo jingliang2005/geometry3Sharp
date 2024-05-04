@@ -196,7 +196,10 @@ namespace g3
 			if (box.Max.y > Max.y) Max.y = box.Max.y;
 		}
 
-
+        /// <summary>
+        /// Contain °üº¬
+        /// </summary>
+        /// <param name="points"></param>
 		public void Contain(IList<Vector2d> points)
 		{
 			int N = points.Count;

@@ -20,18 +20,36 @@ namespace g3
     // exact arithmetic, but is the slowest choice.  The choice Query::QT_REAL
     // uses floating-point arithmetic, but is not robust in all cases.
 
+    /*
+     * David Eberly / geometrictools.com的WildMagic5库中的Wm5ConvexHull2端口
+        构造函数的输入是需要凸包的顶点数组。 
+        如果要让ConvexHull2在销毁期间删除顶点，请将bOwner设置为'true'。 
+        否则，您将拥有顶点，并且必须自己删除它们。
+        您可以选择速度还是精度。 
+        最快的选择是Query :: QT_INT64，但是它放弃了很多精度，将点缩放到[0,2 ^ {20}] ^ 3。 
+        选择Query :: QT_INTEGER会降低精度，将点缩放为[0,2 ^ {24}] ^ 3。 
+        选择Query :: QT_RATIONAL使用精确的算法，但是是最慢的选择。 
+        选择Query :: QT_REAL使用浮点算法，但并非在所有情况下都很可靠。
+    */
 
     /// <summary>
     /// Construct convex hull of a set of 2D points, with various accuracy levels.
-    /// 
+    /// 构造具有各种精度级别的一组2D点的凸包。
     /// HullIndices provides ordered indices of vertices of input points that form hull.
+    /// HullIndices提供形成船体的输入点的顶点的有序索引。
     /// </summary>
     public class ConvexHull2
     {
         //QueryNumberType mQueryType = QueryNumberType.QT_DOUBLE;
+        /// <summary>
+        /// 
+        /// </summary>
         IList<Vector2d> mVertices;
         int mNumVertices;
 
+        /// <summary>
+        /// 
+        /// </summary>
         int mDimension;
         int mNumSimplices;
 
@@ -48,15 +66,20 @@ namespace g3
         /*
          * Outputs
          */
-
-        public int Dimension {
+        /// <summary>
+        /// 维数。
+        /// </summary>
+        public int Dimension
+        {
             get { return mDimension; }
         }
 
         /// <summary>
         /// Number of convex polygon edges
+        /// 凸多边形边的数量
         /// </summary>
-        public int NumSimplices {
+        public int NumSimplices
+        {
             get { return mNumSimplices; }
         }
 
@@ -64,16 +87,20 @@ namespace g3
         /// <summary>
         ///   array of indices into V that represent the convex polygon edges (NumSimplices total elements)
         /// The i-th edge has vertices
+        /// V的索引数组，表示凸多边形的边（NumSimplices个元素总数）第i个边具有顶点
         ///   vertex[0] = V[I[i]]
         ///   vertex[1] = V[I[(i+1) % SQ]]
         /// </summary>
-        public int[] HullIndices {
+        public int[] HullIndices
+        {
             get { return mIndices; }
         }
 
 
         /// <summary>
+        /// 计算输入点的凸包。
         /// Compute convex hull of input points. 
+        /// epsilon仅用于检查点是否位于一条线（1d船体）上，而不用于其余计算。
         /// epsilon is only used for check if points lie on a line (1d hull), not for rest of compute.
         /// </summary>
         public ConvexHull2(IList<Vector2d> vertices, double epsilon, QueryNumberType queryType)
@@ -95,13 +122,15 @@ namespace g3
 
             Vector2d.Information info;
             Vector2d.GetInformation(mVertices, mEpsilon, out info);
-            if (info.mDimension == 0) {
+            if (info.mDimension == 0)
+            {
                 mDimension = 0;
                 mIndices = null;
                 return;
             }
 
-            if (info.mDimension == 1) {
+            if (info.mDimension == 1)
+            {
                 // The set is (nearly) collinear.  The caller is responsible for
                 // creating a ConvexHull1 object.
                 mDimension = 1;
@@ -118,38 +147,47 @@ namespace g3
 
             mSVertices = new Vector2d[mNumVertices];
 
-            if (queryType != QueryNumberType.QT_RATIONAL && queryType != QueryNumberType.QT_FILTERED) {
+            if (queryType != QueryNumberType.QT_RATIONAL && queryType != QueryNumberType.QT_FILTERED)
+            {
 
                 // Transform the vertices to the square [0,1]^2.
                 Vector2d minValue = new Vector2d(info.mMin[0], info.mMin[1]);
                 double scale = ((double)1) / info.mMaxRange;
-                for (int i = 0; i < mNumVertices; ++i) {
+                for (int i = 0; i < mNumVertices; ++i)
+                {
                     mSVertices[i] = (mVertices[i] - minValue) * scale;
                 }
 
                 double expand;
-                if (queryType == QueryNumberType.QT_INT64) {
+                if (queryType == QueryNumberType.QT_INT64)
+                {
                     // Scale the vertices to the square [0,2^{20}]^2 to allow use of
                     // 64-bit integers.
                     expand = (double)(1 << 20);
                     mQuery = new Query2Int64(mSVertices);
 
-                } else if (queryType == QueryNumberType.QT_INTEGER) {
+                }
+                else if (queryType == QueryNumberType.QT_INTEGER)
+                {
                     throw new NotImplementedException("ConvexHull2: Query type QT_INTEGER not currently supported");
                     // Scale the vertices to the square [0,2^{24}]^2 to allow use of
                     // Integer.
                     //expand = (double)(1 << 24);
                     //mQuery = new Query2Integer(mNumVertices, mSVertices);
-                } else {  // queryType == Query::QT_double
+                }
+                else
+                {  // queryType == Query::QT_double
                     // No scaling for floating point.
                     expand = (double)1;
                     mQuery = new Query2d(mSVertices);
                 }
 
-                for (int i = 0; i < mNumVertices; ++i) 
+                for (int i = 0; i < mNumVertices; ++i)
                     mSVertices[i] *= expand;
 
-            } else {
+            }
+            else
+            {
                 throw new NotImplementedException("ConvexHull2: Query type QT_RATIONAL/QT_FILTERED not currently supported");
 
                 // No transformation needed for exact rational arithmetic or filtered
@@ -170,11 +208,14 @@ namespace g3
             Edge edge1 = null;
             Edge edge2 = null;
 
-            if (info.mExtremeCCW) {
+            if (info.mExtremeCCW)
+            {
                 edge0 = new Edge(i0, i1);
                 edge1 = new Edge(i1, i2);
                 edge2 = new Edge(i2, i0);
-            } else {
+            }
+            else
+            {
                 edge0 = new Edge(i0, i2);
                 edge1 = new Edge(i2, i1);
                 edge2 = new Edge(i1, i0);
@@ -190,7 +231,8 @@ namespace g3
             // generating a permutation, just insert them using modulo-indexing, 
             // which is in the ballpark...
             int ii = 0;
-            do {
+            do
+            {
                 if (!Update(ref hull, ii))
                     return;
                 ii = (ii + 31337) % mNumVertices;
@@ -218,6 +260,7 @@ namespace g3
 
 
         /// <summary>
+        /// 从输入点提取凸包多边形
         /// Extract convex hull polygon from input points
         /// </summary>
         public Polygon2d GetHullPolygon()
@@ -256,8 +299,10 @@ namespace g3
             // Locate an edge visible to the input point (if possible).
             Edge visible = null;
             Edge current = hull;
-            do {
-                if (current.GetSign(i, mQuery) > 0) {
+            do
+            {
+                if (current.GetSign(i, mQuery) > 0)
+                {
                     visible = current;
                     break;
                 }
@@ -266,7 +311,8 @@ namespace g3
             }
             while (current != hull);
 
-            if (visible == null) {
+            if (visible == null)
+            {
                 // The point is inside the current hull; nothing to do.
                 return true;
             }
@@ -274,34 +320,40 @@ namespace g3
             // Remove the visible edges.
             Edge adj0 = visible.E0;
             Debug.Assert(adj0 != null); // "Expecting nonnull adjacent\n");
-            if (adj0 == null) {
+            if (adj0 == null)
+            {
                 return false;
             }
 
             Edge adj1 = visible.E1;
             Debug.Assert(adj1 != null); // "Expecting nonnull adjacent\n");
-            if (adj1 == null) {
+            if (adj1 == null)
+            {
                 return false;
             }
 
             visible.DeleteSelf();
 
-            while (adj0.GetSign(i, mQuery) > 0) {
+            while (adj0.GetSign(i, mQuery) > 0)
+            {
                 hull = adj0;
                 adj0 = adj0.E0;
                 Debug.Assert(adj0 != null); // "Expecting nonnull adjacent\n");
-                if (adj0 == null) {
+                if (adj0 == null)
+                {
                     return false;
                 }
 
                 adj0.E1.DeleteSelf();
             }
 
-            while (adj1.GetSign(i, mQuery) > 0) {
+            while (adj1.GetSign(i, mQuery) > 0)
+            {
                 hull = adj1;
                 adj1 = adj1.E1;
                 Debug.Assert(adj1 != null); // "Expecting nonnull adjacent\n");
-                if (adj1 == null) {
+                if (adj1 == null)
+                {
                     return false;
                 }
 
@@ -325,14 +377,16 @@ namespace g3
         /// <summary>
         /// Internal class that represents edge of hull, and neighbours
         /// </summary>
-        protected class Edge {
+        protected class Edge
+        {
             public Vector2i V;
             public Edge E0;
             public Edge E1;
             public int Sign;
             public int Time;
 
-            public Edge(int v0, int v1) {
+            public Edge(int v0, int v1)
+            {
                 Sign = 0;
                 Time = -1;
                 V[0] = v0;
@@ -341,33 +395,39 @@ namespace g3
                 E1 = null;
             }
 
-            public int GetSign(int i, Query2 query) {
-                if (i != Time) {
+            public int GetSign(int i, Query2 query)
+            {
+                if (i != Time)
+                {
                     Time = i;
                     Sign = query.ToLine(i, V[0], V[1]);
                 }
                 return Sign;
             }
 
-            public void Insert(Edge adj0, Edge adj1) {
+            public void Insert(Edge adj0, Edge adj1)
+            {
                 adj0.E1 = this;
                 adj1.E0 = this;
                 E0 = adj0;
                 E1 = adj1;
             }
 
-            public void DeleteSelf() {
-                if (E0 != null) 
+            public void DeleteSelf()
+            {
+                if (E0 != null)
                     E0.E1 = null;
-                if (E1 != null) 
+                if (E1 != null)
                     E1.E0 = null;
             }
 
-            public void GetIndices(ref int numIndices, ref int[] indices) {
+            public void GetIndices(ref int numIndices, ref int[] indices)
+            {
                 // Count the number of edge vertices and allocate the index array.
                 numIndices = 0;
                 Edge current = this;
-                do {
+                do
+                {
                     ++numIndices;
                     current = current.E1;
                 } while (current != this);
@@ -377,7 +437,8 @@ namespace g3
                 // Fill the index array.
                 numIndices = 0;
                 current = this;
-                do {
+                do
+                {
                     indices[numIndices] = current.V[0];
                     ++numIndices;
                     current = current.E1;
